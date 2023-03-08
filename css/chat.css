@@ -1,0 +1,38 @@
+.sidebar {
+    position: absolute;
+    height: 100vh;
+    top: 0%;
+    right: 0%;
+    display: flex;
+}
+
+.chat {
+    width: 20rem;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat__close {
+    height: 100vh;
+}
+
+.chat__log {
+    width: 100%;
+    flex-grow: 1;
+    overflow-y: scroll;
+    background-color: #eeeeee;
+}
+
+.chat__input {
+    width: 100%;
+    display: flex;
+}
+
+.chat__input > input {
+    flex-grow: 1;
+}
+
+.chat__input > button {
+    padding: 0.5rem;
+}
