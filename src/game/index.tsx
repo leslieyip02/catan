@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Database, DatabaseReference } from 'firebase/database';
+import { Database, DatabaseReference } from "firebase/database";
 import Chat from "./chat";
 
 interface gameProps {

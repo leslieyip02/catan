@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { initializeApp } from "firebase/app";
-import { getDatabase } from 'firebase/database';
+import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import App from "./app";
 

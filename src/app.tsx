@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Database, DatabaseReference, update } from 'firebase/database';
+import { Database, DatabaseReference } from "firebase/database";
 import { Auth } from "firebase/auth";
 import Lobby from "./lobby";
 import Game from "./game";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ref, get, set, update, child, Database, DatabaseReference, onValue } from 'firebase/database';
+import { get, update, child, Database, DatabaseReference, onValue } from "firebase/database";
 
 interface chatProps {
     db: Database;

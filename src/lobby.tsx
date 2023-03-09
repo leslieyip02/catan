@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ref, set, update, push, Database, DatabaseReference, onDisconnect } from 'firebase/database';
+import { ref, set, update, push, Database, DatabaseReference, onDisconnect } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
 
 interface lobbyProps {
