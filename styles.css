@@ -1,6 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Sono&display=swap');
+@import "./css/board.css";
 @import "./css/chat.css";
 @import "./css/lobby.css";
+@import "./css/tile.css";
+
+:root {
+    --tile-width: 5rem;
+    --road-width: 0.5rem;
+}
 
 * {
     font-family: 'Sono', sans-serif;

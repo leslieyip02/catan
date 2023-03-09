@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Database, DatabaseReference } from "firebase/database";
+import Board from "./board";
 import Chat from "./chat";
 
 interface gameProps {
@@ -16,7 +17,9 @@ function Game(props: gameProps) {
 
     return (
         <div>
-            <div>{`Room: ${roomRef.key}`}</div>
+            {/* <div>{`Room: ${roomRef.key}`}</div> */}
+            <Board />
+
             <Chat db={props.db} userRef={userRef} roomRef={roomRef} userName={userName} />
         </div>
     );

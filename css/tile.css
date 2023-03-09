@@ -1,0 +1,35 @@
+.tile {
+    display: inline-block;
+    width: var(--tile-width);
+    height: calc(var(--tile-width) * 1.1547);
+    clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
+    margin: var(--road-width);
+    margin-bottom: calc(var(--road-width) - var(--tile-width) * 0.2886);
+    font-size: initial;
+    background: #eeeeee;
+    background-size: contain;
+}
+
+.tile[data-terrain="desert"] {
+    background-image: url("../assets/desert.png");
+}
+
+.tile[data-terrain="fields"] {
+    background-image: url("../assets/fields.png");
+}
+
+.tile[data-terrain="forest"] {
+    background-image: url("../assets/forest.png");
+}
+
+.tile[data-terrain="hills"] {
+    background-image: url("../assets/hills.png");
+}
+
+.tile[data-terrain="mountains"] {
+    background-image: url("../assets/mountains.png");
+}
+
+.tile[data-terrain="pasture"] {
+    background-image: url("../assets/pasture.png");
+}
