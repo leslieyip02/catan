@@ -7,7 +7,9 @@ interface tileProps {
 
 function Tile(props: tileProps) {    
     return (
-        <div className="tile" data-terrain={props.terrain}></div>
+        <div className="tile" data-terrain={props.terrain}>
+            <div className="tile__text">{props.roll}</div>
+        </div>
     );
 };
 

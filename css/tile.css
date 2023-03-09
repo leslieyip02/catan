@@ -1,13 +1,18 @@
 .tile {
-    display: inline-block;
     width: var(--tile-width);
     height: calc(var(--tile-width) * 1.1547);
     clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
     margin: var(--road-width);
     margin-bottom: calc(var(--road-width) - var(--tile-width) * 0.2886);
-    font-size: initial;
     background: #eeeeee;
     background-size: contain;
+    display: flex;
+}
+
+.tile__text {
+    margin: auto;
+    font-size: 1rem;
+    text-align: center;
 }
 
 .tile[data-terrain="desert"] {
