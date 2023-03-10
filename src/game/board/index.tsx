@@ -25,11 +25,11 @@ function Board(props: boardProps) {
     const [terrains, setTerrain] = useState<string[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
 
-    function shuffleTerrains() {
+    function shuffleBoard() {
         let shuffledTerrains = terrains.map((row) => row.slice());
         let shuffledRolls = rolls.map((row) => row.slice());
-        let shuffleCount = randomInt(1, 100);
-        for (; shuffleCount > 0; shuffleCount--) {
+
+        for (let shuffleCount = randomInt(1, 50); shuffleCount > 0; shuffleCount--) {
             let y1 = randomInt(0, shuffledTerrains.length);
             let x1 = randomInt(0, shuffledTerrains[y1].length);
             let y2 = randomInt(0, shuffledTerrains.length);
@@ -49,14 +49,7 @@ function Board(props: boardProps) {
             }
         }
 
-        setTerrain(shuffledTerrains);
-        setRolls(shuffledRolls);
-    }
-
-    function shuffleRolls() {
-        let shuffledRolls = rolls.map((row) => row.slice());
-        let shuffleCount = randomInt(1, 100);
-        for (; shuffleCount > 0; shuffleCount--) {
+        for (let shuffleCount = randomInt(1, 50); shuffleCount > 0; shuffleCount--) {
             let y1 = randomInt(0, shuffledRolls.length);
             let x1 = randomInt(0, shuffledRolls[y1].length);
             let y2 = randomInt(0, shuffledRolls.length);
@@ -74,12 +67,8 @@ function Board(props: boardProps) {
             shuffledRolls[y2][x2] = t1;
         }
 
+        setTerrain(shuffledTerrains);
         setRolls(shuffledRolls);
-    }
-
-    function shuffleBoard() {
-        shuffleTerrains();
-        shuffleRolls();
     }
 
     function resetBoard() {
@@ -89,8 +78,6 @@ function Board(props: boardProps) {
 
     return (
         <div>
-            <button onClick={shuffleTerrains}>Shuffle Terrains</button>
-            <button onClick={shuffleRolls}>Shuffle Rolls</button>
             <button onClick={shuffleBoard}>Shuffle Board</button>
             <button onClick={resetBoard}>Reset Board</button>
             {
