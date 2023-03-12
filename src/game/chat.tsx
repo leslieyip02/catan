@@ -13,7 +13,7 @@ function Chat(props: chatProps) {
     const [roomRef, setRoomRef] = useState<DatabaseReference>(props.roomRef);
     const [currentMessage, setCurrentMessage] = useState<string>("");
     const [messages, setMessages] = useState<string[]>([]);
-    const [open, setOpen] = useState<boolean>(true);
+    const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => {
         let messageRef = child(roomRef, "messages");

@@ -10,7 +10,7 @@
 .chat {
     width: 20rem;
     height: 100vh;
-    display: flex;
+    display: none;
     flex-direction: column;
 }
 
