@@ -1,0 +1,46 @@
+/*  
+      junction )--down--
+              / ________
+       right / /        \
+            / /          \
+    fork --( (  hexagon™  )
+            \ \          /
+        left \ \________/
+              \
+      junction )--down--
+
+    > flipped at 90° because of ascii art limitations
+*/
+
+.road {
+    position: absolute;
+    width: var(--road-width);
+    height: calc(var(--tile-width) * 0.5774 + var(--road-width) * 0.5);
+    scale: 1.25 1;
+    box-sizing: border-box;
+    z-index: var(--road-depth);
+    background-color: #dddddd;
+    transition: background-color 0.5s;
+}
+
+.road--left {
+    position: absolute;
+    top: calc(var(--road-width) * -0.5);
+    left: calc((var(--tile-width) * 0.5 + var(--road-width) * 2) * -0.2886);
+    rotate: 240deg;
+}
+
+.road--right {
+    position: absolute;
+    top: calc(var(--road-width) * -0.5);
+    left: calc((var(--tile-width) * 0.5 + var(--road-width) * 2) * 0.2886);
+    rotate: 120deg;
+}
+
+.road--down {
+    top: calc(var(--road-width) * 0.5);
+}
+
+.road:hover {
+    background-color: #555555;
+}

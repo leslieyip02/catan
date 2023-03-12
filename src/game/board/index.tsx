@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Database, DatabaseReference } from "firebase/database";
+import Intersection, { IntersectionType } from './intersection';
 import Tile, { tileProps } from "./tile";
 import { randomInt } from "../random";
 
@@ -20,6 +21,8 @@ let defaultRolls = [
     [8, 3, 4, 5],
     [5, 6, 11]
 ];
+
+let intersections = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
 
 function Board(props: boardProps) {
     const [terrains, setTerrain] = useState<string[][]>(defaultTerrains);
@@ -76,21 +79,62 @@ function Board(props: boardProps) {
         setRolls(defaultRolls);
     }
 
+    function intersectionType(x: number, y: number): IntersectionType {
+        if (y == intersections.length - 1) {
+            return IntersectionType.end;
+        }
+        
+        if (y % 2 == 0 && y > 5) {
+            if (x == 0) {
+                return IntersectionType.right;
+            } else if (x == intersections[y] - 1) {
+                return IntersectionType.left;
+            }
+        }
+
+        return y % 2 == 0 ? IntersectionType.fork : IntersectionType.junction;
+    }
+
     return (
         <div>
             <button onClick={shuffleBoard}>Shuffle Board</button>
             <button onClick={resetBoard}>Reset Board</button>
-            {
-                terrains.map((row, y) => {
-                    return <div key={y} className="board__row">
-                        {
-                            row.map((terrain, x) => {
-                                return <Tile key={x} terrain={terrain} roll={rolls[y][x]} />
-                            })
-                        }
-                    </div>
-                })
-            }
+            <div className="board">
+                <div className="board__layer board__tiles">
+                    {
+                        terrains.map((row, y) => {
+                            return <div key={`tile-row-${y}`} className="board__row">
+                                {
+                                    row.map((terrain, x) => {
+                                        let terrainProps: tileProps = {
+                                            terrain: terrain,
+                                            roll: rolls[y][x],
+                                        };
+
+                                        return <Tile key={`tile-(${x}, ${y})`} {...terrainProps} />
+                                    })
+                                }
+                            </div>
+                        })
+                    }
+                </div>
+                <div className="board__layer board__paths">
+                    {
+                        intersections.map((n, y) => {
+                            return <div key={`intersection-row-${y}`} className="board__row">
+                                {
+                                    Array(n).fill(0).map((_, x) => {
+                                        return <Intersection
+                                            key={`intersection-(${x}, ${y})`}
+                                            type={intersectionType(x, y)}
+                                        />
+                                    })
+                                }
+                            </div>
+                        })
+                    }
+                </div>
+            </div>
         </div>
     );
 }

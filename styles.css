@@ -1,12 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Sono&display=swap');
 @import "./css/board.css";
 @import "./css/chat.css";
+@import "./css/intersection.css";
 @import "./css/lobby.css";
+@import "./css/road.css";
 @import "./css/tile.css";
 
 :root {
     --tile-width: 5rem;
-    --road-width: 0.5rem;
+    --road-width: 1rem;
+    --road-depth: 5;
+    --tile-depth: 10;
+    --intersection-depth: 15;
 }
 
 * {
@@ -24,4 +29,5 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #f5f5dc;
 }

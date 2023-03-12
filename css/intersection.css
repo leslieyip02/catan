@@ -1,0 +1,47 @@
+/*  
+      junction )--------
+              / ________
+             / /        \
+            / /          \
+    fork --( (  hexagon™  )
+            \ \          /
+             \ \________/
+              \
+      junction )--------
+
+    > fork - 1 road splits to 2
+    > junction - 2 roads join into 1
+    > flipped at 90° because of ascii art limitations
+*/
+
+.intersection {
+    position: relative;
+    margin-top: 0rem;
+    margin-left: calc(var(--tile-width) * 0.5);
+    margin-right: calc(var(--tile-width) * 0.5);
+}
+
+.intersection__point {
+    position: relative;
+    width: var(--road-width);
+    height: var(--road-width);
+    scale: 1.5;
+    box-sizing: border-box;
+    border: 0.1rem solid white;
+    border-radius: 50%;
+    background-color: red;
+    z-index: var(--intersection-depth);
+    transition: scale 0.2s;
+}
+
+.intersection--fork {
+    margin-bottom: calc((var(--tile-width) + var(--road-width)) * 0.2886 - var(--road-width));
+}
+
+.intersection--junction {
+    margin-bottom: calc((var(--tile-width) + var(--road-width) * 1.1547) * 0.5774 - var(--road-width));
+}
+
+.intersection__point:hover {
+    scale: 2;
+}

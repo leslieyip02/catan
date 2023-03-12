@@ -1,12 +1,32 @@
+/*  
+        width / cos30°
+        <------------>  
+           ________
+          /        \    ^
+         /          \   |
+        (  hexagon™  )  | width
+         \          /   |
+          \________/    v
+
+        <->
+      width / cos30° / 4
+
+    > flipped at 90° because of ascii art limitations
+*/
+
 .tile {
+    position: relative;
     width: var(--tile-width);
     height: calc(var(--tile-width) * 1.1547);
     clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
-    margin: var(--road-width);
-    margin-bottom: calc(var(--road-width) - var(--tile-width) * 0.2886);
+    margin-top: var(--road-width);
+    margin-bottom: calc(var(--tile-width) * -0.2886);
+    margin-left: calc(var(--road-width) * 0.5);
+    margin-right: calc(var(--road-width) * 0.5);
     background: #eeeeee;
     background-size: contain;
     display: flex;
+    z-index: var(--tile-depth);
 }
 
 .tile__text {
