@@ -12,6 +12,7 @@
     --road-depth: 5;
     --tile-depth: 10;
     --intersection-depth: 15;
+    --chat-depth: 100;
 }
 
 * {
