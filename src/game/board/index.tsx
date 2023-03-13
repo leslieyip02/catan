@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { Database, DatabaseReference } from "firebase/database";
 import Intersection, { IntersectionType } from './intersection';
-import Tile, { tileProps } from "./tile";
+import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";
+import { Resource, mapTerrainToResource, resourceRoll } from "./resource";
 
 interface boardProps { };
 
 let defaultTerrains = [
-    ["mountains", "pasture", "forest"],
-    ["fields", "hills", "pasture", "hills"],
-    ["fields", "forest", "desert", "forest", "mountains"],
-    ["forest", "mountains", "fields", "pasture"],
-    ["hills", "fields", "pasture"]
+    [TerrainType.mountains, TerrainType.pasture, TerrainType.forest],
+    [TerrainType.fields, TerrainType.hills, TerrainType.pasture, TerrainType.hills],
+    [TerrainType.fields, TerrainType.forest, TerrainType.desert, TerrainType.forest, TerrainType.mountains],
+    [TerrainType.forest, TerrainType.mountains, TerrainType.fields, TerrainType.pasture],
+    [TerrainType.hills, TerrainType.fields, TerrainType.pasture]
 ];
 
 let defaultRolls = [
@@ -25,8 +26,10 @@ let defaultRolls = [
 let intersections = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
 
 function Board(props: boardProps) {
-    const [terrains, setTerrain] = useState<string[][]>(defaultTerrains);
+    const [terrains, setTerrain] = useState<TerrainType[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
+
+    // TODO: keep track of rolls, resources and players who gain resources from those rolls
 
     function shuffleBoard() {
         let shuffledTerrains = terrains.map((row) => row.slice());
@@ -83,8 +86,8 @@ function Board(props: boardProps) {
         if (y == intersections.length - 1) {
             return IntersectionType.end;
         }
-        
-        if (y % 2 == 0 && y > 5) {
+
+        if (y % 2 == 0 && y >= (intersections.length / 2)) {
             if (x == 0) {
                 return IntersectionType.right;
             } else if (x == intersections[y] - 1) {
@@ -93,6 +96,36 @@ function Board(props: boardProps) {
         }
 
         return y % 2 == 0 ? IntersectionType.fork : IntersectionType.junction;
+    }
+
+    function intersectionResourceRolls(x: number, y: number): resourceRoll[] {
+        let resourceRolls: resourceRoll[] = [];
+
+        // offset of adjacent tiles depends on whether intersections are
+        // 1. upper or lower half
+        // 2. forks or junctions
+        let offsets = y < (intersections.length / 2)
+            ? (y % 2 == 0 ? [[-1, -1], [0, -1], [0, 0]] : [[-1, -1], [-1, 0], [0, 0]])
+            : (y % 2 == 0 ? [[-1, -1], [0, -1], [-1, 0]] : [[0, -1], [-1, 0], [0, 0]]);
+
+        y = Math.floor(y / 2);
+        offsets.forEach((offset) => {
+            let ox = x + offset[0];
+            let oy = y + offset[1];
+
+            // check if in range
+            if (oy < 0 || oy >= defaultRolls.length ||
+                ox < 0 || ox >= defaultRolls[oy].length) {
+
+                return;
+            }
+
+            let terrain = terrains[oy][ox];
+            let roll = rolls[oy][ox];
+            resourceRolls.push({ [roll]: mapTerrainToResource(terrain) });
+        });
+
+        return resourceRolls;
     }
 
     return (
@@ -106,12 +139,10 @@ function Board(props: boardProps) {
                             return <div key={`tile-row-${y}`} className="board__row">
                                 {
                                     row.map((terrain, x) => {
-                                        let terrainProps: tileProps = {
-                                            terrain: terrain,
-                                            roll: rolls[y][x],
-                                        };
-
-                                        return <Tile key={`tile-(${x}, ${y})`} {...terrainProps} />
+                                        return <Tile key={`tile-(${x}, ${y})`}
+                                            terrain={terrain}
+                                            roll={rolls[y][x]}
+                                        />
                                     })
                                 }
                             </div>
@@ -127,6 +158,7 @@ function Board(props: boardProps) {
                                         return <Intersection
                                             key={`intersection-(${x}, ${y})`}
                                             type={intersectionType(x, y)}
+                                            resourceRolls={intersectionResourceRolls(x, y)}
                                         />
                                     })
                                 }

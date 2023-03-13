@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Resource, resourceRoll } from "./resource";
 import Road, { RoadDirection } from "./road";
 
 enum IntersectionType {
@@ -11,6 +12,7 @@ enum IntersectionType {
 
 interface intersectionProps {
     type: IntersectionType,
+    resourceRolls: resourceRoll[],
 };
 
 function Intersection(props: intersectionProps) {
@@ -18,7 +20,7 @@ function Intersection(props: intersectionProps) {
         switch (props.type) {
             case IntersectionType.fork:
                 return (
-                    <div className="road__fork">
+                    <div>
                         <Road direction={RoadDirection.left} />
                         <Road direction={RoadDirection.right} />
                     </div>
@@ -38,9 +40,11 @@ function Intersection(props: intersectionProps) {
         }
     }
 
+    // TODO: build settlement method
+
     return (
         <div className={`intersection intersection--${props.type}`}>
-            <div className="intersection__point"></div>
+            <div className="intersection__point" onClick={() => console.log(props.resourceRolls)}></div>
             {roads()}
         </div>
     );

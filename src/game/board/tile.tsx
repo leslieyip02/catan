@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 
+enum TerrainType {
+    hills = "hills",
+    forest = "forest",
+    mountains = "mountains",
+    fields = "fields",
+    pasture = "pasture",
+    desert = "desert",
+};
+
 interface tileProps {
-    terrain: string;
+    terrain: TerrainType;
     roll: number;
 };
 
-function Tile(props: tileProps) {    
+function Tile(props: tileProps) {
     return (
         <div className="tile" data-terrain={props.terrain}>
             <div className="tile__text">{props.roll}</div>
@@ -14,4 +23,4 @@ function Tile(props: tileProps) {
 };
 
 export default Tile;
-export { tileProps };
+export { TerrainType, tileProps };
