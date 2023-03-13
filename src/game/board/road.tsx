@@ -6,11 +6,11 @@ enum RoadDirection {
     down = "down",
 }
 
-interface roadProps {
-    direction: RoadDirection
+interface RoadProps {
+    direction: RoadDirection;
 }
 
-function Road(props: roadProps) {
+function Road(props: RoadProps) {
     return (
         <div className={`road road--${props.direction}`}></div>
     );

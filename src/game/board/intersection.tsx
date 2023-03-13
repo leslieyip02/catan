@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Resource, resourceRoll } from "./resource";
+import { Resource, ResourceRoll } from "./resource";
 import Road, { RoadDirection } from "./road";
 
 enum IntersectionType {
@@ -10,12 +10,12 @@ enum IntersectionType {
     end = "end",
 }
 
-interface intersectionProps {
-    type: IntersectionType,
-    resourceRolls: resourceRoll[],
+interface IntersectionProps {
+    type: IntersectionType;
+    resourceRolls: ResourceRoll[];
 };
 
-function Intersection(props: intersectionProps) {
+function Intersection(props: IntersectionProps) {
     function roads() {
         switch (props.type) {
             case IntersectionType.fork:

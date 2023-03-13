@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { get, update, child, Database, DatabaseReference, onValue } from "firebase/database";
 
-interface chatProps {
+interface ChatProps {
     db: Database;
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
     userName: string;
 };
 
-function Chat(props: chatProps) {
+function Chat(props: ChatProps) {
     const [userRef, setUserRef] = useState<DatabaseReference>(props.userRef);
     const [roomRef, setRoomRef] = useState<DatabaseReference>(props.roomRef);
     const [currentMessage, setCurrentMessage] = useState<string>("");

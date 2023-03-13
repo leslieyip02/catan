@@ -2,19 +2,19 @@ import { useState, useEffect } from "react";
 import { ref, set, update, push, Database, DatabaseReference, onDisconnect } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
 
-interface lobbyProps {
+interface LobbyProps {
     auth: Auth;
     db: Database;
     updateRefs: (newUserRef: DatabaseReference, newRoomRef: DatabaseReference) => void;
     updateUserName: (newUserName: string) => void;
 };
 
-interface userProps {
+interface UserProps {
     id: string;
     name: string;
 };
 
-function Lobby(props: lobbyProps) {
+function Lobby(props: LobbyProps) {
     const [userId, setUserId] = useState<string>();
     const [userRef, setUserRef] = useState<DatabaseReference>();
     const [userName, setUserName] = useState<string>("");
@@ -27,7 +27,7 @@ function Lobby(props: lobbyProps) {
                 // values are not available until after inital render
                 let uid = user.uid;
                 let newUserRef = ref(props.db, `users/${uid}`);
-                let newUser: userProps = {
+                let newUser: UserProps = {
                     id: uid,
                     name: userName,
                 };
@@ -63,14 +63,15 @@ function Lobby(props: lobbyProps) {
             // append user
             let targetRoomRef = ref(props.db, `rooms/${roomId}`);
             update(targetRoomRef, { [userId]: true });
-    
-            let updatedUser: userProps = {
+
+            let updatedUser: UserProps = {
                 id: userId,
                 name: userName || "Anonymous",
             };
-    
-            set(userRef, updatedUser);
-    
+
+            set(userRef, updatedUser)
+                .catch((e) => console.error(e));
+
             // update parent app component
             props.updateRefs(userRef, targetRoomRef);
             props.updateUserName(updatedUser.name);

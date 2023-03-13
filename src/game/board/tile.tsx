@@ -9,12 +9,12 @@ enum TerrainType {
     desert = "desert",
 };
 
-interface tileProps {
+interface TileProps {
     terrain: TerrainType;
     roll: number;
 };
 
-function Tile(props: tileProps) {
+function Tile(props: TileProps) {
     return (
         <div className="tile" data-terrain={props.terrain}>
             <div className="tile__text">{props.roll}</div>
@@ -23,4 +23,4 @@ function Tile(props: tileProps) {
 };
 
 export default Tile;
-export { TerrainType, tileProps };
+export { TerrainType, TileProps };

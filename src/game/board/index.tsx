@@ -3,7 +3,7 @@ import { Database, DatabaseReference } from "firebase/database";
 import Intersection, { IntersectionType } from './intersection';
 import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";
-import { Resource, mapTerrainToResource, resourceRoll } from "./resource";
+import { Resource, ResourceRoll, mapTerrainToResource } from "./resource";
 
 interface boardProps { };
 
@@ -98,8 +98,8 @@ function Board(props: boardProps) {
         return y % 2 == 0 ? IntersectionType.fork : IntersectionType.junction;
     }
 
-    function intersectionResourceRolls(x: number, y: number): resourceRoll[] {
-        let resourceRolls: resourceRoll[] = [];
+    function intersectionResourceRolls(x: number, y: number): ResourceRoll[] {
+        let resourceRolls: ResourceRoll[] = [];
 
         // offset of adjacent tiles depends on whether intersections are
         // 1. upper or lower half

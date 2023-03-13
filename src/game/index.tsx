@@ -3,14 +3,14 @@ import { Database, DatabaseReference } from "firebase/database";
 import Board from "./board";
 import Chat from "./chat";
 
-interface gameProps {
+interface GameProps {
     db: Database;
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
     userName: string;
 };
 
-function Game(props: gameProps) {
+function Game(props: GameProps) {
     const [userRef, setUserRef] = useState<DatabaseReference>(props.userRef);
     const [roomRef, setRoomRef] = useState<DatabaseReference>(props.roomRef);
     const [userName, setUserName] = useState<string>(props.userName);

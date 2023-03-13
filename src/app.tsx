@@ -4,12 +4,12 @@ import { Auth } from "firebase/auth";
 import Lobby from "./lobby";
 import Game from "./game";
 
-interface appProps {
+interface AppProps {
     auth: Auth;
     db: Database;
 };
 
-function App(props: appProps) {
+function App(props: AppProps) {
     const [userRef, setUserRef] = useState<DatabaseReference>();
     const [roomRef, setRoomRef] = useState<DatabaseReference>();
     const [userName, setUserName] = useState<string>("");

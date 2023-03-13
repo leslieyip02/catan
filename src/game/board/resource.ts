@@ -9,6 +9,10 @@ enum Resource {
     none = "none",
 };
 
+interface ResourceRoll {
+    [key: number]: Resource;
+};
+
 function mapTerrainToResource(terrain: TerrainType): Resource {
     switch (terrain) {
         case TerrainType.hills:
@@ -31,8 +35,4 @@ function mapTerrainToResource(terrain: TerrainType): Resource {
     }
 }
 
-interface resourceRoll {
-    [key: number]: Resource,
-};
-
-export { Resource, mapTerrainToResource, resourceRoll };
+export { Resource, ResourceRoll, mapTerrainToResource };
