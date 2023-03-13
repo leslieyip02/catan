@@ -27,11 +27,18 @@
     height: var(--road-width);
     scale: 1.5;
     box-sizing: border-box;
-    border: 0.1rem solid white;
+    border: 0.1rem solid #eeeeee;
     border-radius: 50%;
-    background-color: red;
+    background-color: #eeeeee;
     z-index: var(--intersection-depth);
     transition: scale 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.intersection__icon {
+    font-size: calc(var(--road-width) * 0.5);
 }
 
 .intersection--fork {

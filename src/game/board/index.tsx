@@ -6,31 +6,48 @@ import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";
 import { Resource, ResourceRoll, mapTerrainToResource } from "./resource";
 
-interface boardProps { };
+interface BoardProps {
+    db: Database;
+    userRef: DatabaseReference;
+    roomRef: DatabaseReference;
+};
 
-let defaultTerrains = [
-    [TerrainType.mountains, TerrainType.pasture, TerrainType.forest],
-    [TerrainType.fields, TerrainType.hills, TerrainType.pasture, TerrainType.hills],
-    [TerrainType.fields, TerrainType.forest, TerrainType.desert, TerrainType.forest, TerrainType.mountains],
-    [TerrainType.forest, TerrainType.mountains, TerrainType.fields, TerrainType.pasture],
-    [TerrainType.hills, TerrainType.fields, TerrainType.pasture]
-];
-
-let defaultRolls = [
-    [10, 2, 9],
-    [12, 6, 4, 10],
-    [9, 11, 7, 3, 8],
-    [8, 3, 4, 5],
-    [5, 6, 11]
-];
-
-let intersections = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
-
-function Board(props: boardProps) {
-    const [terrains, setTerrain] = useState<TerrainType[][]>(defaultTerrains);
+function Board(props: BoardProps) {
+    const [userRef, setUserRef] = useState<DatabaseReference>(props.userRef);
+    const [roomRef, setRoomRef] = useState<DatabaseReference>(props.roomRef);
+    const [terrains, setTerrains] = useState<TerrainType[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
+    const [started, setStarted] = useState<boolean>(false);
 
     // TODO: keep track of rolls, resources and players who gain resources from those rolls
+
+    // listen for board updates
+    useEffect(() => {
+        onValue(child(roomRef, "terrains"), (newTerrains) => {
+            if (newTerrains.val()) {
+                setTerrains(newTerrains.val());
+            } else {
+                set(child(roomRef, "terrains"), terrains);
+            }
+        });
+
+        onValue(child(roomRef, "rolls"), (newRolls) => {
+            if (newRolls.val()) {
+                setRolls(newRolls.val());
+            } else {
+                set(child(roomRef, "rolls"), rolls);
+            }
+        });
+
+        // stop listening once the game starts
+        onValue(child(roomRef, "started"), (started) => {
+            if (started.val()) {
+                let listeners = ["terrains", "rolls", "started"];
+                listeners.forEach((listener) => off(child(roomRef, listener)));
+                setStarted(true);
+            }
+        });
+    }, []);
 
     function shuffleBoard() {
         let shuffledTerrains = terrains.map((row) => row.slice());
@@ -74,24 +91,30 @@ function Board(props: boardProps) {
             shuffledRolls[y2][x2] = t1;
         }
 
-        setTerrain(shuffledTerrains);
+        set(child(roomRef, "terrains"), shuffledTerrains);
+        setTerrains(shuffledTerrains);
+
+        set(child(roomRef, "rolls"), shuffledRolls);
         setRolls(shuffledRolls);
     }
 
     function resetBoard() {
-        setTerrain(defaultTerrains);
+        set(child(roomRef, "terrains"), defaultTerrains);
+        setTerrains(defaultTerrains);
+
+        set(child(roomRef, "rolls"), defaultRolls);
         setRolls(defaultRolls);
     }
 
     function intersectionType(x: number, y: number): IntersectionType {
-        if (y == intersections.length - 1) {
+        if (y == intersectionCounts.length - 1) {
             return IntersectionType.end;
         }
 
-        if (y % 2 == 0 && y >= (intersections.length / 2)) {
+        if (y % 2 == 0 && y >= (intersectionCounts.length / 2)) {
             if (x == 0) {
                 return IntersectionType.right;
-            } else if (x == intersections[y] - 1) {
+            } else if (x == intersectionCounts[y] - 1) {
                 return IntersectionType.left;
             }
         }
@@ -105,7 +128,7 @@ function Board(props: boardProps) {
         // offset of adjacent tiles depends on whether intersections are
         // 1. upper or lower half
         // 2. forks or junctions
-        let offsets = y < (intersections.length / 2)
+        let offsets = y < (intersectionCounts.length / 2)
             ? (y % 2 == 0 ? [[-1, -1], [0, -1], [0, 0]] : [[-1, -1], [-1, 0], [0, 0]])
             : (y % 2 == 0 ? [[-1, -1], [0, -1], [-1, 0]] : [[0, -1], [-1, 0], [0, 0]]);
 
@@ -123,7 +146,9 @@ function Board(props: boardProps) {
 
             let terrain = terrains[oy][ox];
             let roll = rolls[oy][ox];
-            resourceRolls.push({ [roll]: mapTerrainToResource(terrain) });
+            if (terrain != TerrainType.desert) {
+                resourceRolls.push({ [roll]: mapTerrainToResource(terrain) });
+            }
         });
 
         return resourceRolls;
@@ -131,8 +156,12 @@ function Board(props: boardProps) {
 
     return (
         <div>
-            <button onClick={shuffleBoard}>Shuffle Board</button>
-            <button onClick={resetBoard}>Reset Board</button>
+            {
+                !started && <div>
+                    <button onClick={shuffleBoard}>Shuffle Board</button>
+                    <button onClick={resetBoard}>Reset Board</button>
+                </div>
+            }
             <div className="board">
                 <div className="board__layer board__tiles">
                     {
@@ -152,12 +181,13 @@ function Board(props: boardProps) {
                 </div>
                 <div className="board__layer board__paths">
                     {
-                        intersections.map((n, y) => {
+                        intersectionCounts.map((n, y) => {
                             return <div key={`intersection-row-${y}`} className="board__row">
                                 {
                                     Array(n).fill(0).map((_, x) => {
                                         return <Intersection
                                             key={`intersection-(${x}, ${y})`}
+                                            userRef={props.userRef}
                                             type={intersectionType(x, y)}
                                             resourceRolls={intersectionResourceRolls(x, y)}
                                         />
