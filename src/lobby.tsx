@@ -1,17 +1,13 @@
 import { useState, useEffect } from "react";
-import { ref, set, update, push, Database, DatabaseReference, onDisconnect } from "firebase/database";
+import { ref, get, set, update, push, child, Database, DatabaseReference, onDisconnect } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
+import { UserProps, userColors, defaultUserQuotas } from "./user";
 
 interface LobbyProps {
     auth: Auth;
     db: Database;
     updateRefs: (newUserRef: DatabaseReference, newRoomRef: DatabaseReference) => void;
     updateUserName: (newUserName: string) => void;
-};
-
-interface UserProps {
-    id: string;
-    name: string;
 };
 
 function Lobby(props: LobbyProps) {
@@ -27,10 +23,7 @@ function Lobby(props: LobbyProps) {
                 // values are not available until after inital render
                 let uid = user.uid;
                 let newUserRef = ref(props.db, `users/${uid}`);
-                let newUser: UserProps = {
-                    id: uid,
-                    name: userName,
-                };
+                let newUser: UserProps = { id: uid, };
 
                 setUserId(uid);
                 setUserRef(newUserRef);
@@ -47,6 +40,7 @@ function Lobby(props: LobbyProps) {
     function createRoom() {
         // create new ref for the room
         let newRoomRef = push(ref(props.db, "rooms"));
+        set(newRoomRef, { host: userId, started: false });
         setRoomId(newRoomRef.key);
 
         // delete room when host leaves
@@ -62,19 +56,32 @@ function Lobby(props: LobbyProps) {
         if (roomId) {
             // append user
             let targetRoomRef = ref(props.db, `rooms/${roomId}`);
-            update(targetRoomRef, { [userId]: true });
+            get(child(targetRoomRef, "started"))
+                .then((started) => {
+                    // cannot join ongoing games
+                    if (!started.val()) {
+                        let roomUsersRef = child(targetRoomRef, "users");
+                        get(roomUsersRef)
+                            .then((currentUsers) => {
+                                let userIds: string[] = currentUsers.val() || [];
+                                set(roomUsersRef, [...userIds, userId]);
 
-            let updatedUser: UserProps = {
-                id: userId,
-                name: userName || "Anonymous",
-            };
+                                let updatedUser: UserProps = {
+                                    id: userId,
+                                    index: userIds.length,
+                                    name: userName || "Anonymous",
+                                    color: userColors[userIds.length],
+                                    ...defaultUserQuotas,
+                                };
 
-            set(userRef, updatedUser)
-                .catch((e) => console.error(e));
+                                set(userRef, updatedUser);
 
-            // update parent app component
-            props.updateRefs(userRef, targetRoomRef);
-            props.updateUserName(updatedUser.name);
+                                // update parent app component
+                                props.updateRefs(userRef, targetRoomRef);
+                                props.updateUserName(updatedUser.name);
+                            });
+                    }
+                });
         }
     };
 
