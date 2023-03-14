@@ -62,15 +62,16 @@ function Lobby(props: LobbyProps) {
                     if (!started.val()) {
                         let roomUsersRef = child(targetRoomRef, "users");
                         get(roomUsersRef)
+                            // currentUsers is a dictionary of user IDs
                             .then((currentUsers) => {
-                                let userIds: string[] = currentUsers.val() || [];
-                                set(roomUsersRef, [...userIds, userId]);
+                                let index = Object.values(currentUsers.val() || {}).length;
+                                update(roomUsersRef, { [userId]: true });
 
                                 let updatedUser: UserProps = {
                                     id: userId,
-                                    index: userIds.length,
+                                    index: index,
                                     name: userName || "Anonymous",
-                                    color: userColors[userIds.length],
+                                    color: userColors[index],
                                     ...defaultUserQuotas,
                                 };
 

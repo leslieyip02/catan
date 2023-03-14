@@ -1,14 +1,20 @@
 {
-    "rules": {
-        ".read": "auth != null",
-        ".write": false,
+    "rules": {        
         "users": {
-            "$uid": {
-                ".write": "auth != null && auth.uid == $uid"
+            "$user_id": {
+                ".read": "auth != null && auth.uid == $user_id",
+                ".write": "auth != null && auth.uid == $user_id"
             }
         },
         "rooms": {
-            ".write": "auth != null"
+            "$room_id": {
+                ".read": "auth != null && 
+                    (data.child('/started').val() == false ||
+                    data.child('/users/' + auth.uid).exists())",
+                ".write": "auth != null && 
+                    ((!data.exists() || data.child('started').val() == false) ||
+                    root.child('rooms/' + $room_id + '/users/' + auth.uid).exists())"
+            }
         }
     }
 }
