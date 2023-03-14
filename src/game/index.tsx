@@ -48,7 +48,10 @@ function Game(props: GameProps) {
         <div>
             {/* <div>{`Room: ${props.roomRef.key}`}</div> */}
             {host && !started && <button onClick={startGame}>Start Game</button>}
-            <Board {...props} />
+            <Board
+                {...props}
+                started={started}
+            />
             <Chat {...props} />
         </div>
     );

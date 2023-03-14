@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { get, set, child, onValue, DatabaseReference } from "firebase/database";
+import { get, set, child, onValue, DatabaseReference, increment } from "firebase/database";
 import { BoardUpdate } from "./";
-import { userColors } from "./data";
+import { defaultColors } from "./defaults";
 import { Resource, ResourceRoll } from "./resource";
 import Road, { RoadDirection } from "./road";
 
@@ -13,6 +13,15 @@ enum IntersectionType {
     end = "end",
 }
 
+// these are the properties that are stored in the Board
+interface IntersectionData {
+    type: IntersectionType;
+    owner?: string;
+    color?: string;
+    productionTier?: number;
+};
+
+// these are the properties that are needed for render
 interface IntersectionProps {
     x: number;
     y: number;
@@ -22,12 +31,20 @@ interface IntersectionProps {
     resourceRolls: ResourceRoll[];
     owner?: string;
     color?: string;
+    productionTier?: number;
 };
 
 function Intersection(props: IntersectionProps) {
     const [owner, setOwner] = useState<string>(props.owner);
     const [color, setColor] = useState<string>(props.color);
-    const [productionTier, setProductionTier] = useState<number>(0);
+    const [productionTier, setProductionTier] = useState<number>(props.productionTier || 0);
+
+    // updates values when data from parent component updates
+    useEffect(() => {
+        setOwner(props.owner);
+        setColor(props.color);
+        setProductionTier(props.productionTier || 0);
+    }, [props]);
 
     // broadcast updates to room
     useEffect(() => {
@@ -43,22 +60,6 @@ function Intersection(props: IntersectionProps) {
             set(child(props.roomRef, "boardUpdate"), boardUpdate);
         }
     }, [productionTier]);
-
-    // TODO: move this listener up into board instead so there's only one listener instead of 54
-    // listen to room updates
-    useEffect(() => {
-        onValue(child(props.roomRef, "boardUpdate"), (update) => {
-            let updateProps: BoardUpdate = update.val();
-            if (updateProps && updateProps.owner != owner &&
-                (updateProps.type == "settlement" || updateProps.type == "city") &&
-                updateProps.x == props.x && updateProps.y == props.y) {
-
-                setOwner(updateProps.owner);
-                setColor(updateProps.color);
-                setProductionTier(updateProps.type == "settlement" ? 1 : 2);
-            }
-        });
-    }, []);
 
     function intersectionRoads(): JSX.Element {
         switch (props.type) {
@@ -119,7 +120,7 @@ function Intersection(props: IntersectionProps) {
                             .then((userIndex) => {
                                 // update production tier after fetching color
                                 // so color can be sent in the board update broadcast
-                                setColor(userColors[userIndex.val()]);
+                                setColor(defaultColors[userIndex.val()]);
                                 setProductionTier((currentProductionTier) => currentProductionTier + 1);
                             });
                     }
@@ -169,4 +170,4 @@ function Intersection(props: IntersectionProps) {
 };
 
 export default Intersection;
-export { IntersectionType };
+export { IntersectionType, IntersectionData, IntersectionProps };
