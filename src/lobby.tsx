@@ -64,7 +64,14 @@ function Lobby(props: LobbyProps) {
                         get(roomUsersRef)
                             // currentUsers is a dictionary of user IDs
                             .then((currentUsers) => {
-                                let index = Object.values(currentUsers.val() || {}).length;
+                                let userIds = currentUsers.val() || {};
+
+                                // check if user is already in a room
+                                if (userId in userIds) {
+                                    return;
+                                }
+
+                                let index = Object.values(userIds).length;
                                 update(roomUsersRef, { [userId]: true });
 
                                 let updatedUser: UserProps = {
