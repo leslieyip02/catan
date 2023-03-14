@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { set, child, onValue, off, Database, DatabaseReference } from "firebase/database";
 import { defaultTerrains, defaultRolls, intersectionCounts } from "./data";
-import Intersection, { IntersectionType } from './intersection';
+import Intersection, { IntersectionType } from "./intersection";
 import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";
 import { Resource, ResourceRoll, mapTerrainToResource } from "./resource";
@@ -12,9 +12,15 @@ interface BoardProps {
     roomRef: DatabaseReference;
 };
 
+interface BoardUpdate {
+    type: "settlement" | "city" | "road",
+    x: number;
+    y: number;
+    owner: string;
+    color: string;
+};
+
 function Board(props: BoardProps) {
-    const [userRef, setUserRef] = useState<DatabaseReference>(props.userRef);
-    const [roomRef, setRoomRef] = useState<DatabaseReference>(props.roomRef);
     const [terrains, setTerrains] = useState<TerrainType[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [started, setStarted] = useState<boolean>(false);
@@ -23,27 +29,27 @@ function Board(props: BoardProps) {
 
     // listen for board updates
     useEffect(() => {
-        onValue(child(roomRef, "terrains"), (newTerrains) => {
+        onValue(child(props.roomRef, "terrains"), (newTerrains) => {
             if (newTerrains.val()) {
                 setTerrains(newTerrains.val());
             } else {
-                set(child(roomRef, "terrains"), terrains);
+                set(child(props.roomRef, "terrains"), terrains);
             }
         });
 
-        onValue(child(roomRef, "rolls"), (newRolls) => {
+        onValue(child(props.roomRef, "rolls"), (newRolls) => {
             if (newRolls.val()) {
                 setRolls(newRolls.val());
             } else {
-                set(child(roomRef, "rolls"), rolls);
+                set(child(props.roomRef, "rolls"), rolls);
             }
         });
 
         // stop listening once the game starts
-        onValue(child(roomRef, "started"), (started) => {
+        onValue(child(props.roomRef, "started"), (started) => {
             if (started.val()) {
                 let listeners = ["terrains", "rolls", "started"];
-                listeners.forEach((listener) => off(child(roomRef, listener)));
+                listeners.forEach((listener) => off(child(props.roomRef, listener)));
                 setStarted(true);
             }
         });
@@ -91,22 +97,22 @@ function Board(props: BoardProps) {
             shuffledRolls[y2][x2] = t1;
         }
 
-        set(child(roomRef, "terrains"), shuffledTerrains);
+        set(child(props.roomRef, "terrains"), shuffledTerrains);
         setTerrains(shuffledTerrains);
 
-        set(child(roomRef, "rolls"), shuffledRolls);
+        set(child(props.roomRef, "rolls"), shuffledRolls);
         setRolls(shuffledRolls);
     }
 
     function resetBoard() {
-        set(child(roomRef, "terrains"), defaultTerrains);
+        set(child(props.roomRef, "terrains"), defaultTerrains);
         setTerrains(defaultTerrains);
 
-        set(child(roomRef, "rolls"), defaultRolls);
+        set(child(props.roomRef, "rolls"), defaultRolls);
         setRolls(defaultRolls);
     }
 
-    function intersectionType(x: number, y: number): IntersectionType {
+    function mapIntersectionType(x: number, y: number): IntersectionType {
         if (y == intersectionCounts.length - 1) {
             return IntersectionType.end;
         }
@@ -122,7 +128,7 @@ function Board(props: BoardProps) {
         return y % 2 == 0 ? IntersectionType.fork : IntersectionType.junction;
     }
 
-    function intersectionResourceRolls(x: number, y: number): ResourceRoll[] {
+    function mapRollsToIntersections(x: number, y: number): ResourceRoll[] {
         let resourceRolls: ResourceRoll[] = [];
 
         // offset of adjacent tiles depends on whether intersections are
@@ -187,9 +193,12 @@ function Board(props: BoardProps) {
                                     Array(n).fill(0).map((_, x) => {
                                         return <Intersection
                                             key={`intersection-(${x}, ${y})`}
+                                            x={x}
+                                            y={y}
                                             userRef={props.userRef}
-                                            type={intersectionType(x, y)}
-                                            resourceRolls={intersectionResourceRolls(x, y)}
+                                            roomRef={props.roomRef}
+                                            type={mapIntersectionType(x, y)}
+                                            resourceRolls={mapRollsToIntersections(x, y)}
                                         />
                                     })
                                 }
@@ -203,3 +212,4 @@ function Board(props: BoardProps) {
 }
 
 export default Board;
+export { BoardUpdate };
