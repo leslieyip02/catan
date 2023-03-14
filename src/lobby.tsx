@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { ref, get, set, update, push, child, Database, DatabaseReference, onDisconnect } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
-import { UserProps, userColors, defaultUserQuotas } from "./user";
+import { UserProps, defaultUserQuotas } from "./user";
 
 interface LobbyProps {
     auth: Auth;
     db: Database;
-    updateRefs: (newUserRef: DatabaseReference, newRoomRef: DatabaseReference) => void;
+    updateUserRef: (newUserRef: DatabaseReference) => void;
+    updateRoomRef: (newRoomRef: DatabaseReference) => void;
     updateUserName: (newUserName: string) => void;
 };
 
@@ -23,11 +24,10 @@ function Lobby(props: LobbyProps) {
                 // values are not available until after inital render
                 let uid = user.uid;
                 let newUserRef = ref(props.db, `users/${uid}`);
-                let newUser: UserProps = { id: uid, };
 
                 setUserId(uid);
                 setUserRef(newUserRef);
-                set(newUserRef, newUser);
+                set(newUserRef, { id: uid });
 
                 // handle disconnection
                 onDisconnect(newUserRef).remove();
@@ -71,14 +71,16 @@ function Lobby(props: LobbyProps) {
                                     id: userId,
                                     index: index,
                                     name: userName || "Anonymous",
-                                    color: userColors[index],
+                                    resources: {},
+                                    resourceRolls: [],
                                     ...defaultUserQuotas,
                                 };
 
                                 set(userRef, updatedUser);
 
                                 // update parent app component
-                                props.updateRefs(userRef, targetRoomRef);
+                                props.updateUserRef(userRef);
+                                props.updateRoomRef(targetRoomRef);
                                 props.updateUserName(updatedUser.name);
                             });
                     }

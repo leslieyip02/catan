@@ -18,4 +18,11 @@ let defaultRolls = [
 
 let intersectionCounts = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
 
-export { defaultTerrains, defaultRolls, intersectionCounts };
+let userColors = [
+    "#d82306",
+    "#8cda52",
+    "#4897f2",
+    "#ffff85",
+];
+
+export { defaultTerrains, defaultRolls, intersectionCounts, userColors };

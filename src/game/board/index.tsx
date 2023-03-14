@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { set, child, onValue, off, Database, DatabaseReference } from "firebase/database";
-import { defaultTerrains, defaultRolls, intersectionCounts } from "./data";
+import { defaultTerrains, defaultRolls, intersectionCounts, userColors } from "./data";
 import Intersection, { IntersectionType } from "./intersection";
 import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";

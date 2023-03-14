@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { get, set, child, onValue, DatabaseReference } from "firebase/database";
 import { BoardUpdate } from "./";
+import { userColors } from "./data";
 import { Resource, ResourceRoll } from "./resource";
 import Road, { RoadDirection } from "./road";
 
@@ -114,11 +115,11 @@ function Intersection(props: IntersectionProps) {
 
                         // assign ownership
                         setOwner(props.userRef.key);
-                        get(child(props.userRef, "color"))
-                            .then((userColor) => {
+                        get(child(props.userRef, "index"))
+                            .then((userIndex) => {
                                 // update production tier after fetching color
                                 // so color can be sent in the board update broadcast
-                                setColor(userColor.val());
+                                setColor(userColors[userIndex.val()]);
                                 setProductionTier((currentProductionTier) => currentProductionTier + 1);
                             });
                     }
@@ -160,13 +161,9 @@ function Intersection(props: IntersectionProps) {
                 style={{ backgroundColor: color }}
                 onClick={() => productionTier == 0 ? buildSettlement() : buildCity()}
             >
-                {
-                    intersectionIcon()
-                }
+                {intersectionIcon()}
             </div>
-            {
-                intersectionRoads()
-            }
+            {intersectionRoads()}
         </div >
     );
 };

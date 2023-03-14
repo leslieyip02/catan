@@ -12,16 +12,7 @@ interface AppProps {
 function App(props: AppProps) {
     const [userRef, setUserRef] = useState<DatabaseReference>();
     const [roomRef, setRoomRef] = useState<DatabaseReference>();
-    const [userName, setUserName] = useState<string>("");
-
-    function updateRefs(newUserRef: DatabaseReference, newRoomRef: DatabaseReference) {
-        setUserRef(newUserRef);
-        setRoomRef(newRoomRef);
-    }
-
-    function updateUserName(newUserName: string) {
-        setUserName(newUserName);
-    }
+    const [userName, setUserName] = useState<string>();
 
     return (
         <div>
@@ -29,8 +20,9 @@ function App(props: AppProps) {
                 ? <Lobby
                     auth={props.auth}
                     db={props.db}
-                    updateRefs={updateRefs}
-                    updateUserName={updateUserName}
+                    updateUserRef={setUserRef}
+                    updateRoomRef={setRoomRef}
+                    updateUserName={setUserName}
                 />
                 : <Game
                     db={props.db}
