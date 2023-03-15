@@ -1,4 +1,5 @@
 import { IntersectionType } from "./intersection";
+import { RoadDirection, RoadData } from "./road";
 import { TerrainType } from "./tile";
 
 let defaultTerrains = [
@@ -19,7 +20,7 @@ let defaultRolls = [
 
 let intersectionCounts = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
 
-function mapIntersectionType(x: number, y: number): IntersectionType {
+function intersectionType(x: number, y: number): IntersectionType {
     // bottom level intersections have no roads
     if (y == intersectionCounts.length - 1) {
         return IntersectionType.end;
@@ -37,9 +38,41 @@ function mapIntersectionType(x: number, y: number): IntersectionType {
     return y % 2 == 0 ? IntersectionType.fork : IntersectionType.junction;
 }
 
+function intersectionRoads(type: IntersectionType): RoadDirection[] {
+    switch (type) {
+        case IntersectionType.fork:
+            return [RoadDirection.left, RoadDirection.right];
+
+        case IntersectionType.junction:
+            return [RoadDirection.down];
+
+        case IntersectionType.left:
+            return [RoadDirection.left];
+
+        case IntersectionType.right:
+            return [RoadDirection.right];
+
+        default:
+            return [];
+    }
+}
+
+// TODO: implement this
+function adjacentIntersections(x: number, y: number): { x: number, y: number } {
+    return { x, y };
+}
+
 let defaultIntersections = intersectionCounts.map((n, y) => {
     return Array(n).fill(0).map((_, x) => {
-        return { type: mapIntersectionType(x, y) };
+        let type = intersectionType(x, y);
+        let roads: RoadData[] = intersectionRoads(type).map((direction) => {
+            return {
+                direction: direction,
+                origin: { x: x, y: y },
+            };
+        });
+
+        return { type: type, roads: roads };
     });
 });
 

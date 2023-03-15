@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
-import { set, child, onValue, off, Database, DatabaseReference } from "firebase/database";
+import { set, child, onValue, off, Database, DatabaseReference, update } from 'firebase/database';
 import { defaultTerrains, defaultRolls, defaultIntersections } from "./defaults";
 import Intersection, { IntersectionData, IntersectionProps } from "./intersection";
 import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";
 import { Resource, ResourceRoll, mapTerrainToResource } from "./resource";
+import { RoadDirection } from "./road";
+
+enum Infrastructure {
+    none = 0,
+    settlement = 1,
+    city = 2,
+    road = 3,
+};
 
 interface BoardProps {
     db: Database;
@@ -14,11 +22,12 @@ interface BoardProps {
 };
 
 interface BoardUpdate {
-    type: "settlement" | "city" | "road";
+    infrastructure: Infrastructure;
     x: number;
     y: number;
     owner: string;
     color: string;
+    roadDirection?: RoadDirection;
 };
 
 function Board(props: BoardProps) {
@@ -43,21 +52,28 @@ function Board(props: BoardProps) {
         });
 
         // listen for board updates
-        onValue(child(props.roomRef, "boardUpdate"), (boardUpdate) => {
-            let infrastructure: BoardUpdate = boardUpdate.val();
-            if (infrastructure) {
-                let { type, x, y, owner, color } = infrastructure;
+        onValue(child(props.roomRef, "boardUpdate"), (update) => {
+            let boardUpdate: BoardUpdate = update.val();
+            if (boardUpdate) {
+                let { infrastructure, x, y, owner, color } = boardUpdate;
+                let updatedIntersections = intersections.map((row) => row.slice());
 
-                if (type == "road") {
-
+                if (infrastructure == Infrastructure.road) {
+                    // check for the correct road to update
+                    for (let i = 0; i < updatedIntersections[y][x].roads.length; i++) {
+                        if (updatedIntersections[y][x].roads[i].direction == boardUpdate.roadDirection) {
+                            updatedIntersections[y][x].roads[i].owner = owner;
+                            updatedIntersections[y][x].roads[i].color = color;
+                            break;
+                        }
+                    }
                 } else {
-                    let updatedIntersections = intersections.map((row) => row.slice());
                     updatedIntersections[y][x].owner = owner;
                     updatedIntersections[y][x].color = color;
-                    updatedIntersections[y][x].productionTier = type == "settlement" ? 1 : 2;
-
-                    setIntersections(updatedIntersections);
+                    updatedIntersections[y][x].infrastructure = infrastructure;
                 }
+
+                setIntersections(updatedIntersections);
             }
         });
     }, []);
@@ -184,10 +200,10 @@ function Board(props: BoardProps) {
                                     row.map((intersectionData, x) => {
                                         return <Intersection
                                             key={`intersection-(${x}, ${y})`}
-                                            x={x}
-                                            y={y}
                                             userRef={props.userRef}
                                             roomRef={props.roomRef}
+                                            x={x}
+                                            y={y}
                                             resourceRolls={mapRollsToIntersections(x, y)}
                                             {...intersectionData}
                                         />
@@ -203,4 +219,4 @@ function Board(props: BoardProps) {
 }
 
 export default Board;
-export { BoardUpdate };
+export { BoardUpdate, Infrastructure };

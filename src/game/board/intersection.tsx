@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { get, set, child, onValue, DatabaseReference, increment } from "firebase/database";
-import { BoardUpdate } from "./";
+import { get, set, child, onValue, DatabaseReference } from "firebase/database";
+import { BoardUpdate, Infrastructure } from "./";
 import { defaultColors } from "./defaults";
 import { Resource, ResourceRoll } from "./resource";
-import Road, { RoadDirection } from "./road";
+import Road, { RoadDirection, RoadData } from "./road";
 
 enum IntersectionType {
     fork = "fork",
@@ -13,99 +13,65 @@ enum IntersectionType {
     end = "end",
 }
 
-// these are the properties that are stored in the Board
+// properties for storage
 interface IntersectionData {
     type: IntersectionType;
+    roads: RoadData[];
     owner?: string;
     color?: string;
-    productionTier?: number;
+    infrastructure?: Infrastructure;
 };
 
-// these are the properties that are needed for render
+// properties for render
 interface IntersectionProps {
-    x: number;
-    y: number;
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
-    type: IntersectionType;
+    x: number;
+    y: number;
     resourceRolls: ResourceRoll[];
+    type: IntersectionType;
+    roads: RoadData[];
     owner?: string;
     color?: string;
-    productionTier?: number;
+    infrastructure?: Infrastructure;
 };
 
 function Intersection(props: IntersectionProps) {
-    const [owner, setOwner] = useState<string>(props.owner);
-    const [color, setColor] = useState<string>(props.color);
-    const [productionTier, setProductionTier] = useState<number>(props.productionTier || 0);
+    const [owner, setOwner] = useState<string>();
+    const [color, setColor] = useState<string>();
+    const [infrastructure, setInfrastructure] = useState<Infrastructure>();
 
     // updates values when data from parent component updates
     useEffect(() => {
         setOwner(props.owner);
         setColor(props.color);
-        setProductionTier(props.productionTier || 0);
+        setInfrastructure(props.infrastructure || Infrastructure.none);
     }, [props]);
 
     // broadcast updates to room
     useEffect(() => {
-        if (productionTier != 0) {
+        if (infrastructure) {
             let boardUpdate: BoardUpdate = {
+                infrastructure: infrastructure,
                 x: props.x,
                 y: props.y,
-                type: productionTier == 1 ? "settlement" : "city",
                 owner: owner,
                 color: color,
             };
 
             set(child(props.roomRef, "boardUpdate"), boardUpdate);
         }
-    }, [productionTier]);
-
-    function intersectionRoads(): JSX.Element {
-        switch (props.type) {
-            case IntersectionType.fork:
-                return (
-                    <div>
-                        <Road direction={RoadDirection.left} />
-                        <Road direction={RoadDirection.right} />
-                    </div>
-                );
-
-            case IntersectionType.junction:
-                return <Road direction={RoadDirection.down} />;
-
-            case IntersectionType.left:
-                return <Road direction={RoadDirection.left} />;
-
-            case IntersectionType.right:
-                return <Road direction={RoadDirection.right} />;
-
-            default:
-                break;
-        }
-    }
-
-    function intersectionIcon(): JSX.Element {
-        switch (productionTier) {
-            case 1:
-                return <i className="intersection__icon fa-solid fa-oil-well"></i>;
-
-            case 2:
-                return <i className="intersection__icon fa-solid fa-city"></i>;
-
-            default:
-                break;
-        }
-    }
+    }, [infrastructure]);
 
     function buildSettlement() {
-        if (productionTier == 0) {
+        if (infrastructure == Infrastructure.none) {
             let settlementsRef = child(props.userRef, "settlements");
             get(settlementsRef)
-                .then((currentSettlements) => {
-                    // check user's quota for settlements
-                    if (currentSettlements.val() > 0) {
-                        set(settlementsRef, currentSettlements.val() - 1);
+                .then((settlements) => {
+                    // check quota
+                    let quota = settlements.val();
+                    if (quota > 0) {
+                        set(settlementsRef, quota - 1);
 
                         let resourceRollsRef = child(props.userRef, "resourceRolls");
                         get(resourceRollsRef)
@@ -115,13 +81,13 @@ function Intersection(props: IntersectionProps) {
                             });
 
                         // assign ownership
-                        setOwner(props.userRef.key);
                         get(child(props.userRef, "index"))
                             .then((userIndex) => {
-                                // update production tier after fetching color
-                                // so color can be sent in the board update broadcast
+                                // update only after fetching color
+                                // so color can be sent in the update broadcast
                                 setColor(defaultColors[userIndex.val()]);
-                                setProductionTier((currentProductionTier) => currentProductionTier + 1);
+                                setOwner(props.userRef.key);
+                                setInfrastructure(Infrastructure.settlement);
                             });
                     }
                 });
@@ -130,18 +96,22 @@ function Intersection(props: IntersectionProps) {
 
     function buildCity() {
         // does nothing once city has been built
-        if (productionTier == 1 && owner == props.userRef.key) {
+        if (infrastructure == Infrastructure.settlement && owner == props.userRef.key) {
             let citiesRef = child(props.userRef, "cities");
             get(citiesRef)
-                .then((currentCities) => {
-                    if (currentCities.val() > 0) {
-                        set(citiesRef, currentCities.val() - 1);
+                .then((cities) => {
+                    // check quota
+                    let quota = cities.val();
+                    if (quota > 0) {
+                        set(citiesRef, quota - 1);
 
+                        // slot for settlement is reopened
                         let settlementsRef = child(props.userRef, "settlements");
                         get(settlementsRef)
-                            .then((currentSettlements) => set(settlementsRef, currentSettlements.val() + 1));
+                            .then((settlements) => set(settlementsRef, settlements.val() + 1));
 
                         // cities double production so just add another set of rolls
+                        // probably not the most efficient data structure
                         let resourceRollsRef = child(props.userRef, "resourceRolls");
                         get(resourceRollsRef)
                             .then((currentRolls) => {
@@ -149,7 +119,7 @@ function Intersection(props: IntersectionProps) {
                                 set(resourceRollsRef, [...rolls, ...props.resourceRolls]);
                             });
 
-                        setProductionTier((currentProductionTier) => currentProductionTier + 1);
+                        setInfrastructure(Infrastructure.city);
                     }
                 });
         }
@@ -160,11 +130,23 @@ function Intersection(props: IntersectionProps) {
             <div
                 className="intersection__point"
                 style={{ backgroundColor: color }}
-                onClick={() => productionTier == 0 ? buildSettlement() : buildCity()}
+                onClick={() => infrastructure == Infrastructure.none ? buildSettlement() : buildCity()}
             >
-                {intersectionIcon()}
+                {
+                    infrastructure == Infrastructure.settlement && <i className="intersection__icon fa-solid fa-oil-well"></i> ||
+                    infrastructure == Infrastructure.city && <i className="intersection__icon fa-solid fa-city"></i>
+                }
             </div>
-            {intersectionRoads()}
+            {
+                props.roads.map((roadData, i) => {
+                    return <Road
+                        key={`road-${i}`}
+                        userRef={props.userRef}
+                        roomRef={props.roomRef}
+                        {...roadData}
+                    />
+                })
+            }
         </div >
     );
 };
