@@ -16,6 +16,7 @@ enum IntersectionType {
 // properties for storage
 interface IntersectionData {
     type: IntersectionType;
+    adjacents: { x: number, y: number }[];
     roads: RoadData[];
     owner?: string;
     color?: string;
@@ -30,6 +31,7 @@ interface IntersectionProps {
     y: number;
     resourceRolls: ResourceRoll[];
     type: IntersectionType;
+    adjacents: { x: number, y: number }[];
     roads: RoadData[];
     owner?: string;
     color?: string;

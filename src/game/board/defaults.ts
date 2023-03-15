@@ -1,4 +1,4 @@
-import { IntersectionType } from "./intersection";
+import { IntersectionType, IntersectionData } from "./intersection";
 import { RoadDirection, RoadData } from "./road";
 import { TerrainType } from "./tile";
 
@@ -19,6 +19,7 @@ let defaultRolls = [
 ];
 
 let intersectionCounts = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
+let halfHeight = intersectionCounts.length / 2;
 
 function intersectionType(x: number, y: number): IntersectionType {
     // bottom level intersections have no roads
@@ -27,7 +28,7 @@ function intersectionType(x: number, y: number): IntersectionType {
     }
 
     // roads in the bottom half join back towards the center
-    if (y % 2 == 0 && y >= (intersectionCounts.length / 2)) {
+    if (y % 2 == 0 && y >= halfHeight) {
         if (x == 0) {
             return IntersectionType.right;
         } else if (x == intersectionCounts[y] - 1) {
@@ -57,22 +58,84 @@ function intersectionRoads(type: IntersectionType): RoadDirection[] {
     }
 }
 
-// TODO: implement this
-function adjacentIntersections(x: number, y: number): { x: number, y: number } {
-    return { x, y };
+function adjacentIntersections(x: number, y: number): { x: number, y: number }[] {
+    let adjacent: { x: number, y: number }[] = [];
+
+    if (y % 2 == 0) {
+        // all intersections have an intersection above except the top layer
+        if (y != 0) {
+            adjacent.push({ x: x, y: y - 1 });
+        }
+
+        if (y < halfHeight) {
+            // top half cascades so don't need to check if x is in bounds for layer below
+            adjacent.push({ x: x, y: y + 1 });
+            adjacent.push({ x: x + 1, y: y + 1 });
+        } else {
+            if (x != 0) {
+                adjacent.push({ x: x - 1, y: y + 1 });
+            }
+
+            if (x < intersectionCounts[y + 1]) {
+                adjacent.push({ x: x, y: y + 1 });
+            }
+        }
+    }
+
+    if (y % 2 == 1) {
+        // all intersections have an intersection below except the bottom layer
+        if (y < intersectionCounts.length - 1) {
+            adjacent.push({ x: x, y: y + 1 });
+        }
+
+        if (y < halfHeight) {
+            if (x != 0) {
+                adjacent.push({ x: x - 1, y: y - 1 });
+            }
+
+            if (x < intersectionCounts[y - 1]) {
+                adjacent.push({ x: x, y: y - 1 });
+            }
+        } else {
+            // bottom half shrinks so don't need to check if x is in bounds for layer above
+            adjacent.push({ x: x, y: y - 1 });
+            adjacent.push({ x: x + 1, y: y - 1 });
+        }
+    }
+
+    return adjacent;
 }
 
-let defaultIntersections = intersectionCounts.map((n, y) => {
+
+let defaultIntersections: IntersectionData[][] = intersectionCounts.map((n, y) => {
     return Array(n).fill(0).map((_, x) => {
         let type = intersectionType(x, y);
+        let adjacents = adjacentIntersections(x, y);
         let roads: RoadData[] = intersectionRoads(type).map((direction) => {
+            let destination = { x: x, y: y + 1 }
+
+            if (direction == RoadDirection.left) {
+                destination = y < halfHeight
+                    ? { x: x, y: y + 1 }
+                    : { x: x - 1, y: y + 1 };
+            } else if (direction == RoadDirection.right) {
+                destination = y < halfHeight
+                    ? { x: x + 1, y: y + 1 }
+                    : { x: x, y: y + 1 };
+            }
+
             return {
                 direction: direction,
                 origin: { x: x, y: y },
+                destination: destination,
             };
         });
 
-        return { type: type, roads: roads };
+        return {
+            type: type,
+            adjacents: adjacents,
+            roads: roads,
+        };
     });
 });
 

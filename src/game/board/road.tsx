@@ -13,6 +13,7 @@ enum RoadDirection {
 interface RoadData {
     direction: RoadDirection;
     origin: { x: number, y: number };
+    destination: { x: number, y: number };
     owner?: string;
     color?: string;
 };
@@ -23,6 +24,7 @@ interface RoadProps {
     roomRef: DatabaseReference;
     direction: RoadDirection;
     origin: { x: number, y: number };
+    destination: { x: number, y: number };
     owner?: string;
     color?: string;
 };
