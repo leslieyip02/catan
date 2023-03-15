@@ -1,3 +1,4 @@
+import { Coordinate } from "./";
 import { IntersectionType, IntersectionData } from "./intersection";
 import { RoadDirection, RoadData } from "./road";
 import { TerrainType } from "./tile";
@@ -58,8 +59,8 @@ function intersectionRoads(type: IntersectionType): RoadDirection[] {
     }
 }
 
-function adjacentIntersections(x: number, y: number): { x: number, y: number }[] {
-    let adjacent: { x: number, y: number }[] = [];
+function adjacentIntersections(x: number, y: number): Coordinate[] {
+    let adjacent: Coordinate[] = [];
 
     if (y % 2 == 0) {
         // all intersections have an intersection above except the top layer
@@ -112,7 +113,7 @@ let defaultIntersections: IntersectionData[][] = intersectionCounts.map((n, y) =
         let type = intersectionType(x, y);
         let adjacents = adjacentIntersections(x, y);
         let roads: RoadData[] = intersectionRoads(type).map((direction) => {
-            let destination = { x: x, y: y + 1 }
+            let destination: Coordinate = { x: x, y: y + 1 }
 
             if (direction == RoadDirection.left) {
                 destination = y < halfHeight

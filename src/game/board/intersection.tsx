@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { get, set, child, onValue, DatabaseReference } from "firebase/database";
-import { BoardUpdate, Infrastructure } from "./";
+import { BoardUpdate, Infrastructure, Coordinate } from "./";
 import { defaultColors } from "./defaults";
 import { Resource, ResourceRoll } from "./resource";
 import Road, { RoadDirection, RoadData } from "./road";
@@ -16,7 +16,7 @@ enum IntersectionType {
 // properties for storage
 interface IntersectionData {
     type: IntersectionType;
-    adjacents: { x: number, y: number }[];
+    adjacents: Coordinate[];
     roads: RoadData[];
     owner?: string;
     color?: string;
@@ -31,7 +31,7 @@ interface IntersectionProps {
     y: number;
     resourceRolls: ResourceRoll[];
     type: IntersectionType;
-    adjacents: { x: number, y: number }[];
+    adjacents: Coordinate[];
     roads: RoadData[];
     owner?: string;
     color?: string;

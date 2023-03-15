@@ -14,6 +14,11 @@ enum Infrastructure {
     road = 3,
 };
 
+interface Coordinate {
+    x: number,
+    y: number,
+}
+
 interface BoardProps {
     db: Database;
     userRef: DatabaseReference;
@@ -219,4 +224,4 @@ function Board(props: BoardProps) {
 }
 
 export default Board;
-export { BoardUpdate, Infrastructure };
+export { BoardUpdate, Infrastructure, Coordinate };

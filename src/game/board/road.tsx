@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { get, set, child, DatabaseReference } from "firebase/database";
-import { BoardUpdate, Infrastructure } from "./";
+import { BoardUpdate, Infrastructure, Coordinate } from "./";
 import { defaultColors } from "./defaults";
 
 enum RoadDirection {
@@ -12,8 +12,8 @@ enum RoadDirection {
 // properties for storage
 interface RoadData {
     direction: RoadDirection;
-    origin: { x: number, y: number };
-    destination: { x: number, y: number };
+    origin: Coordinate;
+    destination: Coordinate;
     owner?: string;
     color?: string;
 };
@@ -23,8 +23,8 @@ interface RoadProps {
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
     direction: RoadDirection;
-    origin: { x: number, y: number };
-    destination: { x: number, y: number };
+    origin: Coordinate;
+    destination: Coordinate;
     owner?: string;
     color?: string;
 };
