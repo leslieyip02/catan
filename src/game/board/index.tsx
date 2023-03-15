@@ -6,18 +6,7 @@ import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";
 import { Resource, ResourceRoll, mapTerrainToResource } from "./resource";
 import { RoadDirection } from "./road";
-
-enum Infrastructure {
-    none = 0,
-    settlement = 1,
-    city = 2,
-    road = 3,
-};
-
-interface Coordinate {
-    x: number,
-    y: number,
-}
+import { Infrastructure, Coordinate } from "./utilities";
 
 interface BoardProps {
     db: Database;
@@ -207,10 +196,12 @@ function Board(props: BoardProps) {
                                             key={`intersection-(${x}, ${y})`}
                                             userRef={props.userRef}
                                             roomRef={props.roomRef}
+                                            setupPhase={true}
                                             x={x}
                                             y={y}
                                             resourceRolls={mapRollsToIntersections(x, y)}
                                             {...intersectionData}
+                                            lookUp={(x: number, y: number) => intersections[y][x]}
                                         />
                                     })
                                 }

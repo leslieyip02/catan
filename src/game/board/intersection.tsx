@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { get, set, child, onValue, DatabaseReference } from "firebase/database";
 import { BoardUpdate, Infrastructure, Coordinate } from "./";
-import { defaultColors } from "./defaults";
 import { Resource, ResourceRoll } from "./resource";
 import Road, { RoadDirection, RoadData } from "./road";
+import { defaultColors } from "./defaults";
 
 enum IntersectionType {
     fork = "fork",
@@ -18,24 +18,26 @@ interface IntersectionData {
     type: IntersectionType;
     adjacents: Coordinate[];
     roads: RoadData[];
+    infrastructure: Infrastructure;
     owner?: string;
     color?: string;
-    infrastructure?: Infrastructure;
 };
 
 // properties for render
 interface IntersectionProps {
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
+    setupPhase: boolean;
     x: number;
     y: number;
     resourceRolls: ResourceRoll[];
     type: IntersectionType;
     adjacents: Coordinate[];
     roads: RoadData[];
+    infrastructure: Infrastructure;
     owner?: string;
     color?: string;
-    infrastructure?: Infrastructure;
+    lookUp: (x: number, y: number) => IntersectionData;
 };
 
 function Intersection(props: IntersectionProps) {
@@ -47,7 +49,7 @@ function Intersection(props: IntersectionProps) {
     useEffect(() => {
         setOwner(props.owner);
         setColor(props.color);
-        setInfrastructure(props.infrastructure || Infrastructure.none);
+        setInfrastructure(props.infrastructure);
     }, [props]);
 
     // broadcast updates to room
@@ -67,32 +69,58 @@ function Intersection(props: IntersectionProps) {
 
     function buildSettlement() {
         if (infrastructure == Infrastructure.none) {
-            let settlementsRef = child(props.userRef, "settlements");
-            get(settlementsRef)
-                .then((settlements) => {
-                    // check quota
-                    let quota = settlements.val();
-                    if (quota > 0) {
-                        set(settlementsRef, quota - 1);
+            // intersections must be connected to at least 1 road
+            let connectedByRoad = false;
+            for (let road of props.roads) {
+                if (road.owner === props.userRef.key) {
+                    connectedByRoad = true;
+                    break;
+                }
+            }
 
-                        let resourceRollsRef = child(props.userRef, "resourceRolls");
-                        get(resourceRollsRef)
-                            .then((currentRolls) => {
-                                let rolls: ResourceRoll[] = currentRolls.val() || [];
-                                set(resourceRollsRef, [...rolls, ...props.resourceRolls]);
-                            });
+            // adjacent intersections cannot have settlements / cities
+            for (let { x, y } of props.adjacents) {
+                let adjacent = props.lookUp(x, y);
+                if (adjacent.infrastructure != Infrastructure.none) {
+                    return;
+                }
 
-                        // assign ownership
-                        get(child(props.userRef, "index"))
-                            .then((userIndex) => {
-                                // update only after fetching color
-                                // so color can be sent in the update broadcast
-                                setColor(defaultColors[userIndex.val()]);
-                                setOwner(props.userRef.key);
-                                setInfrastructure(Infrastructure.settlement);
-                            });
+                // check adjacent child roads to see if they lead into this intersection
+                for (let road of adjacent.roads) {
+                    if (road.owner === props.userRef.key) {
+                        connectedByRoad = true;
                     }
-                });
+                }
+            }
+
+            if (props.setupPhase || connectedByRoad) {
+                let settlementsRef = child(props.userRef, "settlements");
+                get(settlementsRef)
+                    .then((settlements) => {
+                        // check quota
+                        let quota = settlements.val();
+                        if (quota > 0) {
+                            set(settlementsRef, quota - 1);
+
+                            let resourceRollsRef = child(props.userRef, "resourceRolls");
+                            get(resourceRollsRef)
+                                .then((currentRolls) => {
+                                    let rolls: ResourceRoll[] = currentRolls.val() || [];
+                                    set(resourceRollsRef, [...rolls, ...props.resourceRolls]);
+                                });
+
+                            // assign ownership
+                            get(child(props.userRef, "index"))
+                                .then((userIndex) => {
+                                    // update only after fetching color
+                                    // so color can be sent in the update broadcast
+                                    setColor(defaultColors[userIndex.val()]);
+                                    setOwner(props.userRef.key);
+                                    setInfrastructure(Infrastructure.settlement);
+                                });
+                        }
+                    });
+            }
         }
     }
 
@@ -146,6 +174,7 @@ function Intersection(props: IntersectionProps) {
                         userRef={props.userRef}
                         roomRef={props.roomRef}
                         {...roadData}
+                        lookUp={props.lookUp}
                     />
                 })
             }

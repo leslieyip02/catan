@@ -1,7 +1,7 @@
-import { Coordinate } from "./";
 import { IntersectionType, IntersectionData } from "./intersection";
 import { RoadDirection, RoadData } from "./road";
 import { TerrainType } from "./tile";
+import { Infrastructure, Coordinate } from "./utilities";
 
 let defaultTerrains = [
     [TerrainType.mountains, TerrainType.pasture, TerrainType.forest],
@@ -136,6 +136,7 @@ let defaultIntersections: IntersectionData[][] = intersectionCounts.map((n, y) =
             type: type,
             adjacents: adjacents,
             roads: roads,
+            infrastructure: Infrastructure.none,
         };
     });
 });

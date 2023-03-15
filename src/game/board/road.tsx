@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { get, set, child, DatabaseReference } from "firebase/database";
 import { BoardUpdate, Infrastructure, Coordinate } from "./";
+import { IntersectionData } from "./intersection";
 import { defaultColors } from "./defaults";
 
 enum RoadDirection {
@@ -27,6 +28,7 @@ interface RoadProps {
     destination: Coordinate;
     owner?: string;
     color?: string;
+    lookUp: (x: number, y: number) => IntersectionData;
 };
 
 function Road(props: RoadProps) {
@@ -57,24 +59,60 @@ function Road(props: RoadProps) {
 
     function buildRoad() {
         if (!owner) {
-            let roadsRef = child(props.userRef, "roads");
-            get(roadsRef)
-                .then((roads) => {
-                    // check quota
-                    let quota = roads.val();
-                    if (quota > 0) {
-                        set(roadsRef, quota - 1);
+            // roads must be connected to at least 1 road / settlement / city            
+            let conenctedByIntersection = false;
+            let connectedByRoad = false;
+            for (let roadEnd of [props.origin, props.destination]) {
+                let intersection = props.lookUp(roadEnd.x, roadEnd.y);
+                if (intersection.owner && intersection.owner === props.userRef.key) {
+                    conenctedByIntersection = true;
+                    break;
+                }
 
-                        // assign ownership
-                        get(child(props.userRef, "index"))
-                            .then((userIndex) => {
-                                // update owner after fetching color
-                                // so color can be sent in the board update broadcast
-                                setColor(defaultColors[userIndex.val()]);
-                                setOwner(props.userRef.key);
-                            });
+                for (let road of intersection.roads) {
+                    if (road.owner === props.userRef.key) {
+                        connectedByRoad = true;
+                        break;
                     }
-                })
+                }
+
+                for (let { x, y } of intersection.adjacents) {
+                    // check adjacent child roads to see if they lead into this intersection
+                    let adjacent = props.lookUp(x, y);
+                    for (let road of adjacent.roads) {
+                        if (road.destination.x === roadEnd.x &&
+                            road.destination.y === roadEnd.y &&
+                            road.owner === props.userRef.key) {
+
+                            connectedByRoad = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            console.log("intersection:", conenctedByIntersection);
+            console.log("road:", connectedByRoad);
+            if (conenctedByIntersection || connectedByRoad) {
+                let roadsRef = child(props.userRef, "roads");
+                get(roadsRef)
+                    .then((roads) => {
+                        // check quota
+                        let quota = roads.val();
+                        if (quota > 0) {
+                            set(roadsRef, quota - 1);
+
+                            // assign ownership
+                            get(child(props.userRef, "index"))
+                                .then((userIndex) => {
+                                    // update owner after fetching color
+                                    // so color can be sent in the board update broadcast
+                                    setColor(defaultColors[userIndex.val()]);
+                                    setOwner(props.userRef.key);
+                                });
+                        }
+                    })
+            }
         }
     }
 
