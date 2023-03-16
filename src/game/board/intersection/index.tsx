@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { get, set, child, onValue, DatabaseReference } from "firebase/database";
-import { BoardUpdate, Infrastructure, Coordinate } from "./";
-import { Resource, ResourceRoll } from "./resource";
-import Road, { RoadDirection, RoadData } from "./road";
-import { defaultColors } from "./defaults";
+import { BoardUpdate, Coordinate } from "..";
+import { defaultColors } from "../default";
+import { Infrastructure, InfrastructureQuota } from "../infrastructure";
+import { Resource, ResourceRoll } from "../resource";
+import Road, { RoadDirection, RoadData } from "../road";
 
 enum IntersectionType {
     fork = "fork",
@@ -27,7 +28,9 @@ interface IntersectionData {
 interface IntersectionProps {
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
-    setupPhase: boolean;
+    playerTurn: boolean;
+    setupTurn: boolean;
+    setupQuota?: React.MutableRefObject<InfrastructureQuota>;
     x: number;
     y: number;
     resourceRolls: ResourceRoll[];
@@ -38,6 +41,7 @@ interface IntersectionProps {
     owner?: string;
     color?: string;
     lookUp: (x: number, y: number) => IntersectionData;
+    endTurn: () => void;
 };
 
 function Intersection(props: IntersectionProps) {
@@ -68,7 +72,8 @@ function Intersection(props: IntersectionProps) {
     }, [infrastructure]);
 
     function buildSettlement() {
-        if (infrastructure == Infrastructure.none) {
+        if (props.playerTurn &&
+            infrastructure == Infrastructure.none) {
             // intersections must be connected to at least 1 road
             let connectedByRoad = false;
             for (let road of props.roads) {
@@ -93,40 +98,60 @@ function Intersection(props: IntersectionProps) {
                 }
             }
 
-            if (props.setupPhase || connectedByRoad) {
-                let settlementsRef = child(props.userRef, "settlements");
-                get(settlementsRef)
-                    .then((settlements) => {
-                        // check quota
-                        let quota = settlements.val();
-                        if (quota > 0) {
-                            set(settlementsRef, quota - 1);
+            // road connection requirement is waived for setup turns
+            if (props.setupTurn || connectedByRoad) {
+                // check for resources
+                // setup infrastructure is free
+                let sufficientResources = false;
+                if (props.setupTurn && props.setupQuota &&
+                    props.setupQuota.current[Infrastructure.settlement] > 0) {
+                    props.setupQuota.current[Infrastructure.settlement]--;
+                    sufficientResources = true;
+                }
 
-                            let resourceRollsRef = child(props.userRef, "resourceRolls");
-                            get(resourceRollsRef)
-                                .then((currentRolls) => {
-                                    let rolls: ResourceRoll[] = currentRolls.val() || [];
-                                    set(resourceRollsRef, [...rolls, ...props.resourceRolls]);
-                                });
+                if (sufficientResources) {
+                    let settlementsRef = child(props.userRef, "settlements");
+                    get(settlementsRef)
+                        .then((settlements) => {
+                            // check quota
+                            let quota = settlements.val();
+                            if (quota > 0) {
+                                set(settlementsRef, quota - 1);
 
-                            // assign ownership
-                            get(child(props.userRef, "index"))
-                                .then((userIndex) => {
-                                    // update only after fetching color
-                                    // so color can be sent in the update broadcast
-                                    setColor(defaultColors[userIndex.val()]);
-                                    setOwner(props.userRef.key);
-                                    setInfrastructure(Infrastructure.settlement);
-                                });
-                        }
-                    });
+                                let resourceRollsRef = child(props.userRef, "resourceRolls");
+                                get(resourceRollsRef)
+                                    .then((currentRolls) => {
+                                        let rolls: ResourceRoll[] = currentRolls.val() || [];
+                                        set(resourceRollsRef, [...rolls, ...props.resourceRolls]);
+                                    });
+
+                                // assign ownership
+                                get(child(props.userRef, "index"))
+                                    .then((userIndex) => {
+                                        // update only after fetching color
+                                        // so color can be sent in the update broadcast
+                                        setColor(defaultColors[userIndex.val()]);
+                                        setOwner(props.userRef.key);
+                                        setInfrastructure(Infrastructure.settlement);
+
+                                        // end turn automatically for setup turns
+                                        if (props.setupTurn) {
+                                            props.endTurn();
+                                        }
+                                    });
+                            }
+                        });
+                }
             }
         }
     }
 
     function buildCity() {
         // does nothing once city has been built
-        if (infrastructure == Infrastructure.settlement && owner == props.userRef.key) {
+        if (props.playerTurn &&
+            !props.setupTurn &&
+            owner == props.userRef.key &&
+            infrastructure == Infrastructure.settlement) {
             let citiesRef = child(props.userRef, "cities");
             get(citiesRef)
                 .then((cities) => {
@@ -173,8 +198,12 @@ function Intersection(props: IntersectionProps) {
                         key={`road-${i}`}
                         userRef={props.userRef}
                         roomRef={props.roomRef}
+                        playerTurn={props.playerTurn}
+                        setupTurn={props.setupTurn}
+                        setupQuota={props.setupQuota}
                         {...roadData}
                         lookUp={props.lookUp}
+                        endTurn={props.endTurn}
                     />
                 })
             }

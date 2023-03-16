@@ -8,6 +8,7 @@ interface LobbyProps {
     db: Database;
     updateUserRef: (newUserRef: DatabaseReference) => void;
     updateRoomRef: (newRoomRef: DatabaseReference) => void;
+    updateUserIndex: (newUserIndex: number) => void;
     updateUserName: (newUserName: string) => void;
 };
 
@@ -88,6 +89,7 @@ function Lobby(props: LobbyProps) {
                                 // update parent app component
                                 props.updateUserRef(userRef);
                                 props.updateRoomRef(targetRoomRef);
+                                props.updateUserIndex(index);
                                 props.updateUserName(updatedUser.name);
                             });
                     }

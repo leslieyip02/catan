@@ -1,23 +1,7 @@
-import { IntersectionType, IntersectionData } from "./intersection";
-import { RoadDirection, RoadData } from "./road";
-import { TerrainType } from "./tile";
-import { Infrastructure, Coordinate } from "./utilities";
-
-let defaultTerrains = [
-    [TerrainType.mountains, TerrainType.pasture, TerrainType.forest],
-    [TerrainType.fields, TerrainType.hills, TerrainType.pasture, TerrainType.hills],
-    [TerrainType.fields, TerrainType.forest, TerrainType.desert, TerrainType.forest, TerrainType.mountains],
-    [TerrainType.forest, TerrainType.mountains, TerrainType.fields, TerrainType.pasture],
-    [TerrainType.hills, TerrainType.fields, TerrainType.pasture]
-];
-
-let defaultRolls = [
-    [10, 2, 9],
-    [12, 6, 4, 10],
-    [9, 11, 7, 3, 8],
-    [8, 3, 4, 5],
-    [5, 6, 11]
-];
+import { IntersectionType, IntersectionData } from "./";
+import { Coordinate } from "../";
+import { Infrastructure } from "../infrastructure";
+import { RoadDirection, RoadData } from "../road";
 
 let intersectionCounts = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
 let halfHeight = intersectionCounts.length / 2;
@@ -107,28 +91,27 @@ function adjacentIntersections(x: number, y: number): Coordinate[] {
     return adjacent;
 }
 
+function roadDestination(x: number, y: number, direction: RoadDirection) {
+    let destination: Coordinate = { x: x, y: y + 1 }
+
+    if (direction == RoadDirection.left && y >= halfHeight) {
+        destination.x--;
+    } else if (direction == RoadDirection.right && y < halfHeight) {
+        destination.x++;
+    }
+
+    return destination;
+}
 
 let defaultIntersections: IntersectionData[][] = intersectionCounts.map((n, y) => {
     return Array(n).fill(0).map((_, x) => {
         let type = intersectionType(x, y);
         let adjacents = adjacentIntersections(x, y);
         let roads: RoadData[] = intersectionRoads(type).map((direction) => {
-            let destination: Coordinate = { x: x, y: y + 1 }
-
-            if (direction == RoadDirection.left) {
-                destination = y < halfHeight
-                    ? { x: x, y: y + 1 }
-                    : { x: x - 1, y: y + 1 };
-            } else if (direction == RoadDirection.right) {
-                destination = y < halfHeight
-                    ? { x: x + 1, y: y + 1 }
-                    : { x: x, y: y + 1 };
-            }
-
             return {
                 direction: direction,
                 origin: { x: x, y: y },
-                destination: destination,
+                destination: roadDestination(x, y, direction),
             };
         });
 
@@ -141,11 +124,4 @@ let defaultIntersections: IntersectionData[][] = intersectionCounts.map((n, y) =
     });
 });
 
-let defaultColors = [
-    "#d82306",
-    "#8cda52",
-    "#4897f2",
-    "#ffff85",
-];
-
-export { defaultTerrains, defaultRolls, defaultIntersections, defaultColors };
+export { defaultIntersections };

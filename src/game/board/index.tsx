@@ -1,18 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { set, child, onValue, off, Database, DatabaseReference, update } from 'firebase/database';
-import { defaultTerrains, defaultRolls, defaultIntersections } from "./defaults";
+import { defaultTerrains, defaultRolls } from "./default";
 import Intersection, { IntersectionData, IntersectionProps } from "./intersection";
+import { defaultIntersections } from "./intersection/default";
 import Tile, { TerrainType } from "./tile";
 import { randomInt } from "../random";
 import { Resource, ResourceRoll, mapTerrainToResource } from "./resource";
 import { RoadDirection } from "./road";
-import { Infrastructure, Coordinate } from "./utilities";
+import { Infrastructure } from "./infrastructure";
+import { defaultInfrastructure } from "./infrastructure";
+
+interface Coordinate {
+    x: number,
+    y: number,
+}
 
 interface BoardProps {
     db: Database;
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
     started: boolean;
+    playerTurn: boolean;
+    setupTurn: boolean;
+    endTurn: () => void;
 };
 
 interface BoardUpdate {
@@ -28,6 +38,7 @@ function Board(props: BoardProps) {
     const [terrains, setTerrains] = useState<TerrainType[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);
+    const setupQuota = useRef(defaultInfrastructure);
 
     // TODO: keep track of rolls, resources and players who gain resources from those rolls
 
@@ -196,12 +207,15 @@ function Board(props: BoardProps) {
                                             key={`intersection-(${x}, ${y})`}
                                             userRef={props.userRef}
                                             roomRef={props.roomRef}
-                                            setupPhase={true}
+                                            playerTurn={props.playerTurn}
+                                            setupTurn={props.setupTurn}
+                                            setupQuota={setupQuota}
                                             x={x}
                                             y={y}
                                             resourceRolls={mapRollsToIntersections(x, y)}
                                             {...intersectionData}
                                             lookUp={(x: number, y: number) => intersections[y][x]}
+                                            endTurn={props.endTurn}
                                         />
                                     })
                                 }
@@ -215,4 +229,4 @@ function Board(props: BoardProps) {
 }
 
 export default Board;
-export { BoardUpdate, Infrastructure, Coordinate };
+export { BoardUpdate, Coordinate };

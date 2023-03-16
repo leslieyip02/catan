@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { get, set, child, DatabaseReference } from "firebase/database";
-import { BoardUpdate, Infrastructure, Coordinate } from "./";
+import { BoardUpdate, Coordinate } from "./";
+import { Infrastructure, InfrastructureQuota } from "./infrastructure";
 import { IntersectionData } from "./intersection";
-import { defaultColors } from "./defaults";
+import { defaultColors } from "./default";
 
 enum RoadDirection {
     left = "left",
@@ -23,12 +24,16 @@ interface RoadData {
 interface RoadProps {
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
+    playerTurn: boolean;
+    setupTurn: boolean;
+    setupQuota?: React.MutableRefObject<InfrastructureQuota>;
     direction: RoadDirection;
     origin: Coordinate;
     destination: Coordinate;
     owner?: string;
     color?: string;
     lookUp: (x: number, y: number) => IntersectionData;
+    endTurn: () => void;
 };
 
 function Road(props: RoadProps) {
@@ -58,7 +63,7 @@ function Road(props: RoadProps) {
     }, [owner]);
 
     function buildRoad() {
-        if (!owner) {
+        if (props.playerTurn && !owner) {
             // roads must be connected to at least 1 road / settlement / city            
             let conenctedByIntersection = false;
             let connectedByRoad = false;
@@ -91,27 +96,41 @@ function Road(props: RoadProps) {
                 }
             }
 
-            console.log("intersection:", conenctedByIntersection);
-            console.log("road:", connectedByRoad);
             if (conenctedByIntersection || connectedByRoad) {
-                let roadsRef = child(props.userRef, "roads");
-                get(roadsRef)
-                    .then((roads) => {
-                        // check quota
-                        let quota = roads.val();
-                        if (quota > 0) {
-                            set(roadsRef, quota - 1);
+                // check for resources
+                // setup infrastructure is free
+                let sufficientResources = false;
+                if (props.setupTurn && props.setupQuota &&
+                    props.setupQuota.current[Infrastructure.road] > 0) {
+                    props.setupQuota.current[Infrastructure.road]--;
+                    sufficientResources = true;
+                }
 
-                            // assign ownership
-                            get(child(props.userRef, "index"))
-                                .then((userIndex) => {
-                                    // update owner after fetching color
-                                    // so color can be sent in the board update broadcast
-                                    setColor(defaultColors[userIndex.val()]);
-                                    setOwner(props.userRef.key);
-                                });
-                        }
-                    })
+                if (sufficientResources) {
+                    let roadsRef = child(props.userRef, "roads");
+                    get(roadsRef)
+                        .then((roads) => {
+                            // check quota
+                            let quota = roads.val();
+                            if (quota > 0) {
+                                set(roadsRef, quota - 1);
+
+                                // assign ownership
+                                get(child(props.userRef, "index"))
+                                    .then((userIndex) => {
+                                        // update owner after fetching color
+                                        // so color can be sent in the board update broadcast
+                                        setColor(defaultColors[userIndex.val()]);
+                                        setOwner(props.userRef.key);
+                                    });
+
+                                // end turn automatically for setup turns
+                                if (props.setupTurn) {
+                                    props.endTurn();
+                                }
+                            }
+                        })
+                }
             }
         }
     }

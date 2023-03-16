@@ -12,6 +12,7 @@ interface AppProps {
 function App(props: AppProps) {
     const [userRef, setUserRef] = useState<DatabaseReference>();
     const [roomRef, setRoomRef] = useState<DatabaseReference>();
+    const [userIndex, setUserIndex] = useState<number>();
     const [userName, setUserName] = useState<string>();
 
     return (
@@ -22,12 +23,14 @@ function App(props: AppProps) {
                     db={props.db}
                     updateUserRef={setUserRef}
                     updateRoomRef={setRoomRef}
+                    updateUserIndex={setUserIndex}
                     updateUserName={setUserName}
                 />
                 : <Game
                     db={props.db}
                     userRef={userRef}
                     roomRef={roomRef}
+                    userIndex={userIndex}
                     userName={userName}
                 />
             }
