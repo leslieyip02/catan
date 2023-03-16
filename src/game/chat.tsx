@@ -54,8 +54,7 @@ function Chat(props: ChatProps) {
     return (
         <div className="sidebar">
             <button className="chat__close" onClick={toggleHide}>
-                {open ? <i className="fa-solid fa-caret-right"></i>
-                    : <i className="fa-solid fa-caret-left"></i>}
+                <i className="fa-regular fa-comment"></i>
             </button>
             <div className="chat">
                 <div className="chat__log">

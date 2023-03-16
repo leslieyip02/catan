@@ -81,10 +81,11 @@ function Game(props: GameProps) {
     }
 
     return (
-        <div>
-            {/* <div>{`Room: ${props.roomRef.key}`}</div> */}
+        <div className="game">
+            <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div>
+            {/* temporary buttons */}
             {host && !started && <button onClick={startGame}>Start Game</button>}
-            {started && <button onClick={endTurn}>End Turn</button>}
+            {started && !setupTurn && <button onClick={endTurn}>End Turn</button>}
             <Board
                 {...props}
                 started={started}

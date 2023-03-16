@@ -1,6 +1,6 @@
 .sidebar {
     position: absolute;
-    height: 100vh;
+    height: 100%;
     top: 0%;
     right: 0%;
     display: flex;
@@ -9,13 +9,13 @@
 
 .chat {
     width: 20rem;
-    height: 100vh;
+    height: 100%;
     display: none;
     flex-direction: column;
 }
 
 .chat__close {
-    height: 100vh;
+    height: 100%;
 }
 
 .chat__log {
@@ -36,4 +36,24 @@
 
 .chat__input > button {
     padding: 0.5rem;
+}
+
+@media screen and (max-width: 600px) {
+    .sidebar {
+        width: 100vw;
+        height: fit-content;
+        top: auto;
+        bottom: 0%;
+        flex-direction: column;
+    }
+
+    .chat {
+        width: 100vw;
+        height: calc(100vh - 2rem);
+    }
+    
+    .chat__close {
+        width: 100vw;
+        height: 2rem;
+    }
 }

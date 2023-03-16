@@ -16,7 +16,7 @@ function App(props: AppProps) {
     const [userName, setUserName] = useState<string>();
 
     return (
-        <div>
+        <div className="app">
             {!roomRef
                 ? <Lobby
                     auth={props.auth}

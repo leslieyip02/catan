@@ -171,13 +171,13 @@ function Board(props: BoardProps) {
     }
 
     return (
-        <div>
-            {
-                !props.started && <div>
-                    <button onClick={shuffleBoard}>Shuffle Board</button>
-                    <button onClick={resetBoard}>Reset Board</button>
-                </div>
-            }
+        // <div>
+        //     {
+        //         !props.started && <div>
+        //             <button onClick={shuffleBoard}>Shuffle Board</button>
+        //             <button onClick={resetBoard}>Reset Board</button>
+        //         </div>
+        //     }
             <div className="board">
                 <div className="board__layer board__tiles">
                     {
@@ -222,7 +222,7 @@ function Board(props: BoardProps) {
                     }
                 </div>
             </div>
-        </div>
+        // </div>
     );
 }
 
