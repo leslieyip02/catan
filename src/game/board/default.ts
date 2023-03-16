@@ -23,8 +23,4 @@ let defaultColors = [
     "#ffff85",
 ];
 
-export {
-    defaultTerrains,
-    defaultRolls,
-    defaultColors,
-};
+export { defaultTerrains, defaultRolls, defaultColors };

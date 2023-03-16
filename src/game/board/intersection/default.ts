@@ -1,6 +1,6 @@
 import { IntersectionType, IntersectionData } from "./";
 import { Coordinate } from "../";
-import { Infrastructure } from "../infrastructure";
+import Infrastructure from "../infrastructure";
 import { RoadDirection, RoadData } from "../road";
 
 let intersectionCounts = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { get, set, child, DatabaseReference } from "firebase/database";
 import { BoardUpdate, Coordinate } from "./";
-import { Infrastructure, InfrastructureQuota } from "./infrastructure";
+import Infrastructure, { InfrastructureQuota } from "./infrastructure";
 import { IntersectionData } from "./intersection";
 import { defaultColors } from "./default";
 

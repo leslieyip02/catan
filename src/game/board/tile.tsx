@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-
 enum TerrainType {
     hills = "hills",
     forest = "forest",
@@ -23,4 +21,4 @@ function Tile(props: TileProps) {
 };
 
 export default Tile;
-export { TerrainType, TileProps };
+export { TerrainType };

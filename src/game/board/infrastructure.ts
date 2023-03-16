@@ -14,8 +14,5 @@ let defaultInfrastructure: InfrastructureQuota = {
     [Infrastructure.road]: 2,
 };
 
-export {
-    Infrastructure,
-    InfrastructureQuota,
-    defaultInfrastructure,
-};
+export default Infrastructure;
+export { InfrastructureQuota, defaultInfrastructure };

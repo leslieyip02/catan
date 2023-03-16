@@ -1,4 +1,4 @@
-import { Resource, ResourceRoll } from "./game/board/resource";
+import Resource, { ResourceRoll } from "./game/board/resource";
 
 interface UserProps {
     id: string;

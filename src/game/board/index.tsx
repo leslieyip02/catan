@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { set, child, onValue, off, Database, DatabaseReference, update } from 'firebase/database';
+import { useState, useEffect, useRef } from "react";
+import { set, child, onValue, Database, DatabaseReference } from 'firebase/database';
 import { defaultTerrains, defaultRolls } from "./default";
-import Intersection, { IntersectionData, IntersectionProps } from "./intersection";
-import { defaultIntersections } from "./intersection/default";
-import Tile, { TerrainType } from "./tile";
+import Infrastructure, { defaultInfrastructure } from "./infrastructure";
+import Intersection, { IntersectionData, defaultIntersections } from "./intersection";
 import { randomInt } from "../random";
-import { Resource, ResourceRoll, mapTerrainToResource } from "./resource";
+import { ResourceRoll, mapTerrainToResource } from "./resource";
 import { RoadDirection } from "./road";
-import { Infrastructure } from "./infrastructure";
-import { defaultInfrastructure } from "./infrastructure";
+import Tile, { TerrainType } from "./tile";
 
 interface Coordinate {
     x: number,

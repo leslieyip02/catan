@@ -35,4 +35,5 @@ function mapTerrainToResource(terrain: TerrainType): Resource {
     }
 }
 
-export { Resource, ResourceRoll, mapTerrainToResource };
+export default Resource;
+export { ResourceRoll, mapTerrainToResource };

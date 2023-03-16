@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { get, set, child, onValue, DatabaseReference } from "firebase/database";
+import { get, set, child, DatabaseReference } from "firebase/database";
 import { BoardUpdate, Coordinate } from "..";
 import { defaultColors } from "../default";
-import { Infrastructure, InfrastructureQuota } from "../infrastructure";
-import { Resource, ResourceRoll } from "../resource";
-import Road, { RoadDirection, RoadData } from "../road";
+import Infrastructure, { InfrastructureQuota } from "../infrastructure";
+import { ResourceRoll } from "../resource";
+import Road, { RoadData } from "../road";
 
 enum IntersectionType {
     fork = "fork",
@@ -212,4 +212,5 @@ function Intersection(props: IntersectionProps) {
 };
 
 export default Intersection;
-export { IntersectionType, IntersectionData, IntersectionProps };
+export { IntersectionType, IntersectionData };
+export { defaultIntersections } from "./default";
