@@ -2,6 +2,7 @@ import Resource, { ResourceRoll } from "./game/board/resource";
 
 interface UserProps {
     id: string;
+    roomId: string;
     index: number;
     name: string;
     resources: { [key in Resource]?: number };

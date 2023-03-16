@@ -77,6 +77,7 @@ function Lobby(props: LobbyProps) {
 
                                 let updatedUser: UserProps = {
                                     id: userId,
+                                    roomId: roomId,
                                     index: index,
                                     name: userName || "Anonymous",
                                     resources: {},
