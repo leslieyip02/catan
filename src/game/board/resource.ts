@@ -9,7 +9,7 @@ enum Resource {
     none = "none",
 };
 
-interface ResourceRoll {
+type ResourceRoll = {
     [key: number]: Resource;
 };
 

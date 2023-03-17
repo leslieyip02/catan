@@ -4,6 +4,7 @@ import { defaultColors } from "./board/default";
 
 interface PanelData {
     id: string;
+    index: number;
     name: string;
     cards: CardHand;
     settlements: number;
@@ -15,6 +16,8 @@ interface PanelProps extends PanelData {
     thisPlayer: boolean;
     playerTurn: boolean;
     index: number;
+    rollDice: () => void;
+    endTurn: () => void;
 };
 
 function Panel(props: PanelProps) {
@@ -34,16 +37,29 @@ function Panel(props: PanelProps) {
                 <div className="panel__row">
                     <div className="panel__name">{props.name}</div>
                     {
-                        props.playerTurn && <i className="fa-solid fa-gamepad"></i>
+                        props.playerTurn && <i className="fa-solid fa-gamepad" onClick={() => console.log(props.id, props.name, cards)}></i>
                     }
                 </div>
 
-                <div className="panel__cards">
-                    {
-                        Array(cardCount).fill(0).map(() => {
-                            return <i className="panel__card-icon fa-solid fa-money-bill"></i>
-                        })
-                    }
+                <div className="panel__row">
+                    <div className="panel__cards" onClick={() => console.log(cards)}>
+                        {
+                            Array(cardCount).fill(0).map((_, i) => {
+                                return <i
+                                    key={`card-${i}`}
+                                    className="panel__card-icon fa-solid fa-money-bill"
+                                ></i>
+                            })
+                        }
+                    </div>
+                    <button onClick={props.rollDice}>
+                        <i className="fa-solid fa-dice"></i>
+                        Roll
+                    </button>
+                    <button onClick={props.endTurn}>
+                        <i className="fa-solid fa-square-check"></i>
+                        End Turn
+                    </button>
                 </div>
                 {/* {props.thisPlayer
                     ? <div className="panel__cards"></div>
@@ -63,4 +79,4 @@ function Panel(props: PanelProps) {
 }
 
 export default Panel;
-export { PanelData as StatCardData };
+export { PanelData };

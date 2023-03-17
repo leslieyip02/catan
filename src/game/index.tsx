@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { ref, get, set, child, onValue, Database, DatabaseReference, off, DataSnapshot } from "firebase/database";
 import Board from "./board";
 import Chat from "./chat";
-import Panel, { StatCardData } from "./panel";
+import Panel, { PanelData } from "./panel";
 import { UserData } from "../user";
+import { randomInt } from './random';
+import { ResourceRoll } from './board/resource';
+import { CardHand } from './card';
 
 interface GameProps {
     db: Database;
@@ -15,8 +18,9 @@ interface GameProps {
 
 function Game(props: GameProps) {
     const [host, setHost] = useState<boolean>(false);
+    const [players, setPlayers] = useState<PanelData[]>([]);
+    const [playerRefs, setPlayerRefs] = useState<DatabaseReference[]>([]);
     const [playerCount, setPlayerCount] = useState<number>();
-    const [players, setPlayers] = useState<StatCardData[]>([]);
     const [started, setStarted] = useState<boolean>(false);
     const [turn, setTurn] = useState<number>(0);
     const [playerTurn, setPlayerTurn] = useState<boolean>(false);
@@ -32,44 +36,108 @@ function Game(props: GameProps) {
         onValue(gameStartRef, (gameStart) => {
             if (gameStart.val()) {
                 setStarted(true);
+
+                // get a list of the room's users
+                get(child(props.roomRef, "users"))
+                    .then((currentUsers) => {
+                        let userIds = Object.keys(currentUsers.val());
+                        let userRefs = userIds.map((userId) => ref(props.db, `users/${userId}`))
+                        setPlayerRefs(userRefs);
+                        setPlayerCount(userIds.length)
+
+                        // for each user, attach a listener for their card updates
+                        for (let userRef of userRefs) {
+                            let cardsRef = child(userRef, "cards");
+                            onValue(cardsRef, (cards) => {
+                                let newCards = cards.val();
+                                if (newCards) {
+                                    setPlayers((currentPlayers) => {
+                                        let newPlayerStats = [...currentPlayers];
+                                        for (let i = 0; i < currentPlayers.length; i++) {
+                                            if (newPlayerStats[i].id === userRef.key) {
+                                                newPlayerStats[i].cards = newCards;
+                                                break;
+                                            }
+                                        }
+
+                                        return newPlayerStats;
+                                    });
+                                }
+                            });
+                        }
+                    });
+
                 off(gameStartRef);
             }
         });
 
         onValue(child(props.roomRef, "turn"), (turn) => {
-            if (turn.val()) {
+            // javascript moment™
+            if (turn.val() || turn.val() === 0) {
                 setTurn(turn.val());
+            }
+        });
+
+        onValue(child(props.roomRef, "roll"), (roll) => {
+            let newRoll = roll.val();
+
+            // roll is reset to 0 after turn end
+            if (newRoll) {
+                get(child(props.userRef, "resourceRolls"))
+                    .then((currentRolls) => {
+                        // check this user's rolls
+                        let resourceRolls: ResourceRoll[] = currentRolls.val() || [];
+                        let resourcesProduced: CardHand = {};
+                        for (let resourceRoll of resourceRolls) {
+                            let resource = resourceRoll[newRoll];
+                            if (resource) {
+                                resourcesProduced[resource] = (resourcesProduced[resource] || 0) + 1;
+                            }
+                        }
+
+                        // if resources are produced, update the user's cards
+                        // each user listens to the card updates of the others
+                        if (resourcesProduced) {
+                            let cardsRef = child(props.userRef, "cards");
+                            get(cardsRef)
+                                .then((currentCards) => {
+                                    let newCards = currentCards.val() || {};
+                                    for (let [resourceProduced, quantity] of Object.entries(resourcesProduced)) {
+                                        newCards[resourceProduced] = (newCards[resourceProduced] || 0) + quantity;
+                                    }
+
+                                    set(cardsRef, newCards);
+                                });
+                        }
+                    });
             }
         });
     }, []);
 
     useEffect(() => {
         if (started) {
-            get(child(props.roomRef, "users"))
-                .then(async (currentUsers) => {
-                    let userIds = currentUsers.val() || {};
-                    setPlayerCount(Object.values(userIds).length);
+            let userPromises = playerRefs
+                .map((playerRef) => get(playerRef));
+            Promise.all(userPromises)
+                .then((users) => {
+                    let playerStats = users.map((user) => {
+                        let userData: UserData = user.val();
+                        let playerStat: PanelData = {
+                            id: userData.id,
+                            index: userData.index,
+                            name: userData.name,
+                            cards: userData.cards || {},
+                            settlements: userData.settlements,
+                            cities: userData.cities,
+                            roads: userData.roads,
+                        }
 
-                    let userPromises = Object.keys(userIds)
-                        .map((userId) => get(ref(props.db, `users/${userId}`)));
-                    Promise.all(userPromises)
-                        .then((users) => {
-                            let playerStats = users.map((user) => {
-                                let userData: UserData = user.val();
-                                let playerStat: StatCardData = {
-                                    id: userData.id,
-                                    name: userData.name,
-                                    cards: userData.cards,
-                                    settlements: userData.settlements,
-                                    cities: userData.cities,
-                                    roads: userData.roads,
-                                }
+                        return playerStat;
+                    });
 
-                                return playerStat;
-                            });
-
-                            setPlayers(playerStats);
-                        });
+                    // make sure players are sorted by index order
+                    playerStats.sort((player1, player2) => player1.index - player2.index);
+                    setPlayers(playerStats);
                 });
         }
 
@@ -103,8 +171,25 @@ function Game(props: GameProps) {
         return turn < 0;
     }
 
+    function rollDice() {
+        if (isPlayerTurn()) {
+            let rollRef = child(props.roomRef, "roll");
+            get(rollRef)
+                .then((currentRoll) => {
+                    // check that a value hasn't already been rolled for this turn
+                    if (!currentRoll.val()) {
+                        // add 2 dice instead of randomInt(1, 12) for better distribution
+                        let roll = randomInt(1, 6) + randomInt(1, 6);
+                        set(child(props.roomRef, "roll"), roll);
+                    }
+                })
+        }
+    }
+
     function endTurn() {
         if (isPlayerTurn()) {
+            // reset roll so the listener can detect if the same number gets rolled
+            set(child(props.roomRef, "roll"), 0);
             set(child(props.roomRef, "turn"), turn + 1);
             setTurn(turn + 1);
         }
@@ -133,6 +218,8 @@ function Game(props: GameProps) {
                             playerTurn={isPlayerTurn(index)}
                             index={index}
                             {...playerData}
+                            rollDice={rollDice}
+                            endTurn={endTurn}
                         />
                     })
                 }
