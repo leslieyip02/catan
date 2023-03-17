@@ -16,6 +16,7 @@
 
 .chat__close {
     height: 100%;
+    opacity: 80%;
 }
 
 .chat__log {
@@ -23,6 +24,7 @@
     flex-grow: 1;
     overflow-y: scroll;
     background-color: #eeeeee;
+    opacity: 50%;
 }
 
 .chat__input {

@@ -174,11 +174,25 @@ function Intersection(props: IntersectionProps) {
         }
     }
 
+    // map attributes so that intersections can easily be selected
+    function dataAttributes() {
+        if (owner) {
+            let data: { [key: string]: boolean } = {};
+            for (let roll of props.resourceRolls) {
+                let attribute = `data-roll-${Object.keys(roll)[0]}`;
+                data[attribute] = true;
+            }
+
+            return data;
+        }
+    }
+
     return (
         <div className={`intersection intersection--${props.type}`}>
             <div
                 className="intersection__point"
                 style={{ backgroundColor: color }}
+                {...dataAttributes()}
                 onClick={() => infrastructure == Infrastructure.none ? buildSettlement() : buildCity()}
             >
                 {

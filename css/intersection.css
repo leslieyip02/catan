@@ -31,10 +31,19 @@
     border-radius: 50%;
     background-color: #eeeeee;
     z-index: var(--intersection-depth);
-    transition: scale 0.2s;
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: scale 0.2s;
+}
+
+.intersection__point:hover {
+    scale: 2;
+}
+
+.intersection__point--rolled {
+    scale: 2;
+    border: 2px solid #555555;
 }
 
 .intersection__icon {
@@ -47,8 +56,4 @@
 
 .intersection--junction {
     margin-bottom: calc((var(--tile-width) + var(--road-width) * 1.1547) * 0.5774 - var(--road-width));
-}
-
-.intersection__point:hover {
-    scale: 2;
 }

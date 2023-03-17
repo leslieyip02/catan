@@ -85,6 +85,16 @@ function Game(props: GameProps) {
 
             // roll is reset to 0 after turn end
             if (newRoll) {
+                // highlight intersections when rolled
+                document.querySelectorAll(`[data-roll-${newRoll}]`)
+                    .forEach((intersection) => {
+                        intersection.classList.add("intersection__point--rolled");
+
+                        setTimeout(() => {
+                            intersection.classList.remove("intersection__point--rolled");
+                        }, 1200);
+                    });
+
                 get(child(props.userRef, "resourceRolls"))
                     .then((currentRolls) => {
                         // check this user's rolls
