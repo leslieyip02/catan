@@ -4,11 +4,17 @@
     margin: 0rem;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
 }
 
 .game__room-id {
     position: absolute;
+    top: 0%;
+    left: 0%;
+}
+
+.game__start {
+    position: fixed;
     top: 0%;
     left: 0%;
 }

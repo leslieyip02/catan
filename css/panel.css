@@ -1,0 +1,56 @@
+.panels {
+    width: 40%;
+    overflow-y: scroll;
+    padding-top: calc(var(--road-width));
+    padding-bottom: calc(var(--road-width));
+    display: flex;
+    flex-direction: column;
+}
+
+.panel {
+    width: 100%;
+    min-height: calc(var(--tile-width) * 1.2);
+    margin-top: var(--road-width);
+    margin-bottom: var(--road-width);
+    display: flex;
+    z-index: var(--chat-depth);
+    transition: width 0.2s;
+}
+
+.panel__info {
+    width: 75%;
+    max-width: 75%;
+    height: inherit;
+    padding: calc(var(--road-width));
+    background-color: #dddddd;
+}
+
+.panel__row {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.panel__name {
+    width: 75%;
+    max-width: 75%;
+    font-size: 2rem;
+    overflow-x: scroll;
+    margin-right: 1rem;
+}
+
+.panel__card-icon {
+    rotate: 90deg;
+}
+
+.panel__tab {
+    min-width: 2rem;
+    height: inherit;
+    border-top-right-radius: var(--road-width);
+    border-bottom-right-radius: var(--road-width);
+    background-color: #555555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

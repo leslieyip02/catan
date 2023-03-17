@@ -25,7 +25,7 @@ interface IntersectionData {
 };
 
 // properties for render
-interface IntersectionProps {
+interface IntersectionProps extends IntersectionData {
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
     playerTurn: boolean;
@@ -34,12 +34,6 @@ interface IntersectionProps {
     x: number;
     y: number;
     resourceRolls: ResourceRoll[];
-    type: IntersectionType;
-    adjacents: Coordinate[];
-    roads: RoadData[];
-    infrastructure: Infrastructure;
-    owner?: string;
-    color?: string;
     lookUp: (x: number, y: number) => IntersectionData;
     endTurn: () => void;
 };

@@ -2,6 +2,9 @@
     position: relative;
     width: 100vh;
     height: 100vh;
+    padding-left: calc(var(--tile-width) / 2);
+    padding-right: calc(var(--tile-width) / 2);
+    overflow-x: scroll;
 }
 
 .board__layer {
@@ -22,5 +25,7 @@
     .board {
         width: 100vw;
         height: 100vw;
+        padding-left: 0;
+        padding-right: 0;
     }
 }

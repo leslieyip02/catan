@@ -6,7 +6,7 @@ enum Infrastructure {
 };
 
 type InfrastructureQuota = {
-    [key in Infrastructure]?: number
+    [key in Infrastructure]?: number;
 };
 
 let defaultInfrastructure: InfrastructureQuota = {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ref, get, set, update, push, child, Database, DatabaseReference, onDisconnect } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
-import { UserProps, defaultUserQuotas } from "./user";
+import { UserData, defaultUserQuotas } from "./user";
 
 interface LobbyProps {
     auth: Auth;
@@ -75,12 +75,12 @@ function Lobby(props: LobbyProps) {
                                 let index = Object.values(userIds).length;
                                 update(roomUsersRef, { [userId]: true });
 
-                                let updatedUser: UserProps = {
+                                let updatedUser: UserData = {
                                     id: userId,
                                     roomId: roomId,
                                     index: index,
                                     name: userName || "Anonymous",
-                                    resources: {},
+                                    cards: {},
                                     resourceRolls: [],
                                     ...defaultUserQuotas,
                                 };

@@ -21,17 +21,12 @@ interface RoadData {
 };
 
 // properties for render
-interface RoadProps {
+interface RoadProps extends RoadData {
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
     playerTurn: boolean;
     setupTurn: boolean;
     setupQuota?: React.MutableRefObject<InfrastructureQuota>;
-    direction: RoadDirection;
-    origin: Coordinate;
-    destination: Coordinate;
-    owner?: string;
-    color?: string;
     lookUp: (x: number, y: number) => IntersectionData;
     endTurn: () => void;
 };

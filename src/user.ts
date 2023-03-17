@@ -1,11 +1,12 @@
 import Resource, { ResourceRoll } from "./game/board/resource";
+import { CardHand } from "./game/card";
 
-interface UserProps {
+interface UserData {
     id: string;
     roomId: string;
     index: number;
     name: string;
-    resources: { [key in Resource]?: number };
+    cards: CardHand;
     resourceRolls: ResourceRoll[];
     settlements: number;
     cities: number;
@@ -18,4 +19,4 @@ const defaultUserQuotas = {
     roads: 15,
 };
 
-export { UserProps, defaultUserQuotas };
+export { UserData, defaultUserQuotas };
