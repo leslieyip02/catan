@@ -7,4 +7,6 @@ function randomInt(lower: number, upper: number): number {
     return Math.floor(Math.random() * (upper - lower)) + lower;
 }
 
-export { randomInt };
+let dice = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+
+export { randomInt, dice };

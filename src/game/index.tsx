@@ -4,9 +4,10 @@ import Board from "./board";
 import Chat from "./chat";
 import Panel, { PanelData } from "./panel";
 import { UserData } from "../user";
-import { randomInt } from './random';
+import { randomInt, dice } from './random';
 import { ResourceRoll } from './board/resource';
 import { CardHand } from './card';
+import { broadcastMessage } from './chat';
 
 interface GameProps {
     db: Database;
@@ -25,6 +26,7 @@ function Game(props: GameProps) {
     const [turn, setTurn] = useState<number>(0);
     const [playerTurn, setPlayerTurn] = useState<boolean>(false);
     const [setupTurn, setSetupTurn] = useState<boolean>(false);
+    const [messages, setMessages] = useState<string[]>([]);
 
     useEffect(() => {
         // check if this user is the host
@@ -179,8 +181,14 @@ function Game(props: GameProps) {
                     // check that a value hasn't already been rolled for this turn
                     if (!currentRoll.val()) {
                         // add 2 dice instead of randomInt(1, 12) for better distribution
-                        let roll = randomInt(1, 6) + randomInt(1, 6);
+                        let d1 = randomInt(1, 6);
+                        let d2 = randomInt(1, 6);
+                        let roll = d1 + d2;
                         set(child(props.roomRef, "roll"), roll);
+
+                        // update chat
+                        let message = `${props.userName} rolled a ${roll} ${dice[d1 - 1]}${dice[d2 - 1]}`;
+                        broadcastMessage(props.roomRef, messages, message);
                     }
                 })
         }
@@ -232,7 +240,11 @@ function Game(props: GameProps) {
                 setupTurn={setupTurn}
                 endTurn={endTurn}
             />
-            <Chat {...props} />
+            <Chat
+                {...props}
+                messages={messages}
+                setMessages={setMessages}
+            />
         </div>
     );
 }

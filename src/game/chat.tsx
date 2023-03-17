@@ -6,28 +6,32 @@ interface ChatProps {
     userRef: DatabaseReference;
     roomRef: DatabaseReference;
     userName: string;
+    messages: string[];
+    setMessages: (messages: string[]) => void;
 };
 
+function broadcastMessage(roomRef: DatabaseReference, currentMessages: string[], newMessage: string) {
+    let newMessages = [...currentMessages, newMessage];
+    update(roomRef, { messages: newMessages });
+}
+
 function Chat(props: ChatProps) {
-    const [userRef, setUserRef] = useState<DatabaseReference>(props.userRef);
-    const [roomRef, setRoomRef] = useState<DatabaseReference>(props.roomRef);
     const [currentMessage, setCurrentMessage] = useState<string>("");
-    const [messages, setMessages] = useState<string[]>([]);
     const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        let messageRef = child(roomRef, "messages");
+        let messageRef = child(props.roomRef, "messages");
 
         // fetch existing messages
         get(messageRef)
             .then((currentMessages) => {
                 // default to empty array
-                setMessages(currentMessages.val() || []);
+                props.setMessages(currentMessages.val() || []);
             });
 
         // updates messages every time a new one is added
         onValue(messageRef, (newMessages) => {
-            setMessages(newMessages.val() || messages || []);
+            props.setMessages(newMessages.val() || props.messages || []);
 
             // scroll to bottom
             let chatLog = document.querySelector(".chat__log");
@@ -36,8 +40,8 @@ function Chat(props: ChatProps) {
     }, []);
 
     function sendMessage() {
-        let currentMessages = [...messages, `${props.userName}: ${currentMessage}`];
-        update(roomRef, { messages: currentMessages });
+        let message = `${props.userName}: ${currentMessage}`;
+        broadcastMessage(props.roomRef, props.messages, message);
 
         // reset input text
         setCurrentMessage("");
@@ -59,7 +63,7 @@ function Chat(props: ChatProps) {
             <div className="chat">
                 <div className="chat__log">
                     {
-                        messages.map((message, i) => <div key={i}>{message}</div>)
+                        props.messages.map((message, i) => <div key={i}>{message}</div>)
                     }
                 </div>
 
@@ -77,3 +81,4 @@ function Chat(props: ChatProps) {
 }
 
 export default Chat;
+export { broadcastMessage };
