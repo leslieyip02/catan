@@ -1,6 +1,6 @@
 .panels {
     width: 40%;
-    overflow-y: scroll;
+    overflow: visible;
     padding-top: calc(var(--road-width));
     padding-bottom: calc(var(--road-width));
     display: flex;
@@ -13,7 +13,6 @@
     margin-top: var(--road-width);
     margin-bottom: var(--road-width);
     display: flex;
-    z-index: var(--panel-z);
     transition: width 0.2s;
 }
 
@@ -38,6 +37,22 @@
     font-size: 2rem;
     overflow-x: scroll;
     margin-right: 1rem;
+}
+
+.panel__cards {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.1rem;
+    background-image: linear-gradient(#555555 0 0);
+    background-position: 0 100%;
+    background-size: 0% 0.1rem;
+    background-repeat: no-repeat;
+    transition: background-size 0.5s;
+    cursor: pointer;
+}
+
+.panel__cards:hover, .panel__cards:active {
+    background-size: 100% 0.1rem;
 }
 
 .panel__card-icon {

@@ -5,6 +5,7 @@
 @import "./css/game.css";
 @import "./css/intersection.css";
 @import "./css/lobby.css";
+@import "./css/modal.css";
 @import "./css/panel.css";
 @import "./css/road.css";
 @import "./css/tile.css";
@@ -18,9 +19,10 @@
     --road-z: 5;
     --tile-z: 10;
     --intersection-z: 15;
-    --panel-z: 20;
     --tooltip-z: 95;
     --chat-z: 100;
+    --panel-z: 105;
+    --modal-z: 110;
 }
 
 * {

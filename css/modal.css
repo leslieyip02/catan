@@ -1,0 +1,70 @@
+.modal {
+    display: none;
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: var(--modal-z);
+}
+
+.modal__content {
+    margin: auto;
+    margin-top: 10vh;
+    width: fit-content;
+    height: 12rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background-color: #cccccc;
+    box-shadow: 0rem 0.5rem 1rem 1rem #555555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: drop 0.5s;
+}
+
+@keyframes drop {
+    0% {
+        margin-top: -12rem;
+    }   
+
+    100% {
+        margin-top: 10vh;
+    }
+}
+
+.modal__cards {
+    display: flex;
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
+    max-width: 60vw;
+    overflow-x: scroll;
+}
+
+.modal__card {
+    margin: 0.6rem;
+    min-width: calc(var(--tile-width) * 1.5);
+    max-width: calc(var(--tile-width) * 1.5);
+    height: 12rem;
+    padding: 0.2em;
+    background-color: #222222;
+    box-sizing: border-box;
+    border: 0.2rem solid #777777;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal__card-icon {
+    font-size: var(--tile-width);
+    margin-bottom: 1rem;
+    color: #eeeeee;
+}
+
+.modal__card-label {
+    text-align: center;
+    color: #eeeeee;
+}

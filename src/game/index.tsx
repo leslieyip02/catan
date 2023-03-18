@@ -282,6 +282,7 @@ function Game(props: GameProps) {
                             key={`panel-${playerData.id}`}
                             thisPlayer={playerData.id === props.userRef.key}
                             playerTurn={isPlayerTurn(index)}
+                            setupTurn={setupTurn}
                             index={index}
                             {...playerData}
                             rollDice={rollDice}

@@ -27,6 +27,8 @@
     background-size: contain;
     display: flex;
     z-index: var(--tile-z);
+    transition: opacity 0.5s;
+    cursor: pointer;
 }
 
 .tile--disabled {

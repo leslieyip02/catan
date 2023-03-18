@@ -10,4 +10,4 @@ type CardHand = {
     [key in Resource | DevelopmentCard]?: number;
 };
 
-export { CardHand };
+export { CardHand, DevelopmentCard };
