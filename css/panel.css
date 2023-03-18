@@ -13,7 +13,7 @@
     margin-top: var(--road-width);
     margin-bottom: var(--road-width);
     display: flex;
-    z-index: var(--chat-depth);
+    z-index: var(--panel-z);
     transition: width 0.2s;
 }
 

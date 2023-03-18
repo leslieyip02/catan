@@ -30,15 +30,17 @@
     border: 0.1rem solid #eeeeee;
     border-radius: 50%;
     background-color: #eeeeee;
-    z-index: var(--intersection-depth);
+    z-index: var(--intersection-z);
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: scale 0.2s;
+    transition: scale 0.2s, background-color 0.5s;
+    cursor: pointer;
 }
 
 .intersection__point:hover {
     scale: 2;
+    background-color: #555555;
 }
 
 .intersection__point--rolled {

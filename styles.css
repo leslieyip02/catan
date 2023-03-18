@@ -8,16 +8,19 @@
 @import "./css/panel.css";
 @import "./css/road.css";
 @import "./css/tile.css";
+@import "./css/tooltip.css";
 
 :root {
     /* the board is about 31 units tall */
     font-size: calc(100vh / 32);
     --tile-width: 5rem;
     --road-width: 1rem;
-    --road-depth: 5;
-    --tile-depth: 10;
-    --intersection-depth: 15;
-    --chat-depth: 100;
+    --road-z: 5;
+    --tile-z: 10;
+    --intersection-z: 15;
+    --panel-z: 20;
+    --tooltip-z: 95;
+    --chat-z: 100;
 }
 
 * {
@@ -29,7 +32,6 @@ html, body, #root {
     margin: 0rem;
     width: 100%;
     height: 100%;
-    overflow: hidden;
     background-color: #f5f5dc;
 }
 

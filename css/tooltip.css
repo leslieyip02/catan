@@ -1,0 +1,27 @@
+.tooltip {
+    visibility: hidden;
+    position: absolute;
+    left: calc(50% / 1.1 - var(--tile-width) * 0.5 - 0.1rem);
+    bottom: calc(100% + 0.25rem);
+    width: var(--tile-width);
+    padding: 0.1rem;
+    font-size: 0.8rem;
+    text-align: center;
+    color: #eeeeee;
+    background-color: #555555;
+    border-radius: 0.5rem;
+    z-index: var(--tooltip-z);
+}
+
+.tooltip:after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: calc(50% - 0.25rem);
+    border: 0.25rem solid transparent;
+    border-top-color: #555555;
+}
+
+*:hover > .tooltip {
+    visibility: visible;
+}

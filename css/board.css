@@ -9,10 +9,25 @@
 
 .board__layer {
     position: absolute;
-    top: 1rem;
+    top: var(--road-width);
     left: 0%;
     width: 100%;
-    height: 100%;
+    height: calc(100% - var(--road-width));
+}
+
+.board__buttons {
+    top: var(--road-width);
+    left: calc(var(--tile-width) / 2);
+    z-index: var(--panel-z);
+}
+
+.board__button {
+    margin: 0.5rem;
+    cursor: pointer;
+}
+
+.board__button:hover {
+    scale: 1.1;
 }
 
 .board__row {

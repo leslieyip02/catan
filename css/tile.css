@@ -26,7 +26,7 @@
     background: #eeeeee;
     background-size: contain;
     display: flex;
-    z-index: var(--tile-depth);
+    z-index: var(--tile-z);
 }
 
 .tile__text {

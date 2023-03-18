@@ -18,9 +18,10 @@
     height: calc(var(--tile-width) * 0.5774 + var(--road-width) * 0.5);
     scale: 1.25 1;
     box-sizing: border-box;
-    z-index: var(--road-depth);
+    z-index: var(--road-z);
     background-color: #dddddd;
     transition: background-color 0.5s;
+    cursor: pointer;
 }
 
 .road--left {
