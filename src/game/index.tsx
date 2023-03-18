@@ -8,6 +8,8 @@ import { randomInt, dice } from './random';
 import { ResourceRoll } from './board/resource';
 import { CardHand } from './card';
 import { broadcastMessage } from './chat';
+import { Terrain } from './board/tile';
+import { Coordinate } from './board';
 
 interface GameProps {
     db: Database;
@@ -27,6 +29,8 @@ function Game(props: GameProps) {
     const [playerTurn, setPlayerTurn] = useState<boolean>(false);
     const [setupTurn, setSetupTurn] = useState<boolean>(false);
     const [messages, setMessages] = useState<string[]>([]);
+    const [robber, setRobber] = useState<Coordinate>();
+    const [canPlaceRobber, setCanPlaceRobber] = useState<boolean>();
 
     useEffect(() => {
         // check if this user is the host
@@ -102,14 +106,14 @@ function Game(props: GameProps) {
                         let resourcesProduced: CardHand = {};
                         for (let resourceRoll of resourceRolls) {
                             let resource = resourceRoll[newRoll];
-                            if (resource) {
+                            if (resource && !isRobbed(resourceRoll.tile)) {
                                 resourcesProduced[resource] = (resourcesProduced[resource] || 0) + 1;
                             }
                         }
 
                         // if resources are produced, update the user's cards
                         // each user listens to the card updates of the others
-                        if (resourcesProduced) {
+                        if (Object.keys(resourceRolls).length > 0) {
                             let cardsRef = child(props.userRef, "cards");
                             get(cardsRef)
                                 .then((currentCards) => {
@@ -122,6 +126,13 @@ function Game(props: GameProps) {
                                 });
                         }
                     });
+            }
+        });
+
+        // listen for robber position
+        onValue(child(props.roomRef, "robber"), (newRobber) => {
+            if (newRobber.val()) {
+                setRobber(() => newRobber.val());
             }
         });
     }, []);
@@ -157,6 +168,10 @@ function Game(props: GameProps) {
         setSetupTurn(isSetupTurn());
     }, [turn]);
 
+    useEffect(() => {
+        setCanPlaceRobber(false);
+    }, [robber]);
+
     function startGame() {
         set(child(props.roomRef, "started"), true);
         get(child(props.roomRef, "users"))
@@ -168,10 +183,24 @@ function Game(props: GameProps) {
                 // each player gets 4 turns to place their 2 starter roads and 2 settlements
                 let currentTurn = count * -4;
                 set(child(props.roomRef, "turn"), currentTurn);
+
                 setTurn(currentTurn);
                 setStarted(true);
             });
 
+        // set robber
+        get(child(props.roomRef, "terrains"))
+            .then((terrains) => {
+                let tiles: Terrain[][] = terrains.val();
+                for (let y = 0; y < tiles.length; y++) {
+                    for (let x = 0; x < tiles[y].length; x++) {
+                        if (tiles[y][x] === Terrain.desert) {
+                            set(child(props.roomRef, "robber"), { x: x, y: y });
+                            break;
+                        }
+                    }
+                }
+            });
     }
 
     function isPlayerTurn(playerIndex: number = props.userIndex): boolean {
@@ -199,8 +228,32 @@ function Game(props: GameProps) {
                         // update chat
                         let message = `${props.userName} rolled a ${roll} ${dice[d1 - 1]}${dice[d2 - 1]}`;
                         broadcastMessage(props.roomRef, messages, message);
+
+                        // move robber
+                        if (roll === 7) {
+                            setCanPlaceRobber(true);
+                        }
                     }
                 })
+        }
+    }
+
+    function isRobbed(tile: Coordinate): boolean {
+        let robbed = false;
+
+        // access latest state
+        setRobber((robber) => {
+            robbed = robber && tile.x === robber.x && tile.y === robber.y;
+            return robber;
+        });
+
+        return robbed;
+    }
+
+    function placeRobber(x: number, y: number) {
+        if (canPlaceRobber &&
+            !(robber.x === x && robber.y === y)) {
+            set(child(props.roomRef, "robber"), { x: x, y: y });
         }
     }
 
@@ -216,16 +269,14 @@ function Game(props: GameProps) {
     return (
         <div className="game">
             {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
-            {/* temporary buttons */}
-            {host && !started &&
-                <button
+            {
+                host && !started && <button
                     className="game__start"
                     onClick={startGame}
                 >
                     Start Game
                 </button>
             }
-            {/* {started && !setupTurn && <button onClick={endTurn}>End Turn</button>} */}
 
             <div className="panels">
                 {
@@ -248,7 +299,9 @@ function Game(props: GameProps) {
                 started={started}
                 playerTurn={playerTurn}
                 setupTurn={setupTurn}
+                robber={robber}
                 endTurn={endTurn}
+                placeRobber={canPlaceRobber ? placeRobber : null}
             />
             <Chat
                 {...props}

@@ -43,14 +43,7 @@ function Panel(props: PanelProps) {
 
                 <div className="panel__row">
                     <div className="panel__cards" onClick={() => console.log(cards)}>
-                        {
-                            Array(cardCount).fill(0).map((_, i) => {
-                                return <i
-                                    key={`card-${i}`}
-                                    className="panel__card-icon fa-solid fa-money-bill"
-                                ></i>
-                            })
-                        }
+                        {cardCount} x <i className="panel__card-icon fa-solid fa-money-bill"></i>
                     </div>
                     <button onClick={props.rollDice}>
                         <i className="fa-solid fa-dice"></i>

@@ -1,11 +1,11 @@
-import { TerrainType } from "./tile";
+import { Terrain } from "./tile";
 
 let defaultTerrains = [
-    [TerrainType.mountains, TerrainType.pasture, TerrainType.forest],
-    [TerrainType.fields, TerrainType.hills, TerrainType.pasture, TerrainType.hills],
-    [TerrainType.fields, TerrainType.forest, TerrainType.desert, TerrainType.forest, TerrainType.mountains],
-    [TerrainType.forest, TerrainType.mountains, TerrainType.fields, TerrainType.pasture],
-    [TerrainType.hills, TerrainType.fields, TerrainType.pasture]
+    [Terrain.mountains, Terrain.pasture, Terrain.forest],
+    [Terrain.fields, Terrain.hills, Terrain.pasture, Terrain.hills],
+    [Terrain.fields, Terrain.forest, Terrain.desert, Terrain.forest, Terrain.mountains],
+    [Terrain.forest, Terrain.mountains, Terrain.fields, Terrain.pasture],
+    [Terrain.hills, Terrain.fields, Terrain.pasture]
 ];
 
 let defaultRolls = [

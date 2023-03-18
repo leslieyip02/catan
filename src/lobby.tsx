@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ref, get, set, update, push, child, Database, DatabaseReference, onDisconnect } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
 import { UserData, defaultUserQuotas } from "./user";
+import { defaultTerrains, defaultRolls } from "./game/board/default";
 
 interface LobbyProps {
     auth: Auth;
@@ -41,7 +42,13 @@ function Lobby(props: LobbyProps) {
     function createRoom() {
         // create new ref for the room
         let newRoomRef = push(ref(props.db, "rooms"));
-        set(newRoomRef, { host: userId, started: false });
+        set(newRoomRef, {
+            host: userId,
+            started: false,
+            terrains: defaultTerrains,
+            rolls: defaultRolls,
+        });
+
         setRoomId(newRoomRef.key);
 
         // delete room when host leaves

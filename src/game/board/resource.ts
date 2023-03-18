@@ -1,4 +1,5 @@
-import { TerrainType } from "./tile";
+import { Coordinate } from ".";
+import { Terrain } from "./tile";
 
 enum Resource {
     brick = "brick",
@@ -11,23 +12,24 @@ enum Resource {
 
 type ResourceRoll = {
     [key: number]: Resource;
+    tile: Coordinate;
 };
 
-function mapTerrainToResource(terrain: TerrainType): Resource {
+function mapTerrainToResource(terrain: Terrain): Resource {
     switch (terrain) {
-        case TerrainType.hills:
+        case Terrain.hills:
             return Resource.brick;
 
-        case TerrainType.forest:
+        case Terrain.forest:
             return Resource.lumber;
 
-        case TerrainType.mountains:
+        case Terrain.mountains:
             return Resource.ore;
 
-        case TerrainType.fields:
+        case Terrain.fields:
             return Resource.grain;
 
-        case TerrainType.pasture:
+        case Terrain.pasture:
             return Resource.wool;
 
         default:

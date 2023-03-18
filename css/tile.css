@@ -29,6 +29,14 @@
     z-index: var(--tile-z);
 }
 
+.tile--disabled {
+    pointer-events: none;
+}
+
+.tile:hover {
+    opacity: 50%;
+}
+
 .tile__text {
     margin: auto;
     font-size: 1rem;

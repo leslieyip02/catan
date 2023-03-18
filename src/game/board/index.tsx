@@ -6,7 +6,7 @@ import Intersection, { IntersectionData, defaultIntersections } from "./intersec
 import { randomInt } from "../random";
 import { ResourceRoll, mapTerrainToResource } from "./resource";
 import { RoadDirection } from "./road";
-import Tile, { TerrainType } from "./tile";
+import Tile, { Terrain } from "./tile";
 
 interface Coordinate {
     x: number,
@@ -20,7 +20,9 @@ interface BoardProps {
     started: boolean;
     playerTurn: boolean;
     setupTurn: boolean;
+    robber?: Coordinate;
     endTurn: () => void;
+    placeRobber?: (x: number, y: number) => void;
 };
 
 interface BoardUpdate {
@@ -33,7 +35,7 @@ interface BoardUpdate {
 };
 
 function Board(props: BoardProps) {
-    const [terrains, setTerrains] = useState<TerrainType[][]>(defaultTerrains);
+    const [terrains, setTerrains] = useState<Terrain[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);
     const setupQuota = useRef(defaultInfrastructure);
@@ -162,8 +164,11 @@ function Board(props: BoardProps) {
 
             let terrain = terrains[oy][ox];
             let roll = rolls[oy][ox];
-            if (terrain != TerrainType.desert) {
-                resourceRolls.push({ [roll]: mapTerrainToResource(terrain) });
+            if (terrain != Terrain.desert) {
+                resourceRolls.push({
+                    [roll]: mapTerrainToResource(terrain),
+                    tile: { x: ox, y: oy },
+                });
             }
         });
 
@@ -171,58 +176,72 @@ function Board(props: BoardProps) {
     }
 
     return (
-        // <div>
-        //     {
-        //         !props.started && <div>
-        //             <button onClick={shuffleBoard}>Shuffle Board</button>
-        //             <button onClick={resetBoard}>Reset Board</button>
-        //         </div>
-        //     }
-            <div className="board">
-                <div className="board__layer board__tiles">
-                    {
-                        terrains.map((row, y) => {
-                            return <div key={`tile-row-${y}`} className="board__row">
-                                {
-                                    row.map((terrain, x) => {
-                                        return <Tile key={`tile-(${x}, ${y})`}
-                                            terrain={terrain}
-                                            roll={rolls[y][x]}
-                                        />
-                                    })
-                                }
-                            </div>
-                        })
-                    }
+        <div className="board">
+            {
+                !props.started && <div className="board__layer board__buttons">
+                    <div>
+                        <i
+                            className="board__button fa-solid fa-shuffle"
+                            onClick={shuffleBoard}
+                        >
+                            <span className="tooltip">Shuffle</span>
+                        </i>
+                        <i
+                            className="board__button fa-solid fa-arrow-rotate-left"
+                            onClick={resetBoard}
+                        >
+                            <span className="tooltip">Reset</span>
+                        </i>
+                    </div>
                 </div>
-                <div className="board__layer board__paths">
-                    {
-                        intersections.map((row, y) => {
-                            return <div key={`intersection-row-${y}`} className="board__row">
-                                {
-                                    row.map((intersectionData, x) => {
-                                        return <Intersection
-                                            key={`intersection-(${x}, ${y})`}
-                                            userRef={props.userRef}
-                                            roomRef={props.roomRef}
-                                            playerTurn={props.playerTurn}
-                                            setupTurn={props.setupTurn}
-                                            setupQuota={setupQuota}
-                                            x={x}
-                                            y={y}
-                                            resourceRolls={mapRollsToIntersections(x, y)}
-                                            {...intersectionData}
-                                            lookUp={(x: number, y: number) => intersections[y][x]}
-                                            endTurn={props.endTurn}
-                                        />
-                                    })
-                                }
-                            </div>
-                        })
-                    }
-                </div>
+            }
+            <div className="board__layer board__tiles">
+                {
+                    terrains.map((row, y) => {
+                        return <div key={`tile-row-${y}`} className="board__row">
+                            {
+                                row.map((terrain, x) => {
+                                    let robber = props.robber && x === props.robber.x && y === props.robber.y;
+                                    let placeRobber = props.placeRobber ? () => props.placeRobber(x, y) : null;
+                                    return <Tile key={`tile-(${x}, ${y})`}
+                                        terrain={terrain}
+                                        roll={rolls[y][x]}
+                                        robber={robber}
+                                        placeRobber={placeRobber}
+                                    />
+                                })
+                            }
+                        </div>
+                    })
+                }
             </div>
-        // </div>
+            <div className="board__layer board__paths">
+                {
+                    intersections.map((row, y) => {
+                        return <div key={`intersection-row-${y}`} className="board__row">
+                            {
+                                row.map((intersectionData, x) => {
+                                    return <Intersection
+                                        key={`intersection-(${x}, ${y})`}
+                                        userRef={props.userRef}
+                                        roomRef={props.roomRef}
+                                        playerTurn={props.playerTurn}
+                                        setupTurn={props.setupTurn}
+                                        setupQuota={setupQuota}
+                                        x={x}
+                                        y={y}
+                                        resourceRolls={mapRollsToIntersections(x, y)}
+                                        {...intersectionData}
+                                        lookUp={(x: number, y: number) => intersections[y][x]}
+                                        endTurn={props.endTurn}
+                                    />
+                                })
+                            }
+                        </div>
+                    })
+                }
+            </div>
+        </div>
     );
 }
 

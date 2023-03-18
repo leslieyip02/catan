@@ -1,4 +1,5 @@
-enum TerrainType {
+import { Coordinate } from '.';
+enum Terrain {
     hills = "hills",
     forest = "forest",
     mountains = "mountains",
@@ -8,17 +9,28 @@ enum TerrainType {
 };
 
 interface TileProps {
-    terrain: TerrainType;
+    terrain: Terrain;
     roll: number;
+    robber?: boolean
+    placeRobber?: () => void;
 };
 
 function Tile(props: TileProps) {
     return (
-        <div className="tile" data-terrain={props.terrain}>
-            <div className="tile__text">{props.roll}</div>
+        <div
+            className={`tile${!props.placeRobber || props.robber ? " tile--disabled" : ""}`}
+            data-terrain={props.terrain}
+            onClick={props.placeRobber}
+        >
+            <div className="tile__text">
+                {
+                    props.robber && <i className="fa-solid fa-user-minus"></i> ||
+                    props.roll
+                }
+            </div>
         </div>
     );
 };
 
 export default Tile;
-export { TerrainType };
+export { Terrain };
