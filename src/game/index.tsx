@@ -168,10 +168,6 @@ function Game(props: GameProps) {
         setSetupTurn(isSetupTurn());
     }, [turn]);
 
-    useEffect(() => {
-        setCanPlaceRobber(false);
-    }, [robber]);
-
     function startGame() {
         set(child(props.roomRef, "started"), true);
         get(child(props.roomRef, "users"))
@@ -213,15 +209,15 @@ function Game(props: GameProps) {
     }
 
     function rollDice() {
-        if (isPlayerTurn()) {
+        if (isPlayerTurn() && !setupTurn) {
             let rollRef = child(props.roomRef, "roll");
             get(rollRef)
                 .then((currentRoll) => {
                     // check that a value hasn't already been rolled for this turn
                     if (!currentRoll.val()) {
-                        // add 2 dice instead of randomInt(1, 12) for better distribution
-                        let d1 = randomInt(1, 6);
-                        let d2 = randomInt(1, 6);
+                        // add 2 dice instead of randomInt(2, 13) for better distribution
+                        let d1 = randomInt(1, 7);
+                        let d2 = randomInt(1, 7);
                         let roll = d1 + d2;
                         set(child(props.roomRef, "roll"), roll);
 
@@ -254,6 +250,7 @@ function Game(props: GameProps) {
         if (canPlaceRobber &&
             !(robber.x === x && robber.y === y)) {
             set(child(props.roomRef, "robber"), { x: x, y: y });
+            setCanPlaceRobber(false);
         }
     }
 
