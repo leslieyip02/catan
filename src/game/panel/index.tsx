@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CardHand } from "../card";
+import { CardHand, countCards } from "../card";
 import { defaultColors } from "../board/default";
 import Modal from './modal';
 
@@ -18,6 +18,7 @@ interface PanelProps extends PanelData {
     playerTurn: boolean;
     setupTurn: boolean;
     index: number;
+    gained?: boolean;
     rollDice: () => void;
     endTurn: () => void;
 };
@@ -30,9 +31,20 @@ function Panel(props: PanelProps) {
 
     useEffect(() => {
         setCards(props.cards);
+        setCardCount((currentCount) => {
+            let count = countCards(props.cards || {});
 
-        let cardCounts = Object.values(props.cards || {});
-        setCardCount(cardCounts.reduce((previous, current) => previous + current, 0));
+            if (count > currentCount) {
+                let panel: HTMLDivElement = document.querySelector(`#panel-${props.id}`);
+                panel.style.width = "110%";
+
+                setTimeout(() => {
+                    panel.style.width = "100%";
+                }, 1200);
+            }
+
+            return count;
+        });
     }, [props.cards])
 
     function toggleHide() {
@@ -42,7 +54,7 @@ function Panel(props: PanelProps) {
     }
 
     return (
-        <div className="panel">
+        <div id={`panel-${props.id}`} className="panel">
             <div className="panel__info">
                 <div className="panel__row">
                     <div className="panel__name">{props.name}</div>
@@ -50,7 +62,6 @@ function Panel(props: PanelProps) {
                         props.playerTurn && <i className="fa-solid fa-gamepad" onClick={() => console.log(props.id, props.name, cards)}></i>
                     }
                 </div>
-
                 <div className="panel__row">
                     <div
                         className="panel__cards"
@@ -89,10 +100,6 @@ function Panel(props: PanelProps) {
                         </div>
                     }
                 </div>
-                {/* {props.thisPlayer
-                    ? <div className="panel__cards"></div>
-                    : <div className="panel__cards"></div>
-                } */}
             </div>
             <div
                 className="panel__tab"

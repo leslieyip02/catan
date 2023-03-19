@@ -1,4 +1,4 @@
-import { CardHand, DevelopmentCard } from "../card";
+import { CardHand, countCards } from "../card";
 import Resource from "../board/resource";
 
 interface ModalProps {
@@ -27,7 +27,7 @@ function Modal(props: ModalProps) {
             <div className="modal__content">
                 <div className="modal__cards">
                     {
-                        Object.values(props.cards).reduce((c1, c2) => c1 + c2, 0) > 0
+                        countCards(props.cards) > 0
                             ? Object.entries(props.cards).map(([card, quantity]) => {
                                 return <div
                                     className="modal__card"
