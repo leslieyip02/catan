@@ -175,6 +175,7 @@ function Game(props: GameProps) {
 
         // reset causes dice roll bubble to disappear
         setDice(null);
+        set(child(props.roomRef, "dice"), null);
     }, [turn]);
 
     useEffect(() => {
@@ -310,6 +311,7 @@ function Game(props: GameProps) {
                             setupTurn={setupTurn}
                             index={index}
                             dice={playerTurn && dice}
+                            canPlaceRobber={canPlaceRobber}
                             rollDice={rollDice}
                             endTurn={endTurn}
                         />

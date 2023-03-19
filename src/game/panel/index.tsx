@@ -10,6 +10,7 @@ interface PanelProps extends PlayerData {
     setupTurn: boolean;
     index: number;
     dice?: string;
+    canPlaceRobber: boolean;
     rollDice: () => void;
     endTurn: () => void;
 };
@@ -76,7 +77,7 @@ function Panel(props: PanelProps) {
                                 Roll
                             </button>
                             <button
-                                disabled={!props.playerTurn || props.setupTurn || !rolled}
+                                disabled={!props.playerTurn || props.setupTurn || props.canPlaceRobber || !rolled}
                                 onClick={() => {
                                     setRolled(false);
                                     props.endTurn();

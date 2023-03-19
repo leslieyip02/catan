@@ -24,8 +24,11 @@ function Tile(props: TileProps) {
         >
             <div className="tile__text">
                 {
-                    props.robber && <i className="fa-solid fa-user-minus"></i> ||
-                    props.roll
+                    props.robber && (
+                        props.placeRobber
+                            ? <i className="tile__robber tile__robber--blinking fa-solid fa-user-minus"></i>
+                            : <i className="tile__robber fa-solid fa-user-minus"></i>
+                    ) || props.roll
                 }
             </div>
         </div>

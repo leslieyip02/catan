@@ -45,6 +45,28 @@
     text-align: center;
 }
 
+.tile__robber {
+    transition: font-size 0.2s;
+}
+
+.tile__robber--blinking {
+    animation: blinking 0.5s infinite;
+}
+
+@keyframes blinking {
+    0% {
+        opacity: 0%;
+    }
+
+    50% {
+        opacity: 100%;
+    }
+
+    100% {
+        opacity: 0%;
+    }
+}
+
 .tile[data-terrain="desert"] {
     background-image: url("../assets/desert.png");
 }
