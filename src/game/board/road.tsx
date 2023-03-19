@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { get, set, child, DatabaseReference } from "firebase/database";
 import { BoardUpdate, Coordinate } from "./";
-import Infrastructure, { InfrastructureQuota } from "./infrastructure";
+import Infrastructure, { InfrastructureQuota, hasSufficientResources, deductResources } from "./infrastructure";
 import { IntersectionData } from "./intersection";
 import { defaultColors } from "./default";
+import { CardHand } from "../card";
 
 enum RoadDirection {
     left = "left",
@@ -26,39 +27,16 @@ interface RoadProps extends RoadData {
     roomRef: DatabaseReference;
     playerTurn: boolean;
     setupTurn: boolean;
-    setupQuota?: React.MutableRefObject<InfrastructureQuota>;
+    cards: React.MutableRefObject<CardHand>;
+    quota: React.MutableRefObject<InfrastructureQuota>;
     lookUp: (x: number, y: number) => IntersectionData;
+    broadcastUpdate: (boardUpdate: Partial<BoardUpdate>) => void;
     endTurn: () => void;
 };
 
 function Road(props: RoadProps) {
-    const [owner, setOwner] = useState<string>();
-    const [color, setColor] = useState<string>();
-
-    // updates values when data from parent component updates
-    useEffect(() => {
-        setOwner(props.owner);
-        setColor(props.color);
-    }, [props]);
-
-    // broadcast updates to room
-    useEffect(() => {
-        if (owner) {
-            let boardUpdate: BoardUpdate = {
-                infrastructure: Infrastructure.road,
-                x: props.origin.x,
-                y: props.origin.y,
-                owner: owner,
-                color: color,
-                roadDirection: props.direction,
-            };
-
-            set(child(props.roomRef, "boardUpdate"), boardUpdate);
-        }
-    }, [owner]);
-
     function buildRoad() {
-        if (props.playerTurn && !owner) {
+        if (props.playerTurn && !props.owner) {
             // roads must be connected to at least 1 road / settlement / city            
             let conenctedByIntersection = false;
             let connectedByRoad = false;
@@ -94,14 +72,14 @@ function Road(props: RoadProps) {
             if (conenctedByIntersection || connectedByRoad) {
                 // check for resources
                 // setup infrastructure is free
-                let sufficientResources = false;
-                if (props.setupTurn && props.setupQuota &&
-                    props.setupQuota.current[Infrastructure.road] > 0) {
-                    props.setupQuota.current[Infrastructure.road]--;
-                    sufficientResources = true;
+                let sufficientQuota = false;
+                if (props.quota.current[Infrastructure.road] > 0) {
+                    props.quota.current[Infrastructure.road]--;
+                    sufficientQuota = true;
                 }
 
-                if (sufficientResources) {
+                let sufficientResources = hasSufficientResources(Infrastructure.road, props.cards);
+                if (sufficientQuota || sufficientResources) {
                     let roadsRef = child(props.userRef, "roads");
                     get(roadsRef)
                         .then((roads) => {
@@ -113,11 +91,18 @@ function Road(props: RoadProps) {
                                 // assign ownership
                                 get(child(props.userRef, "index"))
                                     .then((userIndex) => {
-                                        // update owner after fetching color
-                                        // so color can be sent in the board update broadcast
-                                        setColor(defaultColors[userIndex.val()]);
-                                        setOwner(props.userRef.key);
+                                        props.broadcastUpdate({
+                                            infrastructure: Infrastructure.road,
+                                            owner: props.userRef.key,
+                                            color: defaultColors[userIndex.val()],
+                                            roadDirection: props.direction,
+                                        });
                                     });
+
+                                // deduct cost
+                                if (!sufficientQuota && sufficientResources) {
+                                    deductResources(Infrastructure.road, props.userRef);
+                                }
 
                                 // end turn automatically for setup turns
                                 if (props.setupTurn) {
@@ -133,7 +118,7 @@ function Road(props: RoadProps) {
     return (
         <div
             className={`road road--${props.direction}`}
-            style={{ backgroundColor: color }}
+            style={{ backgroundColor: props.color }}
             onClick={buildRoad}
         ></div>
     );

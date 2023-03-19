@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { ref, get, set, child, onValue, Database, DatabaseReference, off, DataSnapshot } from "firebase/database";
+import { ref, get, set, child, onValue, Database, DatabaseReference, off, DataSnapshot, increment, update } from "firebase/database";
 import Board from "./board";
 import Chat from "./chat";
-import Panel, { PanelData } from "./panel";
-import { UserData } from "../user";
+import Panel from "./panel";
+import { UserData, PlayerData } from "../user";
 import { randomInt, dice } from './random';
 import { ResourceRoll } from './board/resource';
 import { CardHand } from './card';
 import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
 import { Coordinate } from './board';
+import { defaultInfrastructure, InfrastructureQuota } from './board/infrastructure';
 
 interface GameProps {
     db: Database;
@@ -21,7 +22,7 @@ interface GameProps {
 
 function Game(props: GameProps) {
     const [host, setHost] = useState<boolean>(false);
-    const [players, setPlayers] = useState<PanelData[]>([]);
+    const [players, setPlayers] = useState<PlayerData[]>([]);
     const [playerRefs, setPlayerRefs] = useState<DatabaseReference[]>([]);
     const [playerCount, setPlayerCount] = useState<number>();
     const [started, setStarted] = useState<boolean>(false);
@@ -31,6 +32,10 @@ function Game(props: GameProps) {
     const [messages, setMessages] = useState<string[]>([]);
     const [robber, setRobber] = useState<Coordinate>();
     const [canPlaceRobber, setCanPlaceRobber] = useState<boolean>();
+
+    // keep separate reference
+    const cards = useRef<CardHand>({});
+    const quota = useRef<InfrastructureQuota>(defaultInfrastructure);
 
     useEffect(() => {
         // check if this user is the host
@@ -114,16 +119,10 @@ function Game(props: GameProps) {
                         // if resources are produced, update the user's cards
                         // each user listens to the card updates of the others
                         if (Object.keys(resourceRolls).length > 0) {
-                            let cardsRef = child(props.userRef, "cards");
-                            get(cardsRef)
-                                .then((currentCards) => {
-                                    let newCards = currentCards.val() || {};
-                                    for (let [resourceProduced, quantity] of Object.entries(resourcesProduced)) {
-                                        newCards[resourceProduced] = (newCards[resourceProduced] || 0) + quantity;
-                                    }
+                            let newCards = Object.fromEntries(Object.entries(resourcesProduced)
+                                .map(([resource, quantity]) => [resource, increment(quantity)]));
 
-                                    set(cardsRef, newCards);
-                                });
+                            update(child(props.userRef, "cards"), newCards);
                         }
                     });
             }
@@ -145,7 +144,7 @@ function Game(props: GameProps) {
                 .then((users) => {
                     let playerStats = users.map((user) => {
                         let userData: UserData = user.val();
-                        let playerStat: PanelData = {
+                        let playerStat: PlayerData = {
                             id: userData.id,
                             index: userData.index,
                             name: userData.name,
@@ -167,6 +166,15 @@ function Game(props: GameProps) {
         setPlayerTurn(isPlayerTurn());
         setSetupTurn(isSetupTurn());
     }, [turn]);
+
+    useEffect(() => {
+        // update current hand
+        for (let player of players) {
+            if (player.id === props.userRef.key) {
+                cards.current = player.cards;
+            }
+        }
+    }, [players]);
 
     function startGame() {
         set(child(props.roomRef, "started"), true);
@@ -297,6 +305,8 @@ function Game(props: GameProps) {
                 started={started}
                 playerTurn={playerTurn}
                 setupTurn={setupTurn}
+                cards={cards}
+                quota={quota}
                 robber={robber}
                 endTurn={endTurn}
                 placeRobber={canPlaceRobber ? placeRobber : null}

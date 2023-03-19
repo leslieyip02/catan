@@ -28,19 +28,21 @@ function Modal(props: ModalProps) {
                 <div className="modal__cards">
                     {
                         countCards(props.cards) > 0
-                            ? Object.entries(props.cards).map(([card, quantity]) => {
-                                return <div
-                                    className="modal__card"
-                                    key={card}
-                                >
-                                    {
-                                        cardIcon(card)
-                                    }
-                                    <div className="modal__card-label">
-                                        {`${quantity} x ${card}`}
+                            ? Object.entries(props.cards)
+                                .filter(([card, quantity]) => quantity > 0)
+                                .map(([card, quantity]) => {
+                                    return <div
+                                        className="modal__card"
+                                        key={card}
+                                    >
+                                        {
+                                            cardIcon(card)
+                                        }
+                                        <div className="modal__card-label">
+                                            {`${quantity} x ${card}`}
+                                        </div>
                                     </div>
-                                </div>
-                            })
+                                })
                             : <div
                                 className="modal__card"
                             >

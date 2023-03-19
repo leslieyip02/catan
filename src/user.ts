@@ -13,10 +13,12 @@ interface UserData {
     roads: number;
 };
 
+interface PlayerData extends Omit<UserData, "roomId" | "resourceRolls"> { };
+
 const defaultUserQuotas = {
     settlements: 5,
     cities: 4,
     roads: 15,
 };
 
-export { UserData, defaultUserQuotas };
+export { UserData, PlayerData, defaultUserQuotas };

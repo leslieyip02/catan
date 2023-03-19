@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { set, child, onValue, Database, DatabaseReference } from 'firebase/database';
 import { defaultTerrains, defaultRolls } from "./default";
-import Infrastructure, { defaultInfrastructure } from "./infrastructure";
+import Infrastructure, { defaultInfrastructure, InfrastructureQuota } from "./infrastructure";
 import Intersection, { IntersectionData, defaultIntersections } from "./intersection";
 import { randomInt } from "../random";
 import { ResourceRoll, mapTerrainToResource } from "./resource";
 import { RoadDirection } from "./road";
 import Tile, { Terrain } from "./tile";
+import { CardHand } from "../card";
 
 interface Coordinate {
     x: number,
@@ -20,6 +21,8 @@ interface BoardProps {
     started: boolean;
     playerTurn: boolean;
     setupTurn: boolean;
+    cards: React.MutableRefObject<CardHand>;
+    quota: React.MutableRefObject<InfrastructureQuota>;
     robber?: Coordinate;
     endTurn: () => void;
     placeRobber?: (x: number, y: number) => void;
@@ -38,7 +41,6 @@ function Board(props: BoardProps) {
     const [terrains, setTerrains] = useState<Terrain[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);
-    const setupQuota = useRef(defaultInfrastructure);
 
     // TODO: keep track of rolls, resources and players who gain resources from those rolls
 
@@ -227,7 +229,8 @@ function Board(props: BoardProps) {
                                         roomRef={props.roomRef}
                                         playerTurn={props.playerTurn}
                                         setupTurn={props.setupTurn}
-                                        setupQuota={setupQuota}
+                                        cards={props.cards}
+                                        quota={props.quota}
                                         x={x}
                                         y={y}
                                         resourceRolls={mapRollsToIntersections(x, y)}

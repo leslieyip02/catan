@@ -2,18 +2,9 @@ import { useState, useEffect } from "react";
 import { CardHand, countCards } from "../card";
 import { defaultColors } from "../board/default";
 import Modal from './modal';
+import { PlayerData } from "../../user";
 
-interface PanelData {
-    id: string;
-    index: number;
-    name: string;
-    cards: CardHand;
-    settlements: number;
-    cities: number;
-    roads: number;
-};
-
-interface PanelProps extends PanelData {
+interface PanelProps extends PlayerData {
     thisPlayer: boolean;
     playerTurn: boolean;
     setupTurn: boolean;
@@ -114,4 +105,3 @@ function Panel(props: PanelProps) {
 }
 
 export default Panel;
-export { PanelData };

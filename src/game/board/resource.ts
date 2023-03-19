@@ -2,12 +2,12 @@ import { Coordinate } from ".";
 import { Terrain } from "./tile";
 
 enum Resource {
+    none = "none",
     brick = "brick",
     lumber = "lumber",
     ore = "ore",
     grain = "grain",
     wool = "wool",
-    none = "none",
 };
 
 type ResourceRoll = {
