@@ -42,8 +42,6 @@ function Board(props: BoardProps) {
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);
 
-    // TODO: keep track of rolls, resources and players who gain resources from those rolls
-
     useEffect(() => {
         // listen for board shuffles
         onValue(child(props.roomRef, "terrains"), (newTerrains) => {
@@ -225,6 +223,7 @@ function Board(props: BoardProps) {
                                 row.map((intersectionData, x) => {
                                     return <Intersection
                                         key={`intersection-(${x}, ${y})`}
+                                        {...intersectionData}
                                         userRef={props.userRef}
                                         roomRef={props.roomRef}
                                         playerTurn={props.playerTurn}
@@ -234,7 +233,6 @@ function Board(props: BoardProps) {
                                         x={x}
                                         y={y}
                                         resourceRolls={mapRollsToIntersections(x, y)}
-                                        {...intersectionData}
                                         lookUp={(x: number, y: number) => intersections[y][x]}
                                         endTurn={props.endTurn}
                                     />

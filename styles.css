@@ -2,10 +2,10 @@
 @import "./css/app.css";
 @import "./css/board.css";
 @import "./css/chat.css";
+@import "./css/deck.css";
 @import "./css/game.css";
 @import "./css/intersection.css";
 @import "./css/lobby.css";
-@import "./css/modal.css";
 @import "./css/panel.css";
 @import "./css/road.css";
 @import "./css/tile.css";
@@ -22,7 +22,7 @@
     --tooltip-z: 95;
     --chat-z: 100;
     --panel-z: 105;
-    --modal-z: 110;
+    --deck-z: 110;
 }
 
 * {

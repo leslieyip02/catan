@@ -1,4 +1,4 @@
-.modal {
+.deck {
     display: none;
     position: fixed;
     top: 0%;
@@ -6,10 +6,10 @@
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: var(--modal-z);
+    z-index: var(--deck-z);
 }
 
-.modal__content {
+.deck__content {
     margin: auto;
     margin-top: 10vh;
     width: 60vw;
@@ -31,12 +31,12 @@
     }
 }
 
-.modal__cards {
+.deck__cards {
     display: flex;
     overflow-x: scroll;
 }
 
-.modal__card {
+.deck__card {
     margin: 0.8rem;
     min-width: calc(var(--tile-width) * 1.5);
     max-width: calc(var(--tile-width) * 1.5);
@@ -53,13 +53,13 @@
     align-items: center;
 }
 
-.modal__card-icon {
+.deck__card-icon {
     font-size: var(--tile-width);
     margin-bottom: 1rem;
     color: #eeeeee;
 }
 
-.modal__card-label {
+.deck__card-label {
     text-align: center;
     color: #eeeeee;
 }

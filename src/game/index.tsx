@@ -4,7 +4,7 @@ import Board from "./board";
 import Chat from "./chat";
 import Panel from "./panel";
 import { UserData, PlayerData } from "../user";
-import { randomInt, dice } from './random';
+import { randomInt, diceIcons } from './random';
 import { ResourceRoll } from './board/resource';
 import { CardHand } from './card';
 import { broadcastMessage } from './chat';
@@ -29,6 +29,7 @@ function Game(props: GameProps) {
     const [turn, setTurn] = useState<number>(0);
     const [playerTurn, setPlayerTurn] = useState<boolean>(false);
     const [setupTurn, setSetupTurn] = useState<boolean>(false);
+    const [dice, setDice] = useState<string>();
     const [messages, setMessages] = useState<string[]>([]);
     const [robber, setRobber] = useState<Coordinate>();
     const [canPlaceRobber, setCanPlaceRobber] = useState<boolean>();
@@ -128,10 +129,16 @@ function Game(props: GameProps) {
             }
         });
 
+        onValue(child(props.roomRef, "dice"), (newDice) => {
+            if (newDice.val()) {
+                setDice(newDice.val());
+            }
+        })
+
         // listen for robber position
         onValue(child(props.roomRef, "robber"), (newRobber) => {
             if (newRobber.val()) {
-                setRobber(() => newRobber.val());
+                setRobber(newRobber.val());
             }
         });
     }, []);
@@ -165,6 +172,9 @@ function Game(props: GameProps) {
 
         setPlayerTurn(isPlayerTurn());
         setSetupTurn(isSetupTurn());
+
+        // reset causes dice roll bubble to disappear
+        setDice(null);
     }, [turn]);
 
     useEffect(() => {
@@ -223,14 +233,18 @@ function Game(props: GameProps) {
                 .then((currentRoll) => {
                     // check that a value hasn't already been rolled for this turn
                     if (!currentRoll.val()) {
-                        // add 2 dice instead of randomInt(2, 13) for better distribution
-                        let d1 = randomInt(1, 7);
-                        let d2 = randomInt(1, 7);
-                        let roll = d1 + d2;
+                        // add 2 die instead of randomInt(2, 13) for better distribution
+                        let r1 = randomInt(1, 7);
+                        let r2 = randomInt(1, 7);
+                        let roll = r1 + r2;
                         set(child(props.roomRef, "roll"), roll);
 
+                        // update dice
+                        let icons = diceIcons[r1 - 1] + diceIcons[r2 - 1];
+                        set(child(props.roomRef, "dice"), icons);
+
                         // update chat
-                        let message = `${props.userName} rolled a ${roll} ${dice[d1 - 1]}${dice[d2 - 1]}`;
+                        let message = `${props.userName} rolled a ${roll} ${icons}`;
                         broadcastMessage(props.roomRef, messages, message);
 
                         // move robber
@@ -286,13 +300,16 @@ function Game(props: GameProps) {
             <div className="panels">
                 {
                     players.map((playerData, index) => {
+                        let playerTurn = isPlayerTurn(index);
+
                         return <Panel
                             key={`panel-${playerData.id}`}
+                            {...playerData}
                             thisPlayer={playerData.id === props.userRef.key}
-                            playerTurn={isPlayerTurn(index)}
+                            playerTurn={playerTurn}
                             setupTurn={setupTurn}
                             index={index}
-                            {...playerData}
+                            dice={playerTurn && dice}
                             rollDice={rollDice}
                             endTurn={endTurn}
                         />

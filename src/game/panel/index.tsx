@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { CardHand, countCards } from "../card";
 import { defaultColors } from "../board/default";
-import Modal from './modal';
+import Deck from './deck';
 import { PlayerData } from "../../user";
 
 interface PanelProps extends PlayerData {
@@ -9,19 +9,17 @@ interface PanelProps extends PlayerData {
     playerTurn: boolean;
     setupTurn: boolean;
     index: number;
-    gained?: boolean;
+    dice?: string;
     rollDice: () => void;
     endTurn: () => void;
 };
 
 function Panel(props: PanelProps) {
-    const [cards, setCards] = useState<CardHand>();
     const [cardCount, setCardCount] = useState<number>(0);
     const [rolled, setRolled] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        setCards(props.cards);
         setCardCount((currentCount) => {
             let count = countCards(props.cards || {});
 
@@ -39,8 +37,8 @@ function Panel(props: PanelProps) {
     }, [props.cards])
 
     function toggleHide() {
-        let modal: HTMLDivElement = document.querySelector(".modal");
-        modal.style.display = open ? "none" : "block";
+        let deck: HTMLDivElement = document.querySelector(".deck");
+        deck.style.display = open ? "none" : "block";
         setOpen(!open);
     }
 
@@ -50,7 +48,7 @@ function Panel(props: PanelProps) {
                 <div className="panel__row">
                     <div className="panel__name">{props.name}</div>
                     {
-                        props.playerTurn && <i className="fa-solid fa-gamepad" onClick={() => console.log(props.id, props.name, cards)}></i>
+                        props.playerTurn && <i className="fa-solid fa-gamepad"></i>
                     }
                 </div>
                 <div className="panel__row">
@@ -60,9 +58,8 @@ function Panel(props: PanelProps) {
                     >
                         {cardCount}x<i className="panel__card-icon fa-solid fa-money-bill"></i>
                         {
-                            props.thisPlayer && <Modal
+                            props.thisPlayer && <Deck
                                 cards={props.cards}
-                                toggleHide={toggleHide}
                             />
                         }
                     </div>
@@ -99,6 +96,12 @@ function Panel(props: PanelProps) {
                 {
                     props.thisPlayer && <i className="fa-regular fa-user"></i>
                 }
+                <span
+                    className="panel__dice"
+                    style={{ opacity: (props.playerTurn && props.dice) ? "100%" : "0%" }}
+                >
+                    <div className="panel__dice-text">{props.dice}</div>
+                </span>
             </div>
         </div >
     );

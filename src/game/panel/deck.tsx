@@ -1,14 +1,13 @@
 import { CardHand, countCards } from "../card";
 import Resource from "../board/resource";
 
-interface ModalProps {
+interface DeckProps {
     cards: CardHand;
-    toggleHide: () => void;
 };
 
-function Modal(props: ModalProps) {
+function Deck(props: DeckProps) {
     function cardIcon(card: string) {
-        let classNames = ["modal__card-icon", "fa-solid"];
+        let classNames = ["deck__card-icon", "fa-solid"];
 
         let icons: Record<string, string> = {
             [Resource.brick]: "fa-trowel-bricks",
@@ -23,31 +22,31 @@ function Modal(props: ModalProps) {
     }
 
     return (
-        <div className="modal">
-            <div className="modal__content">
-                <div className="modal__cards">
+        <div className="deck">
+            <div className="deck__content">
+                <div className="deck__cards">
                     {
                         countCards(props.cards) > 0
                             ? Object.entries(props.cards)
                                 .filter(([card, quantity]) => quantity > 0)
                                 .map(([card, quantity]) => {
                                     return <div
-                                        className="modal__card"
+                                        className="deck__card"
                                         key={card}
                                     >
                                         {
                                             cardIcon(card)
                                         }
-                                        <div className="modal__card-label">
+                                        <div className="deck__card-label">
                                             {`${quantity} x ${card}`}
                                         </div>
                                     </div>
                                 })
                             : <div
-                                className="modal__card"
+                                className="deck__card"
                             >
-                                <i className="modal__card-icon fa-solid fa-face-frown"></i>
-                                <div className="modal__card-label">
+                                <i className="deck__card-icon fa-solid fa-face-frown"></i>
+                                <div className="deck__card-label">
                                     No cards
                                 </div>
                             </div>
@@ -58,4 +57,4 @@ function Modal(props: ModalProps) {
     );
 }
 
-export default Modal;
+export default Deck;

@@ -202,13 +202,13 @@ function Intersection(props: IntersectionProps) {
                 props.roads.map((roadData, i) => {
                     return <Road
                         key={`road-${i}`}
+                        {...roadData}
                         userRef={props.userRef}
                         roomRef={props.roomRef}
                         playerTurn={props.playerTurn}
                         setupTurn={props.setupTurn}
                         cards={props.cards}
                         quota={props.quota}
-                        {...roadData}
                         lookUp={props.lookUp}
                         endTurn={props.endTurn}
                         broadcastUpdate={broadcastUpdate}
