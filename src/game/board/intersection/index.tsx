@@ -69,7 +69,9 @@ function Intersection(props: IntersectionProps) {
 
                 // check adjacent child roads to see if they lead into this intersection
                 for (let road of adjacent.roads) {
-                    if (road.owner === props.userRef.key) {
+                    if (road.destination.x == props.x &&
+                        road.destination.y == props.y &&
+                        road.owner === props.userRef.key) {
                         connectedByRoad = true;
                     }
                 }
