@@ -37,7 +37,7 @@ interface BoardUpdate {
     roadDirection?: RoadDirection;
 };
 
-function Board(props: BoardProps) {
+const Board = (props: BoardProps) => {
     const [terrains, setTerrains] = useState<Terrain[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);

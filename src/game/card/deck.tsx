@@ -7,7 +7,7 @@ interface DeckProps {
     drop?: boolean;
 };
 
-function Deck(props: DeckProps) {
+const Deck = (props: DeckProps) => {
     return (
         <div className={`deck${props.drop ? " deck--drop" : ""}`}>
             <div className="deck__cards">

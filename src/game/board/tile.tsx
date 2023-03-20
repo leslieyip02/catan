@@ -15,7 +15,15 @@ interface TileProps {
     placeRobber?: () => void;
 };
 
-function Tile(props: TileProps) {
+const Tile = (props: TileProps) => {
+    const Robber = () => {
+        return (
+            props.placeRobber
+                ? <i className="tile__robber tile__robber--blinking fa-solid fa-user-minus"></i>
+                : <i className="tile__robber fa-solid fa-user-minus"></i>
+        );
+    }
+
     return (
         <div
             className={`tile${!props.placeRobber || props.robber ? " tile--disabled" : ""}`}
@@ -24,11 +32,7 @@ function Tile(props: TileProps) {
         >
             <div className="tile__text">
                 {
-                    props.robber && (
-                        props.placeRobber
-                            ? <i className="tile__robber tile__robber--blinking fa-solid fa-user-minus"></i>
-                            : <i className="tile__robber fa-solid fa-user-minus"></i>
-                    ) || props.roll
+                    props.robber && <Robber /> || props.roll
                 }
             </div>
         </div>

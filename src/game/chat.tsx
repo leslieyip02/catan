@@ -15,7 +15,7 @@ function broadcastMessage(roomRef: DatabaseReference, currentMessages: string[],
     update(roomRef, { messages: newMessages });
 }
 
-function Chat(props: ChatProps) {
+const Chat = (props: ChatProps) => {
     const [currentMessage, setCurrentMessage] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
 

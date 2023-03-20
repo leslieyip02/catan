@@ -34,7 +34,7 @@ interface RoadProps extends RoadData {
     endTurn: () => void;
 };
 
-function Road(props: RoadProps) {
+const Road = (props: RoadProps) => {
     function buildRoad() {
         if (props.playerTurn && !props.owner) {
             // roads must be connected to at least 1 road / settlement / city            

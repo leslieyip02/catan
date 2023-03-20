@@ -15,7 +15,7 @@ interface PanelProps extends PlayerData {
     endTurn: () => void;
 };
 
-function Panel(props: PanelProps) {
+const Panel = (props: PanelProps) => {
     const [cardCount, setCardCount] = useState<number>(0);
     const [rolled, setRolled] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false);
@@ -43,6 +43,36 @@ function Panel(props: PanelProps) {
         setOpen(!open);
     }
 
+    const RollDiceButton = () => {
+        function rollDice() {
+            setRolled(true);
+            props.rollDice();
+        }
+
+        let disabled = !props.playerTurn || props.setupTurn || rolled;
+
+        return (
+            <button disabled={disabled} onClick={rollDice}>
+                <i className="fa-solid fa-dice"></i>Roll
+            </button>
+        );
+    }
+
+    const EndTurnButton = () => {
+        function endTurn() {
+            setRolled(false);
+            props.endTurn();
+        }
+
+        let disabled = !props.playerTurn || props.setupTurn || props.canPlaceRobber || !rolled;
+
+        return (
+            <button disabled={disabled} onClick={endTurn}>
+                <i className="fa-solid fa-square-check"></i>End Turn
+            </button>
+        );
+    }
+
     return (
         <div id={`panel-${props.id}`} className="panel">
             <div className="panel__info">
@@ -66,24 +96,8 @@ function Panel(props: PanelProps) {
                     </div>
                     {
                         props.thisPlayer && <div className="panel__buttons">
-                            <button
-                                disabled={!props.playerTurn || props.setupTurn || rolled}
-                                onClick={() => {
-                                    setRolled(true);
-                                    props.rollDice();
-                                }}
-                            >
-                                <i className="fa-solid fa-dice"></i>Roll
-                            </button>
-                            <button
-                                disabled={!props.playerTurn || props.setupTurn || props.canPlaceRobber || !rolled}
-                                onClick={() => {
-                                    setRolled(false);
-                                    props.endTurn();
-                                }}
-                            >
-                                <i className="fa-solid fa-square-check"></i>End Turn
-                            </button>
+                            <RollDiceButton />
+                            <EndTurnButton />
                         </div>
                     }
                 </div>

@@ -9,7 +9,7 @@ interface AppProps {
     db: Database;
 };
 
-function App(props: AppProps) {
+const App = (props: AppProps) => {
     const [userRef, setUserRef] = useState<DatabaseReference>();
     const [roomRef, setRoomRef] = useState<DatabaseReference>();
     const [userIndex, setUserIndex] = useState<number>();
@@ -17,22 +17,23 @@ function App(props: AppProps) {
 
     return (
         <div className="app">
-            {!roomRef
-                ? <Lobby
-                    auth={props.auth}
-                    db={props.db}
-                    updateUserRef={setUserRef}
-                    updateRoomRef={setRoomRef}
-                    updateUserIndex={setUserIndex}
-                    updateUserName={setUserName}
-                />
-                : <Game
-                    db={props.db}
-                    userRef={userRef}
-                    roomRef={roomRef}
-                    userIndex={userIndex}
-                    userName={userName}
-                />
+            {
+                !roomRef
+                    ? <Lobby
+                        auth={props.auth}
+                        db={props.db}
+                        updateUserRef={setUserRef}
+                        updateRoomRef={setRoomRef}
+                        updateUserIndex={setUserIndex}
+                        updateUserName={setUserName}
+                    />
+                    : <Game
+                        db={props.db}
+                        userRef={userRef}
+                        roomRef={roomRef}
+                        userIndex={userIndex}
+                        userName={userName}
+                    />
             }
         </div>
     );

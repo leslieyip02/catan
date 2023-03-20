@@ -13,7 +13,7 @@ interface LobbyProps {
     updateUserName: (newUserName: string) => void;
 };
 
-function Lobby(props: LobbyProps) {
+const Lobby = (props: LobbyProps) => {
     const [userId, setUserId] = useState<string>();
     const [userRef, setUserRef] = useState<DatabaseReference>();
     const [userName, setUserName] = useState<string>("");

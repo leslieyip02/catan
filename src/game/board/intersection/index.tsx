@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
 import { get, set, child, DatabaseReference } from "firebase/database";
 import { BoardUpdate, Coordinate } from "..";
 import { defaultColors } from "../default";
 import Infrastructure, { InfrastructureQuota, hasSufficientResources, deductResources } from "../infrastructure";
-import Resource, { ResourceRoll } from "../../card/resource";
+import { ResourceRoll } from "../../card/resource";
 import Road, { RoadData } from "../road";
 import { CardHand } from "../../card/hand";
 
@@ -40,7 +39,7 @@ interface IntersectionProps extends IntersectionData {
     endTurn: () => void;
 };
 
-function Intersection(props: IntersectionProps) {
+const Intersection = (props: IntersectionProps) => {
     // broadcast updates to room
     function broadcastUpdate(boardUpdate: Partial<BoardUpdate>) {
         boardUpdate.x = props.x;
@@ -217,7 +216,7 @@ function Intersection(props: IntersectionProps) {
                     />
                 })
             }
-        </div >
+        </div>
     );
 };
 

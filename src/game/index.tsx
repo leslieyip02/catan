@@ -5,8 +5,8 @@ import Chat from "./chat";
 import Panel from "./panel";
 import { UserData, PlayerData } from "../user";
 import { randomInt, diceIcons } from './random';
-import { ResourceRoll } from './board/resource';
-import { CardHand } from './card';
+import { ResourceRoll } from './card/resource';
+import { CardHand } from './card/hand';
 import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
 import { Coordinate } from './board';
@@ -20,7 +20,7 @@ interface GameProps {
     userName: string;
 };
 
-function Game(props: GameProps) {
+const Game = (props: GameProps) => {
     const [host, setHost] = useState<boolean>(false);
     const [players, setPlayers] = useState<PlayerData[]>([]);
     const [playerRefs, setPlayerRefs] = useState<DatabaseReference[]>([]);
@@ -286,16 +286,19 @@ function Game(props: GameProps) {
         }
     }
 
+    const StartButton = () => {
+        return (
+            <button className="game__start" onClick={startGame}>
+                Start Game
+            </button>
+        );
+    }
+
     return (
         <div className="game">
             {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
             {
-                host && !started && <button
-                    className="game__start"
-                    onClick={startGame}
-                >
-                    Start Game
-                </button>
+                host && !started && <StartButton />
             }
 
             <div className="panels">
@@ -330,6 +333,7 @@ function Game(props: GameProps) {
                 endTurn={endTurn}
                 placeRobber={canPlaceRobber ? placeRobber : null}
             />
+
             <Chat
                 {...props}
                 messages={messages}
