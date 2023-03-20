@@ -3,9 +3,9 @@ import { get, set, child, DatabaseReference } from "firebase/database";
 import { BoardUpdate, Coordinate } from "..";
 import { defaultColors } from "../default";
 import Infrastructure, { InfrastructureQuota, hasSufficientResources, deductResources } from "../infrastructure";
-import Resource, { ResourceRoll } from "../resource";
+import Resource, { ResourceRoll } from "../../card/resource";
 import Road, { RoadData } from "../road";
-import { CardHand } from "../../card";
+import { CardHand } from "../../card/hand";
 
 enum IntersectionType {
     fork = "fork",

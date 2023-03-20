@@ -1,5 +1,5 @@
-import { Coordinate } from ".";
-import { Terrain } from "./tile";
+import { Coordinate } from "../board";
+import { Terrain } from "../board/tile";
 
 enum Resource {
     none = "none",

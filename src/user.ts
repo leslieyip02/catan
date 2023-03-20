@@ -1,5 +1,5 @@
-import Resource, { ResourceRoll } from "./game/board/resource";
-import { CardHand } from "./game/card";
+import Resource, { ResourceRoll } from "./game/card/resource";
+import { CardHand } from "./game/card/hand";
 
 interface UserData {
     id: string;

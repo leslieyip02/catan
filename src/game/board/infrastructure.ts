@@ -1,6 +1,6 @@
 import { update, increment, child, DatabaseReference } from 'firebase/database';
-import { CardHand } from '../card';
-import Resource from './resource';
+import { CardHand } from '../card/hand';
+import Resource from '../card/resource';
 
 enum Infrastructure {
     none = 0,

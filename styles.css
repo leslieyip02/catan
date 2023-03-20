@@ -6,6 +6,7 @@
 @import "./css/game.css";
 @import "./css/intersection.css";
 @import "./css/lobby.css";
+@import "./css/overlay.css";
 @import "./css/panel.css";
 @import "./css/road.css";
 @import "./css/tile.css";
@@ -22,7 +23,7 @@
     --tooltip-z: 95;
     --chat-z: 100;
     --panel-z: 105;
-    --deck-z: 110;
+    --overlay-z: 110;
 }
 
 * {

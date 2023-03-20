@@ -4,10 +4,10 @@ import { defaultTerrains, defaultRolls } from "./default";
 import Infrastructure, { defaultInfrastructure, InfrastructureQuota } from "./infrastructure";
 import Intersection, { IntersectionData, defaultIntersections } from "./intersection";
 import { randomInt } from "../random";
-import { ResourceRoll, mapTerrainToResource } from "./resource";
+import { ResourceRoll, mapTerrainToResource } from "../card/resource";
 import { RoadDirection } from "./road";
 import Tile, { Terrain } from "./tile";
-import { CardHand } from "../card";
+import { CardHand } from "../card/hand";
 
 interface Coordinate {
     x: number,
@@ -175,23 +175,29 @@ function Board(props: BoardProps) {
         return resourceRolls;
     }
 
+    const ShuffleButton = () => {
+        return (
+            <i className="board__button fa-solid fa-shuffle" onClick={shuffleBoard}>
+                <span className="tooltip">Shuffle</span>
+            </i>
+        );
+    }
+
+    const ResetButton = () => {
+        return (
+            <i className="board__button fa-solid fa-arrow-rotate-left" onClick={resetBoard}>
+                <span className="tooltip">Reset</span>
+            </i>
+        );
+    }
+
     return (
         <div className="board">
             {
                 !props.started && <div className="board__layer board__buttons">
                     <div>
-                        <i
-                            className="board__button fa-solid fa-shuffle"
-                            onClick={shuffleBoard}
-                        >
-                            <span className="tooltip">Shuffle</span>
-                        </i>
-                        <i
-                            className="board__button fa-solid fa-arrow-rotate-left"
-                            onClick={resetBoard}
-                        >
-                            <span className="tooltip">Reset</span>
-                        </i>
+                        <ShuffleButton />
+                        <ResetButton />
                     </div>
                 </div>
             }

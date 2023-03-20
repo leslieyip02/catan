@@ -4,7 +4,7 @@ import { BoardUpdate, Coordinate } from "./";
 import Infrastructure, { InfrastructureQuota, hasSufficientResources, deductResources } from "./infrastructure";
 import { IntersectionData } from "./intersection";
 import { defaultColors } from "./default";
-import { CardHand } from "../card";
+import { CardHand } from "../card/hand";
 
 enum RoadDirection {
     left = "left",

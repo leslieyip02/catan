@@ -1,15 +1,4 @@
 .deck {
-    display: none;
-    position: fixed;
-    top: 0%;
-    left: 0%;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: var(--deck-z);
-}
-
-.deck__content {
     margin: auto;
     margin-top: 10vh;
     width: 60vw;
@@ -18,6 +7,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.deck--drop {
     animation: drop 0.5s;
 }
 

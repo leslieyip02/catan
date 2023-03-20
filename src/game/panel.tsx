@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { CardHand, countCards } from "../card";
-import { defaultColors } from "../board/default";
-import Deck from './deck';
-import { PlayerData } from "../../user";
+import { CardHand, countCards } from "./card/hand";
+import { defaultColors } from "./board/default";
+import Deck from './card/deck';
+import { PlayerData } from "../user";
 
 interface PanelProps extends PlayerData {
     thisPlayer: boolean;
@@ -38,7 +38,7 @@ function Panel(props: PanelProps) {
     }, [props.cards])
 
     function toggleHide() {
-        let deck: HTMLDivElement = document.querySelector(".deck");
+        let deck: HTMLDivElement = document.querySelector(`#deck-${props.id}`);
         deck.style.display = open ? "none" : "block";
         setOpen(!open);
     }
@@ -59,9 +59,9 @@ function Panel(props: PanelProps) {
                     >
                         {cardCount}x<i className="panel__card-icon fa-solid fa-money-bill"></i>
                         {
-                            props.thisPlayer && <Deck
-                                cards={props.cards}
-                            />
+                            props.thisPlayer && <div id={`deck-${props.id}`} className="overlay">
+                                <Deck cards={props.cards} drop={true} />
+                            </div>
                         }
                     </div>
                     {
@@ -73,8 +73,7 @@ function Panel(props: PanelProps) {
                                     props.rollDice();
                                 }}
                             >
-                                <i className="fa-solid fa-dice"></i>
-                                Roll
+                                <i className="fa-solid fa-dice"></i>Roll
                             </button>
                             <button
                                 disabled={!props.playerTurn || props.setupTurn || props.canPlaceRobber || !rolled}
@@ -83,8 +82,7 @@ function Panel(props: PanelProps) {
                                     props.endTurn();
                                 }}
                             >
-                                <i className="fa-solid fa-square-check"></i>
-                                End Turn
+                                <i className="fa-solid fa-square-check"></i>End Turn
                             </button>
                         </div>
                     }
@@ -104,7 +102,7 @@ function Panel(props: PanelProps) {
                     <div className="panel__dice-text">{props.dice}</div>
                 </span>
             </div>
-        </div >
+        </div>
     );
 }
 
