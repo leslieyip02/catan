@@ -12,6 +12,11 @@
     animation: drop 0.5s;
 }
 
+.deck__stack {
+    color: #eeeeee;
+    transition: scale 0.2s;
+}
+
 @keyframes drop {
     0% {
         margin-top: -12rem;

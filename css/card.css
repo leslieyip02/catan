@@ -23,12 +23,11 @@
 
 .card__icon {
     font-size: var(--tile-width);
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     color: #eeeeee;
 }
 
 .card__label {
-    width: 80%;
     padding: 0.1rem;
     text-align: center;
     color: #eeeeee;
