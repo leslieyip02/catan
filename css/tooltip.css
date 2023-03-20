@@ -1,10 +1,11 @@
 .tooltip {
     visibility: hidden;
     position: absolute;
-    left: calc(50% / 1.1 - var(--tile-width) * 0.5 - 0.1rem);
     bottom: calc(100% + 0.25rem);
-    width: var(--tile-width);
-    padding: 0.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    padding: 0.2rem;
     font-size: 0.8rem;
     text-align: center;
     color: #eeeeee;

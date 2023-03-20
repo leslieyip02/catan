@@ -1,5 +1,5 @@
-import Resource from "./card/resource";
-import { CardHand } from "./card/hand";
+import Resource from "../card/resource";
+import { CardHand } from "../card/hand";
 
 interface TradeData {
     parties: [string, string];
@@ -7,9 +7,10 @@ interface TradeData {
 };
 
 interface TradeOffer {
-    from: string;
-    requesting: CardHand;
+    fromId: string;
+    fromName: string;
     offering: CardHand;
+    requesting: CardHand;
 }
 
 export { TradeData, TradeOffer };

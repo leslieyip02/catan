@@ -1,0 +1,52 @@
+.trade__form {
+    position: relative;
+}
+
+.trade__table {
+    display: none;
+    position: absolute;
+    top: 0%;
+    left: calc(100% + 1rem);
+    padding: 1rem;
+    border-radius: 0.3rem;
+    border-top-left-radius: 0rem;
+    color: #eeeeee;
+    background-color: #555555;
+    z-index: var(--overlay-z);
+}
+
+.trade__table::before {
+    content: "";
+    position: absolute;
+    top: 0%;
+    right: 100%;
+    border: 1rem solid transparent;
+    border-right-color: #555555;
+}
+
+.trade__form:hover > .trade__table {
+    display: block;
+    animation: fade 0.5s;
+}
+
+@keyframes fade {
+    0% {
+        opacity: 0%;
+    }
+
+    100% {
+        opacity: 100%;
+    }
+}
+
+.trade__input {
+    width: 3rem;
+}
+
+.trade__icon {
+    margin: auto;
+}
+
+td {
+    text-align: center;
+}

@@ -5,7 +5,9 @@
                 ".read": "auth != null &&
                     auth.uid == $user_id ||
                     root.child('users/' + auth.uid + '/roomId').val() == data.child('roomId').val()",
-                ".write": "auth != null && auth.uid == $user_id"
+                ".write": "auth != null &&
+                    auth.uid == $user_id ||
+                    root.child('users/' + auth.uid + '/roomId').val() == data.child('roomId').val()"
             }
         },
         "rooms": {

@@ -1,0 +1,37 @@
+.menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.menu__label {
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    z-index: var(--overlay-z);
+}
+
+.menu__transfer {
+    color: #eeeeee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu__icon {
+    font-size: 2rem;
+}
+
+.menu__buttons {
+    margin-left: 2rem;
+    margin-right: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu__button {
+    position: relative;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+}

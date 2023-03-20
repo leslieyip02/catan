@@ -17,6 +17,7 @@ const Deck = (props: DeckProps) => {
                             .filter(([card, quantity]) => quantity > 0)
                             .map(([card, quantity]) => {
                                 return <Card
+                                    key={card}
                                     iconClassNames={defaultIcons[card]}
                                     label={`${quantity} x ${card}`}
                                 />

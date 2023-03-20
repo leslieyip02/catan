@@ -1,16 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { ref, get, set, child, onValue, Database, DatabaseReference, off, DataSnapshot, increment, update } from "firebase/database";
+import { ref, get, set, child, onValue, Database, DatabaseReference, off, increment, update } from "firebase/database";
 import Board from "./board";
 import Chat from "./chat";
 import Panel from "./panel";
 import { UserData, PlayerData } from "../user";
 import { randomInt, diceIcons } from './random';
 import { ResourceRoll } from './card/resource';
-import { CardHand } from './card/hand';
+import { CardHand, countCards } from './card/hand';
 import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
 import { Coordinate } from './board';
 import { defaultInfrastructure, InfrastructureQuota } from './board/infrastructure';
+import { TradeOffer } from './trade';
+import Menu from './trade/domestic';
+import Resource from './card/resource';
+import Development from './card/development';
 
 interface GameProps {
     db: Database;
@@ -33,6 +37,8 @@ const Game = (props: GameProps) => {
     const [messages, setMessages] = useState<string[]>([]);
     const [robber, setRobber] = useState<Coordinate>();
     const [canPlaceRobber, setCanPlaceRobber] = useState<boolean>();
+    const [tradeOffer, setTradeOffer] = useState<TradeOffer>();
+    const [ongoingTrade, setOngoingTrade] = useState<boolean>(false);
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -83,6 +89,7 @@ const Game = (props: GameProps) => {
             }
         });
 
+        // listen for next turn
         onValue(child(props.roomRef, "turn"), (turn) => {
             // javascript moment™
             if (turn.val() || turn.val() === 0) {
@@ -90,6 +97,7 @@ const Game = (props: GameProps) => {
             }
         });
 
+        // listen for dice rolls
         onValue(child(props.roomRef, "roll"), (roll) => {
             let newRoll = roll.val();
 
@@ -139,6 +147,14 @@ const Game = (props: GameProps) => {
         onValue(child(props.roomRef, "robber"), (newRobber) => {
             if (newRobber.val()) {
                 setRobber(newRobber.val());
+            }
+        });
+
+        // listen for trade offers made to this user
+        onValue(child(props.userRef, "tradeOffer"), (newOffer) => {
+            if (newOffer.val()) {
+                setTradeOffer(newOffer.val());
+                setOngoingTrade(true);
             }
         });
     }, []);
@@ -294,6 +310,81 @@ const Game = (props: GameProps) => {
         );
     }
 
+    function offerTrade(targetId: string, offering: CardHand,
+        requesting: CardHand): Promise<string> {
+
+        // check that the offer is valid
+        if (countCards(offering) === 0 || countCards(requesting) === 0) {
+            return Promise.reject("Incomplete offer");
+        }
+
+        // check for cards
+        let card: `${Resource}` | `${Development}`;
+        for (card in offering) {
+            if (!cards.current[card] ||
+                cards.current[card] < offering[card]) {
+                return Promise.reject("Insufficient resources");;
+            }
+        }
+
+        let offer: TradeOffer = {
+            fromId: props.userRef.key,
+            fromName: props.userName,
+            offering: offering,
+            requesting: requesting,
+        };
+
+        let targetRef = ref(props.db, `users/${targetId}/tradeOffer`);
+        set(targetRef, offer);
+        onValue(targetRef, (offer) => {
+            if (!offer.val()) {
+                setOngoingTrade(false);
+                off(targetRef);
+            }
+        });
+
+        setOngoingTrade(true);
+        return Promise.resolve("Offer sent!");
+    }
+
+    function canAcceptOffer(offer: TradeOffer): boolean {
+        let card: `${Resource}` | `${Development}`;
+        for (card in offer.requesting) {
+            if (!cards.current[card] ||
+                cards.current[card] < offer.requesting[card]) {
+                return false
+            }
+        }
+
+        return true;
+    }
+
+    function processOffer(accept: boolean, offer?: TradeOffer) {
+        if (accept && offer) {
+            let transfer: Record<string, number> = {};
+
+            for (let [card, quantity] of Object.entries(offer.offering)) {
+                transfer[card] = (transfer[card] || 0) - quantity;
+            }
+
+            for (let [card, quantity] of Object.entries(offer.requesting)) {
+                transfer[card] = (transfer[card] || 0) + quantity;
+            }
+
+            let offerUpdate = Object.fromEntries(Object.entries(transfer)
+                .map(([card, quantity]) => [card, increment(quantity)]));
+            update(ref(props.db, `users/${offer.fromId}/cards`), offerUpdate);
+
+            let requestUpdate = Object.fromEntries(Object.entries(transfer)
+                .map(([card, quantity]) => [card, increment(quantity * -1)]));
+            update(child(props.userRef, "cards"), requestUpdate);
+        }
+
+        set(child(props.userRef, "tradeOffer"), null);
+        setTradeOffer(null);
+        setOngoingTrade(false);
+    }
+
     return (
         <div className="game">
             {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
@@ -304,23 +395,31 @@ const Game = (props: GameProps) => {
             <div className="panels">
                 {
                     players.map((playerData, index) => {
-                        let playerTurn = isPlayerTurn(index);
-
                         return <Panel
                             key={`panel-${playerData.id}`}
                             {...playerData}
                             thisPlayer={playerData.id === props.userRef.key}
-                            playerTurn={playerTurn}
+                            playerTurn={isPlayerTurn(index)}
                             setupTurn={setupTurn}
                             index={index}
-                            dice={playerTurn && dice}
+                            dice={dice}
                             canPlaceRobber={canPlaceRobber}
+                            trading={ongoingTrade}
                             rollDice={rollDice}
+                            offerTrade={offerTrade}
                             endTurn={endTurn}
                         />
                     })
                 }
             </div>
+
+            {
+                tradeOffer && <Menu
+                    offer={tradeOffer}
+                    canAccept={canAcceptOffer(tradeOffer)}
+                    processOffer={processOffer}
+                />
+            }
 
             <Board
                 {...props}

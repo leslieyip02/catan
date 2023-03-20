@@ -7,9 +7,9 @@ interface CardProps {
 
 const Card = (props: CardProps) => {
     return (
-        <div className="deck__card">
-            <i className={`${["deck__card-icon", ...props.iconClassNames].join(" ")}`}></i>
-            <div className="deck__card-label">{props.label}</div>
+        <div className="card">
+            <i className={`${["card__icon", ...props.iconClassNames].join(" ")}`}></i>
+            <div className="card__label">{props.label}</div>
         </div>
     );
 }

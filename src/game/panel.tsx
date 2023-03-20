@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import { CardHand, countCards } from "./card/hand";
 import { defaultColors } from "./board/default";
 import Deck from './card/deck';
 import { PlayerData } from "../user";
+import TradeForm from "./trade/form";
 
 interface PanelProps extends PlayerData {
     thisPlayer: boolean;
@@ -11,7 +12,10 @@ interface PanelProps extends PlayerData {
     index: number;
     dice?: string;
     canPlaceRobber: boolean;
+    trading: boolean;
     rollDice: () => void;
+    offerTrade: (targetId: string, offering: CardHand,
+        requesting: CardHand) => Promise<string>;
     endTurn: () => void;
 };
 
@@ -49,10 +53,10 @@ const Panel = (props: PanelProps) => {
             props.rollDice();
         }
 
-        let disabled = !props.playerTurn || props.setupTurn || rolled;
+        let canRoll = props.playerTurn && !props.setupTurn && !rolled;
 
         return (
-            <button disabled={disabled} onClick={rollDice}>
+            <button disabled={!canRoll} onClick={rollDice}>
                 <i className="fa-solid fa-dice"></i>Roll
             </button>
         );
@@ -64,10 +68,11 @@ const Panel = (props: PanelProps) => {
             props.endTurn();
         }
 
-        let disabled = !props.playerTurn || props.setupTurn || props.canPlaceRobber || !rolled;
+        let canEnd = props.playerTurn && !props.setupTurn &&
+            !props.canPlaceRobber && !props.trading && rolled;
 
         return (
-            <button disabled={disabled} onClick={endTurn}>
+            <button disabled={!canEnd} onClick={endTurn}>
                 <i className="fa-solid fa-square-check"></i>End Turn
             </button>
         );
@@ -94,12 +99,16 @@ const Panel = (props: PanelProps) => {
                             </div>
                         }
                     </div>
-                    {
-                        props.thisPlayer && <div className="panel__buttons">
-                            <RollDiceButton />
-                            <EndTurnButton />
-                        </div>
-                    }
+                    <div className="panel__buttons">
+                        {
+                            props.thisPlayer
+                                ? <>
+                                    <RollDiceButton />
+                                    <EndTurnButton />
+                                </>
+                                : <TradeForm {...props} />
+                        }
+                    </div>
                 </div>
             </div>
             <div
