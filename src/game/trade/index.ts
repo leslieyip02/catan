@@ -1,10 +1,5 @@
-import Resource from "../card/resource";
+import { CardType } from "../card";
 import { CardHand } from "../card/hand";
-
-interface TradeData {
-    parties: [string, string];
-    transfer: [CardHand, CardHand];
-};
 
 interface TradeOffer {
     fromId: string;
@@ -13,4 +8,16 @@ interface TradeOffer {
     requesting: CardHand;
 }
 
-export { TradeData, TradeOffer };
+function hasRequiredCards(cards: CardHand, required: CardHand): boolean {
+    let card: CardType;
+    for (card in required) {
+        if (!cards[card] ||
+            cards[card] < required[card]) {
+            return false
+        }
+    }
+
+    return true;
+}
+
+export { TradeOffer, hasRequiredCards };

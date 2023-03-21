@@ -1,4 +1,7 @@
 import Resource from "./resource";
+import Development from "./development";
+
+type CardType = `${Resource}` | `${Development}`;
 
 interface CardProps {
     iconClassNames: string[];
@@ -15,3 +18,4 @@ const Card = (props: CardProps) => {
 }
 
 export default Card;
+export { CardType };

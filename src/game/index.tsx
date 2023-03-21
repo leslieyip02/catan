@@ -11,10 +11,8 @@ import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
 import { Coordinate } from './board';
 import { defaultInfrastructure, InfrastructureQuota } from './board/infrastructure';
-import { TradeOffer } from './trade';
+import { hasRequiredCards, TradeOffer } from './trade';
 import Menu from './trade/domestic';
-import Resource from './card/resource';
-import Development from './card/development';
 
 interface GameProps {
     db: Database;
@@ -25,14 +23,19 @@ interface GameProps {
 };
 
 const Game = (props: GameProps) => {
+    // user data
     const [host, setHost] = useState<boolean>(false);
     const [players, setPlayers] = useState<PlayerData[]>([]);
     const [playerRefs, setPlayerRefs] = useState<DatabaseReference[]>([]);
     const [playerCount, setPlayerCount] = useState<number>();
+
+    // game turn data
     const [started, setStarted] = useState<boolean>(false);
     const [turn, setTurn] = useState<number>(0);
     const [playerTurn, setPlayerTurn] = useState<boolean>(false);
     const [setupTurn, setSetupTurn] = useState<boolean>(false);
+
+    // game activity data
     const [dice, setDice] = useState<string>();
     const [messages, setMessages] = useState<string[]>([]);
     const [robber, setRobber] = useState<Coordinate>();
@@ -289,6 +292,9 @@ const Game = (props: GameProps) => {
         if (canPlaceRobber &&
             !(robber.x === x && robber.y === y)) {
             set(child(props.roomRef, "robber"), { x: x, y: y });
+
+
+
             setCanPlaceRobber(false);
         }
     }
@@ -302,14 +308,6 @@ const Game = (props: GameProps) => {
         }
     }
 
-    const StartButton = () => {
-        return (
-            <button className="game__start" onClick={startGame}>
-                Start Game
-            </button>
-        );
-    }
-
     function offerTrade(targetId: string, offering: CardHand,
         requesting: CardHand): Promise<string> {
 
@@ -319,12 +317,8 @@ const Game = (props: GameProps) => {
         }
 
         // check for cards
-        let card: `${Resource}` | `${Development}`;
-        for (card in offering) {
-            if (!cards.current[card] ||
-                cards.current[card] < offering[card]) {
-                return Promise.reject("Insufficient resources");;
-            }
+        if (!hasRequiredCards(cards.current, offering)) {
+            return Promise.reject("Insufficient resources");;
         }
 
         let offer: TradeOffer = {
@@ -345,18 +339,6 @@ const Game = (props: GameProps) => {
 
         setOngoingTrade(true);
         return Promise.resolve("Offer sent!");
-    }
-
-    function canAcceptOffer(offer: TradeOffer): boolean {
-        let card: `${Resource}` | `${Development}`;
-        for (card in offer.requesting) {
-            if (!cards.current[card] ||
-                cards.current[card] < offer.requesting[card]) {
-                return false
-            }
-        }
-
-        return true;
     }
 
     function processOffer(accept: boolean, offer?: TradeOffer) {
@@ -385,6 +367,50 @@ const Game = (props: GameProps) => {
         setOngoingTrade(false);
     }
 
+    function panelProps(playerId: string, playerIndex: number) {
+        return {
+            thisPlayer: playerId === props.userRef.key,
+            playerTurn: isPlayerTurn(playerIndex),
+            setupTurn: setupTurn,
+            index: playerIndex,
+            dice: dice,
+            canPlaceRobber: canPlaceRobber,
+            ongoingTrade: ongoingTrade,
+            rollDice: rollDice,
+            offerTrade: offerTrade,
+            endTurn: endTurn,
+        };
+    }
+
+    function boardProps() {
+        return {
+            started: started,
+            playerTurn: playerTurn,
+            setupTurn: setupTurn,
+            cards: cards,
+            quota: quota,
+            robber: robber,
+            endTurn: endTurn,
+            placeRobber: canPlaceRobber ? placeRobber : null,
+        };
+    }
+
+    function menuProps() {
+        return {
+            offer: tradeOffer,
+            canAccept: hasRequiredCards(cards.current, tradeOffer.requesting),
+            processOffer: processOffer,
+        };
+    }
+
+    const StartButton = () => {
+        return (
+            <button className="game__start" onClick={startGame}>
+                Start Game
+            </button>
+        );
+    }
+
     return (
         <div className="game">
             {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
@@ -398,46 +424,19 @@ const Game = (props: GameProps) => {
                         return <Panel
                             key={`panel-${playerData.id}`}
                             {...playerData}
-                            thisPlayer={playerData.id === props.userRef.key}
-                            playerTurn={isPlayerTurn(index)}
-                            setupTurn={setupTurn}
-                            index={index}
-                            dice={dice}
-                            canPlaceRobber={canPlaceRobber}
-                            trading={ongoingTrade}
-                            rollDice={rollDice}
-                            offerTrade={offerTrade}
-                            endTurn={endTurn}
+                            {...panelProps(playerData.id, index)}
                         />
                     })
                 }
             </div>
 
             {
-                tradeOffer && <Menu
-                    offer={tradeOffer}
-                    canAccept={canAcceptOffer(tradeOffer)}
-                    processOffer={processOffer}
-                />
+                tradeOffer && <Menu {...menuProps()} />
             }
 
-            <Board
-                {...props}
-                started={started}
-                playerTurn={playerTurn}
-                setupTurn={setupTurn}
-                cards={cards}
-                quota={quota}
-                robber={robber}
-                endTurn={endTurn}
-                placeRobber={canPlaceRobber ? placeRobber : null}
-            />
+            <Board {...props} {...boardProps()} />
 
-            <Chat
-                {...props}
-                messages={messages}
-                setMessages={setMessages}
-            />
+            <Chat {...props} messages={messages} setMessages={setMessages} />
         </div>
     );
 }

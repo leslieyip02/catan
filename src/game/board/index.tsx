@@ -83,6 +83,62 @@ const Board = (props: BoardProps) => {
         });
     }, []);
 
+    function mapRollsToIntersections(x: number, y: number): ResourceRoll[] {
+        let resourceRolls: ResourceRoll[] = [];
+
+        // offset of adjacent tiles depends on whether intersections are
+        // 1. upper or lower half
+        // 2. forks or junctions
+        let offsets = y < (defaultIntersections.length / 2)
+            ? (y % 2 == 0 ? [[-1, -1], [0, -1], [0, 0]] : [[-1, -1], [-1, 0], [0, 0]])
+            : (y % 2 == 0 ? [[-1, -1], [0, -1], [-1, 0]] : [[0, -1], [-1, 0], [0, 0]]);
+
+        y = Math.floor(y / 2);
+        offsets.forEach((offset) => {
+            let ox = x + offset[0];
+            let oy = y + offset[1];
+
+            // check if in range
+            if (oy < 0 || oy >= defaultRolls.length ||
+                ox < 0 || ox >= defaultRolls[oy].length) {
+
+                return;
+            }
+
+            let terrain = terrains[oy][ox];
+            let roll = rolls[oy][ox];
+            if (terrain != Terrain.desert) {
+                resourceRolls.push({
+                    [roll]: mapTerrainToResource(terrain),
+                    tile: { x: ox, y: oy },
+                });
+            }
+        });
+
+        return resourceRolls;
+    }
+
+    function tileProps(terrain: Terrain, x: number, y: number) {
+        let robber = props.robber && x === props.robber.x && y === props.robber.y;
+        let placeRobber = props.placeRobber ? () => props.placeRobber(x, y) : null;
+
+        return {
+            terrain: terrain,
+            roll: rolls[y][x],
+            robber: robber,
+            placeRobber: placeRobber,
+        };
+    }
+
+    function intersectionProps(x: number, y: number) {
+        return {
+            x: x,
+            y: y,
+            resourceRolls: mapRollsToIntersections(x, y),
+            lookUp: (x: number, y: number) => intersections[y][x],
+        };
+    }
+
     function shuffleBoard() {
         let shuffledTerrains = terrains.map((row) => row.slice());
         let shuffledRolls = rolls.map((row) => row.slice());
@@ -140,41 +196,6 @@ const Board = (props: BoardProps) => {
         setRolls(defaultRolls);
     }
 
-    function mapRollsToIntersections(x: number, y: number): ResourceRoll[] {
-        let resourceRolls: ResourceRoll[] = [];
-
-        // offset of adjacent tiles depends on whether intersections are
-        // 1. upper or lower half
-        // 2. forks or junctions
-        let offsets = y < (defaultIntersections.length / 2)
-            ? (y % 2 == 0 ? [[-1, -1], [0, -1], [0, 0]] : [[-1, -1], [-1, 0], [0, 0]])
-            : (y % 2 == 0 ? [[-1, -1], [0, -1], [-1, 0]] : [[0, -1], [-1, 0], [0, 0]]);
-
-        y = Math.floor(y / 2);
-        offsets.forEach((offset) => {
-            let ox = x + offset[0];
-            let oy = y + offset[1];
-
-            // check if in range
-            if (oy < 0 || oy >= defaultRolls.length ||
-                ox < 0 || ox >= defaultRolls[oy].length) {
-
-                return;
-            }
-
-            let terrain = terrains[oy][ox];
-            let roll = rolls[oy][ox];
-            if (terrain != Terrain.desert) {
-                resourceRolls.push({
-                    [roll]: mapTerrainToResource(terrain),
-                    tile: { x: ox, y: oy },
-                });
-            }
-        });
-
-        return resourceRolls;
-    }
-
     const ShuffleButton = () => {
         return (
             <i className="board__button fa-solid fa-shuffle" onClick={shuffleBoard}>
@@ -207,13 +228,9 @@ const Board = (props: BoardProps) => {
                         return <div key={`tile-row-${y}`} className="board__row">
                             {
                                 row.map((terrain, x) => {
-                                    let robber = props.robber && x === props.robber.x && y === props.robber.y;
-                                    let placeRobber = props.placeRobber ? () => props.placeRobber(x, y) : null;
-                                    return <Tile key={`tile-(${x}, ${y})`}
-                                        terrain={terrain}
-                                        roll={rolls[y][x]}
-                                        robber={robber}
-                                        placeRobber={placeRobber}
+                                    return <Tile
+                                        key={`tile-(${x}, ${y})`}
+                                        {...tileProps(terrain, x, y)}
                                     />
                                 })
                             }
@@ -230,17 +247,8 @@ const Board = (props: BoardProps) => {
                                     return <Intersection
                                         key={`intersection-(${x}, ${y})`}
                                         {...intersectionData}
-                                        userRef={props.userRef}
-                                        roomRef={props.roomRef}
-                                        playerTurn={props.playerTurn}
-                                        setupTurn={props.setupTurn}
-                                        cards={props.cards}
-                                        quota={props.quota}
-                                        x={x}
-                                        y={y}
-                                        resourceRolls={mapRollsToIntersections(x, y)}
-                                        lookUp={(x: number, y: number) => intersections[y][x]}
-                                        endTurn={props.endTurn}
+                                        {...props}
+                                        {...intersectionProps(x, y)}
                                     />
                                 })
                             }

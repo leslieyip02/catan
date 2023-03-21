@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
-import { CardHand, countCards } from "./card/hand";
+import { CardHand, countCards, differentCards } from "./card/hand";
 import { defaultColors } from "./board/default";
 import Deck from './card/deck';
 import { PlayerData } from "../user";
 import TradeForm from "./trade/form";
+import { CardType } from "./card";
 
 interface PanelProps extends PlayerData {
     thisPlayer: boolean;
@@ -12,7 +13,7 @@ interface PanelProps extends PlayerData {
     index: number;
     dice?: string;
     canPlaceRobber: boolean;
-    trading: boolean;
+    ongoingTrade: boolean;
     rollDice: () => void;
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
@@ -24,22 +25,27 @@ const Panel = (props: PanelProps) => {
     const [rolled, setRolled] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false);
 
+    // keep track of whether cards have changed
+    const cards = useRef<CardHand>({});
+
     useEffect(() => {
-        setCardCount((currentCount) => {
-            let count = countCards(props.cards || {});
+        // check for card changes
+        if (differentCards(cards.current, props.cards)) {
+            cards.current = { ...props.cards };
+            activatePanel();
+        }
 
-            if (count > currentCount) {
-                let panel: HTMLDivElement = document.querySelector(`#panel-${props.id}`);
-                panel.style.width = "110%";
-
-                setTimeout(() => {
-                    panel.style.width = "100%";
-                }, 1200);
-            }
-
-            return count;
-        });
+        setCardCount(countCards(props.cards || {}));
     }, [props.cards])
+
+    function activatePanel() {
+        let panel: HTMLDivElement = document.querySelector(`#panel-${props.id}`);
+        panel.style.width = "110%";
+
+        setTimeout(() => {
+            panel.style.width = "100%";
+        }, 1200);
+    }
 
     function toggleHide() {
         let deck: HTMLDivElement = document.querySelector(`#deck-${props.id}`);
@@ -69,7 +75,7 @@ const Panel = (props: PanelProps) => {
         }
 
         let canEnd = props.playerTurn && !props.setupTurn &&
-            !props.canPlaceRobber && !props.trading && rolled;
+            !props.canPlaceRobber && !props.ongoingTrade && rolled;
 
         return (
             <button disabled={!canEnd} onClick={endTurn}>
@@ -130,3 +136,4 @@ const Panel = (props: PanelProps) => {
 }
 
 export default Panel;
+export { PanelProps };

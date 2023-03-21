@@ -11,7 +11,7 @@ interface TradeFormProps {
     index: number;
     dice?: string;
     canPlaceRobber: boolean;
-    trading: boolean;
+    ongoingTrade: boolean;
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
 };
@@ -58,7 +58,7 @@ const TradeForm = (props: TradeFormProps) => {
     function canTrade(): boolean {
         // dice is null if not rolled
         return props.dice && !props.playerTurn &&
-            !props.setupTurn && !props.canPlaceRobber && !props.trading;
+            !props.setupTurn && !props.canPlaceRobber && !props.ongoingTrade;
     }
 
     const TradeInput = ({ offer, resource }: { offer: boolean, resource: Resource }) => {
@@ -129,7 +129,7 @@ const TradeForm = (props: TradeFormProps) => {
             >
                 {tooltipText}
             </span>
-            <button className="trade__button" disabled={!canTrade()} type="submit">
+            <button className="trade__button" disabled={!canTrade() || props.ongoingTrade} type="submit">
                 <i className="fa-solid fa-arrow-right-arrow-left"></i>Trade
             </button>
 

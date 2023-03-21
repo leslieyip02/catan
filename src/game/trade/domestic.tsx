@@ -8,7 +8,7 @@ interface MenuProps {
 };
 
 // menu for trade offers received
-const Menu = (props: MenuProps) => {
+const TradeMenu = (props: MenuProps) => {
     const AcceptButton = () => {
         return (
             <button
@@ -59,4 +59,4 @@ const Menu = (props: MenuProps) => {
     );
 }
 
-export default Menu;
+export default TradeMenu;

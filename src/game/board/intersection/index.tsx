@@ -186,33 +186,48 @@ const Intersection = (props: IntersectionProps) => {
         }
     }
 
+    function roadProps() {
+        return {
+            userRef: props.userRef,
+            roomRef: props.roomRef,
+            playerTurn: props.playerTurn,
+            setupTurn: props.setupTurn,
+            cards: props.cards,
+            quota: props.quota,
+            lookUp: props.lookUp,
+            endTurn: props.endTurn,
+            broadcastUpdate: broadcastUpdate,
+        };
+    }
+
+    const IntersectionIcon = () => {
+        if (props.infrastructure === Infrastructure.settlement) {
+            return <i className="intersection__icon fa-solid fa-oil-well"></i>;
+        } else if (props.infrastructure === Infrastructure.city) {
+            return <i className="intersection__icon fa-solid fa-city"></i>;
+        }
+    }
+
     return (
         <div className={`intersection intersection--${props.type}`}>
             <div
                 className="intersection__point"
                 style={{ backgroundColor: props.color }}
+                onClick={() => {
+                    props.infrastructure === Infrastructure.none
+                        ? buildSettlement()
+                        : buildCity();
+                }}
                 {...dataAttributes()}
-                onClick={() => props.infrastructure == Infrastructure.none ? buildSettlement() : buildCity()}
             >
-                {
-                    props.infrastructure === Infrastructure.settlement && <i className="intersection__icon fa-solid fa-oil-well"></i> ||
-                    props.infrastructure === Infrastructure.city && <i className="intersection__icon fa-solid fa-city"></i>
-                }
+                <IntersectionIcon />
             </div>
             {
                 props.roads.map((roadData, i) => {
                     return <Road
                         key={`road-${i}`}
                         {...roadData}
-                        userRef={props.userRef}
-                        roomRef={props.roomRef}
-                        playerTurn={props.playerTurn}
-                        setupTurn={props.setupTurn}
-                        cards={props.cards}
-                        quota={props.quota}
-                        lookUp={props.lookUp}
-                        endTurn={props.endTurn}
-                        broadcastUpdate={broadcastUpdate}
+                        {...roadProps()}
                     />
                 })
             }

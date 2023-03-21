@@ -15,10 +15,12 @@ const Deck = (props: DeckProps) => {
     return (
         <div className={`deck${props.drop ? " deck--drop" : ""}`}>
             {
-                countCards(props.cards) > 0 && <button onClick={(e) => {
-                    e.stopPropagation();
-                    setStack((current) => !current);
-                }}>
+                countCards(props.cards) > 0 && <button
+                    className="deck__stack"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setStack((current) => !current);
+                    }}>
                     <i className="fa-solid fa-layer-group"></i>
                 </button>
             }

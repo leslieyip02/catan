@@ -5,7 +5,7 @@ let defaultIcons: Record<string, string[]> = {
     [Resource.grain]: ["fa-solid", "fa-wheat-awn"],
     [Resource.lumber]: ["fa-solid", "fa-tree"],
     [Resource.ore]: ["fa-solid", "fa-mountain"],
-    [Resource.wool]: ["fa-solid", "fa-worm"],
+    [Resource.wool]: ["fa-solid", "fa-cloud"],
 };
 
 export { defaultIcons };
