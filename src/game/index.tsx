@@ -6,13 +6,14 @@ import Panel from "./panel";
 import { UserData, PlayerData } from "../user";
 import { randomInt, diceIcons } from './random';
 import { ResourceRoll } from './card/resource';
-import { CardHand, countCards } from './card/hand';
+import { CardHand, countCards, countResourceCards } from './card/hand';
 import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
 import { Coordinate } from './board';
 import { defaultInfrastructure, InfrastructureQuota } from './board/infrastructure';
 import { hasRequiredCards, TradeOffer } from './trade';
-import Menu from './trade/domestic';
+import TradeMenu from './trade/domestic';
+import Deck from './card/deck';
 
 interface GameProps {
     db: Database;
@@ -40,8 +41,10 @@ const Game = (props: GameProps) => {
     const [messages, setMessages] = useState<string[]>([]);
     const [robber, setRobber] = useState<Coordinate>();
     const [canPlaceRobber, setCanPlaceRobber] = useState<boolean>();
+    const [needToDiscard, setNeedToDiscard] = useState<number>(0);
     const [tradeOffer, setTradeOffer] = useState<TradeOffer>();
     const [ongoingTrade, setOngoingTrade] = useState<boolean>(false);
+    const [ongoingSteal, setOngoingSteal] = useState<boolean>(false);
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -73,15 +76,15 @@ const Game = (props: GameProps) => {
                                 let newCards = cards.val();
                                 if (newCards) {
                                     setPlayers((currentPlayers) => {
-                                        let newPlayerStats = [...currentPlayers];
+                                        let newPlayerData = [...currentPlayers];
                                         for (let i = 0; i < currentPlayers.length; i++) {
-                                            if (newPlayerStats[i].id === userRef.key) {
-                                                newPlayerStats[i].cards = newCards;
+                                            if (newPlayerData[i].id === userRef.key) {
+                                                newPlayerData[i].cards = newCards;
                                                 break;
                                             }
                                         }
 
-                                        return newPlayerStats;
+                                        return newPlayerData;
                                     });
                                 }
                             });
@@ -168,9 +171,9 @@ const Game = (props: GameProps) => {
                 .map((playerRef) => get(playerRef));
             Promise.all(userPromises)
                 .then((users) => {
-                    let playerStats = users.map((user) => {
+                    let playerData: PlayerData[] = users.map((user) => {
                         let userData: UserData = user.val();
-                        let playerStat: PlayerData = {
+                        return {
                             id: userData.id,
                             index: userData.index,
                             name: userData.name,
@@ -178,14 +181,12 @@ const Game = (props: GameProps) => {
                             settlements: userData.settlements,
                             cities: userData.cities,
                             roads: userData.roads,
-                        }
-
-                        return playerStat;
+                        };
                     });
 
                     // make sure players are sorted by index order
-                    playerStats.sort((player1, player2) => player1.index - player2.index);
-                    setPlayers(playerStats);
+                    playerData.sort((player1, player2) => player1.index - player2.index);
+                    setPlayers(playerData);
                 });
         }
 
@@ -205,6 +206,14 @@ const Game = (props: GameProps) => {
             }
         }
     }, [players]);
+
+    useEffect(() => {
+        // use robber movement hook to trigger card discard menu
+        let count = countResourceCards(cards.current);
+        if (count > 7) {
+            setNeedToDiscard(Math.floor(count / 2));
+        }
+    }, [robber]);
 
     function startGame() {
         set(child(props.roomRef, "started"), true);
@@ -293,19 +302,61 @@ const Game = (props: GameProps) => {
             !(robber.x === x && robber.y === y)) {
             set(child(props.roomRef, "robber"), { x: x, y: y });
 
+            // let userPromises = playerRefs
+            //     .filter((playerRef) => playerRef.key !== props.userRef.key)
+            //     .map((playerRef) => get(playerRef));
+            // Promise.all(userPromises)
+            //     .then((users) => {
+            //         let canSteal = false;
+            //         users.forEach((user) => {
+            //             let userData: UserData = user.val();
 
+            //             for (let resourceRoll of userData.resourceRolls) {
+            //                 if (resourceRoll.tile.x === x &&
+            //                     resourceRoll.tile.y === y) {
+
+            //                     // update whether player can be robbed
+            //                     setPlayers((currentPlayers) => {
+            //                         let newPlayerData = [...currentPlayers];
+            //                         for (let i = 0; i < currentPlayers.length; i++) {
+            //                             if (newPlayerData[i].id === userData.id) {
+            //                                 newPlayerData[i].canStealFrom = true;
+            //                             }
+            //                         }
+
+            //                         return newPlayerData;
+            //                     });
+
+            //                     canSteal = true;
+            //                 }
+            //             }
+            //         });
+
+            //         setOngoingSteal(canSteal);
+            //     });
 
             setCanPlaceRobber(false);
         }
     }
 
-    function endTurn() {
-        if (isPlayerTurn()) {
-            // reset roll so the listener can detect if the same number gets rolled
-            set(child(props.roomRef, "roll"), 0);
-            set(child(props.roomRef, "turn"), turn + 1);
-            setTurn(turn + 1);
-        }
+    // return completion state
+    function discardCards(cards: CardHand) {
+        setNeedToDiscard((currentDiscard) => {
+            // only proceed if the correct number is discarded
+            if (countCards(cards) !== currentDiscard) {
+                return currentDiscard;
+            }
+
+            let discardUpdate = Object.fromEntries(Object.entries(cards)
+                .map(([card, quantity]) => [card, increment(quantity * -1)]));
+            update(child(props.userRef, "cards"), discardUpdate);
+
+            return 0;
+        });
+    }
+
+    function stealCard() {
+
     }
 
     function offerTrade(targetId: string, offering: CardHand,
@@ -367,6 +418,15 @@ const Game = (props: GameProps) => {
         setOngoingTrade(false);
     }
 
+    function endTurn() {
+        if (isPlayerTurn()) {
+            // reset roll so the listener can detect if the same number gets rolled
+            set(child(props.roomRef, "roll"), 0);
+            set(child(props.roomRef, "turn"), turn + 1);
+            setTurn(turn + 1);
+        }
+    }
+
     function panelProps(playerId: string, playerIndex: number) {
         return {
             thisPlayer: playerId === props.userRef.key,
@@ -376,6 +436,7 @@ const Game = (props: GameProps) => {
             dice: dice,
             canPlaceRobber: canPlaceRobber,
             ongoingTrade: ongoingTrade,
+            ongoingSteal: ongoingSteal,
             rollDice: rollDice,
             offerTrade: offerTrade,
             endTurn: endTurn,
@@ -411,6 +472,18 @@ const Game = (props: GameProps) => {
         );
     }
 
+    const DiscardMenu = () => {
+        return (
+            <div className="overlay menu" style={{ display: "flex" }}>
+                <Deck
+                    cards={cards.current}
+                    actionLabel={`Discard ${needToDiscard}`}
+                    action={discardCards}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="game">
             {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
@@ -431,7 +504,11 @@ const Game = (props: GameProps) => {
             </div>
 
             {
-                tradeOffer && <Menu {...menuProps()} />
+                tradeOffer && <TradeMenu {...menuProps()} />
+            }
+
+            {
+                needToDiscard > 0 && <DiscardMenu />
             }
 
             <Board {...props} {...boardProps()} />

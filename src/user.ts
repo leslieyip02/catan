@@ -9,6 +9,7 @@ interface PlayerData {
     settlements: number;
     cities: number;
     roads: number;
+    canStealFrom?: boolean;
 };
 
 interface UserData extends PlayerData {

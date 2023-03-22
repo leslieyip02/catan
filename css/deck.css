@@ -28,7 +28,7 @@
     overflow-x: scroll;
 }
 
-.deck__stack {
+.deck__button {
     position: absolute;
     right: 100%;
 }

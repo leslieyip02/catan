@@ -1,4 +1,5 @@
 import { CardType } from ".";
+import Resource from "./resource";
 
 type CardHand = {
     [key in CardType]?: number;
@@ -6,6 +7,13 @@ type CardHand = {
 
 function countCards(cards: CardHand): number {
     return Object.values(cards || {})
+        .reduce((c1, c2) => c1 + c2, 0);
+}
+
+function countResourceCards(cards: CardHand): number {
+    return Object.entries(cards || {})
+        .filter(([card, _]) => card in Resource)
+        .map(([_, quantity]) => quantity)
         .reduce((c1, c2) => c1 + c2, 0);
 }
 
@@ -30,4 +38,4 @@ function differentCards(original: CardHand, current: CardHand): boolean {
     return false;
 }
 
-export { CardHand, countCards, differentCards };
+export { CardHand, countCards, countResourceCards, differentCards };

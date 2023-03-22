@@ -14,6 +14,7 @@ interface PanelProps extends PlayerData {
     dice?: string;
     canPlaceRobber: boolean;
     ongoingTrade: boolean;
+    ongoingSteal: boolean;
     rollDice: () => void;
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
@@ -68,6 +69,14 @@ const Panel = (props: PanelProps) => {
         );
     }
 
+    const StealButton = () => {
+        return (
+            <button>
+                <i className="fa-solid fa-people-robbery"></i>
+            </button>
+        );
+    }
+
     const EndTurnButton = () => {
         function endTurn() {
             setRolled(false);
@@ -75,7 +84,8 @@ const Panel = (props: PanelProps) => {
         }
 
         let canEnd = props.playerTurn && !props.setupTurn &&
-            !props.canPlaceRobber && !props.ongoingTrade && rolled;
+            !props.canPlaceRobber && !props.ongoingTrade &&
+            !props.ongoingSteal && rolled;
 
         return (
             <button disabled={!canEnd} onClick={endTurn}>
@@ -96,7 +106,7 @@ const Panel = (props: PanelProps) => {
                 <div className="panel__row">
                     <div
                         className="panel__cards"
-                        onClick={props.thisPlayer ? toggleHide : () => { }}
+                        onClick={() => props.thisPlayer ? toggleHide() : {}}
                     >
                         {cardCount}x<i className="panel__card-icon fa-solid fa-money-bill"></i>
                         {
@@ -113,6 +123,9 @@ const Panel = (props: PanelProps) => {
                                     <EndTurnButton />
                                 </>
                                 : <TradeForm {...props} />
+                        }
+                        {
+                            props.canStealFrom && <StealButton />
                         }
                     </div>
                 </div>
