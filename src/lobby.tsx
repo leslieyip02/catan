@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ref, get, set, update, push, child, Database, DatabaseReference, onDisconnect } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
-import { UserData, defaultUserQuotas } from "./user";
+import { UserData, defaultUserQuotas } from "./game/user";
 import { defaultTerrains, defaultRolls } from "./game/board/default";
 
 interface LobbyProps {

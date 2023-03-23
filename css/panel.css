@@ -59,6 +59,11 @@
     rotate: 90deg;
 }
 
+.panel__buttons {
+    display: flex;
+    width: fit-content;
+}
+
 .panel__tab {
     position: relative;
     min-width: 2rem;

@@ -21,7 +21,21 @@
 }
 
 .card--selected {
-    border: 0.2rem solid #eeeeee;
+    border: 0.3rem solid #eeeeee;
+}
+
+.card--flip {
+    animation: flip 1.0s;
+}
+
+@keyframes flip {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    100% {
+        transform: rotateY(360deg);
+    }
 }
 
 .card__icon {

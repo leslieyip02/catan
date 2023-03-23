@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
-import { CardHand, countCards, differentCards } from "./card/hand";
-import { defaultColors } from "./board/default";
-import Deck from './card/deck';
-import { PlayerData } from "../user";
-import TradeForm from "./trade/form";
-import { CardType } from "./card";
+import { CardHand, countCards, differentCards } from "../card/hand";
+import { defaultColors } from "../board/default";
+import Deck from '../card/deck';
+import { PlayerData } from ".";
+import TradeForm from "../trade/form";
+import Inventory from './inventory';
+import Resource from "../card/resource";
 
 interface PanelProps extends PlayerData {
     thisPlayer: boolean;
@@ -13,18 +14,19 @@ interface PanelProps extends PlayerData {
     index: number;
     dice?: string;
     canPlaceRobber: boolean;
+    needToSteal: boolean;
+    allDiscarded: boolean;
     ongoingTrade: boolean;
-    ongoingSteal: boolean;
     rollDice: () => void;
+    stealCards: (targetId: string, cards: CardHand) => void;
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
     endTurn: () => void;
 };
 
-const Panel = (props: PanelProps) => {
+const UserPanel = (props: PanelProps) => {
     const [cardCount, setCardCount] = useState<number>(0);
     const [rolled, setRolled] = useState<boolean>(false);
-    const [open, setOpen] = useState<boolean>(false);
 
     // keep track of whether cards have changed
     const cards = useRef<CardHand>({});
@@ -48,12 +50,6 @@ const Panel = (props: PanelProps) => {
         }, 1200);
     }
 
-    function toggleHide() {
-        let deck: HTMLDivElement = document.querySelector(`#deck-${props.id}`);
-        deck.style.display = open ? "none" : "block";
-        setOpen(!open);
-    }
-
     const RollDiceButton = () => {
         function rollDice() {
             setRolled(true);
@@ -70,10 +66,39 @@ const Panel = (props: PanelProps) => {
     }
 
     const StealButton = () => {
+        const [hidden, setHidden] = useState<boolean>(true);
+
+        function toggleHide() {
+            let stealMenu: HTMLDivElement = document.querySelector(`#steal-menu-${props.id}`);
+            stealMenu.style.display = "flex";
+        }
+
+        function stealCard(cards: CardHand) {
+            setHidden(false);
+
+            setTimeout(() => {
+                props.stealCards(props.id, cards);
+            }, 2000);
+        }
+
         return (
-            <button>
+            <div onClick={toggleHide}>
                 <i className="fa-solid fa-people-robbery"></i>
-            </button>
+                <div
+                    id={`steal-menu-${props.id}`}
+                    className="overlay"
+                    style={{ display: "none" }}
+                >
+                    <Deck
+                        cards={props.cards}
+                        drop={true}
+                        hidden={hidden}
+                        selectQuota={1}
+                        actionLabel={"Steal 1"}
+                        action={stealCard}
+                    />
+                </div>
+            </div>
         );
     }
 
@@ -85,7 +110,7 @@ const Panel = (props: PanelProps) => {
 
         let canEnd = props.playerTurn && !props.setupTurn &&
             !props.canPlaceRobber && !props.ongoingTrade &&
-            !props.ongoingSteal && rolled;
+            !props.needToSteal && props.allDiscarded && rolled;
 
         return (
             <button disabled={!canEnd} onClick={endTurn}>
@@ -104,17 +129,7 @@ const Panel = (props: PanelProps) => {
                     }
                 </div>
                 <div className="panel__row">
-                    <div
-                        className="panel__cards"
-                        onClick={() => props.thisPlayer ? toggleHide() : {}}
-                    >
-                        {cardCount}x<i className="panel__card-icon fa-solid fa-money-bill"></i>
-                        {
-                            props.thisPlayer && <div id={`deck-${props.id}`} className="overlay">
-                                <Deck cards={props.cards} drop={true} />
-                            </div>
-                        }
-                    </div>
+                    <Inventory {...props} cardCount={cardCount} />
                     <div className="panel__buttons">
                         {
                             props.thisPlayer
@@ -125,7 +140,7 @@ const Panel = (props: PanelProps) => {
                                 : <TradeForm {...props} />
                         }
                         {
-                            props.canStealFrom && <StealButton />
+                            props.canStealFrom && props.needToSteal && <StealButton />
                         }
                     </div>
                 </div>
@@ -148,5 +163,5 @@ const Panel = (props: PanelProps) => {
     );
 }
 
-export default Panel;
+export default UserPanel;
 export { PanelProps };

@@ -3,11 +3,14 @@ import Card from ".";
 import { CardHand, countCards } from "./hand";
 import { defaultIcons } from "./default";
 import Resource from './resource';
+import { CardType } from '.';
 
 interface DeckProps {
     cards: CardHand;
     drop?: boolean;
     stack?: boolean;
+    hidden?: boolean;
+    selectQuota?: number;
     actionLabel?: string;
     action?: (cards: CardHand) => void;
 };
@@ -15,6 +18,11 @@ interface DeckProps {
 const Deck = (props: DeckProps) => {
     const [stack, setStack] = useState<boolean>(props.stack || false);
     const [selected, setSelected] = useState<CardHand>();
+    const [hidden, setHidden] = useState<boolean>();
+
+    useEffect(() => {
+        setHidden(props.hidden);
+    }, [props.hidden]);
 
     useEffect(() => {
         // stacking disallowed when an action needs to be taken
@@ -23,28 +31,28 @@ const Deck = (props: DeckProps) => {
         }
     }, [props.action]);
 
-    function stackedCardProps(card: Resource, quantity: number) {
-        return {
-            iconClassNames: defaultIcons[card],
-            label: `${quantity} x ${card}`,
-        };
-    }
-
-    function singleCardProps(card: Resource) {
-        function toggleSelect(selected: boolean) {
-            setSelected((currentSelected) => {
-                let newSelected = { ...currentSelected };
-                newSelected[card] = (newSelected[card] || 0) +
-                    (selected ? 1 : -1);
-                return newSelected;
-            });
+    function toggleSelect(card: Resource, select: boolean): boolean {
+        if (!props.action) {
+            return false;
         }
 
-        return {
-            iconClassNames: defaultIcons[card],
-            label: card,
-            toggleSelect: props.action ? toggleSelect : null,
-        };
+        if (props.selectQuota) {
+            let currentCount = countCards(selected);
+            let newCount = currentCount + (select ? 1 : -1);
+
+            if (newCount > props.selectQuota) {
+                return false;
+            }
+        }
+
+        setSelected((currentSelected) => {
+            let newSelected = { ...currentSelected };
+            newSelected[card] = (newSelected[card] || 0) +
+                (select ? 1 : -1);
+            return newSelected;
+        });
+
+        return true;
     }
 
     const StackButton = () => {
@@ -64,6 +72,10 @@ const Deck = (props: DeckProps) => {
 
     const ActionButton = () => {
         function takeAction() {
+            if (hidden) {
+                setHidden(false);
+            }
+
             props.action(selected);
         }
 
@@ -92,10 +104,11 @@ const Deck = (props: DeckProps) => {
                         ? Object.entries(props.cards)
                             .filter(([_, quantity]) => quantity > 0)
                             .map(([card, quantity]) => {
-                                return stack && !props.action
+                                return (stack && !props.action)
                                     ? <Card
                                         key={`stacked-${card}`}
-                                        {...stackedCardProps(card as Resource, quantity)}
+                                        card={card as CardType}
+                                        label={`${quantity} x ${card}`}
                                     />
                                     : <Fragment key={`cards-${card}`}>
                                         {
@@ -103,16 +116,17 @@ const Deck = (props: DeckProps) => {
                                                 .map((_, index) => {
                                                     return <Card
                                                         key={`${card}-${index}`}
-                                                        {...singleCardProps(card as Resource)}
+                                                        card={card as CardType}
+                                                        label={card}
+                                                        index={index}
+                                                        hidden={hidden}
+                                                        toggleSelect={toggleSelect}
                                                     />
                                                 })
                                         }
                                     </Fragment>
                             })
-                        : <Card
-                            iconClassNames={["fa-solid", "fa-face-frown"]}
-                            label={"No cards"}
-                        />
+                        : <Card card={"none"} label={"No cards"} />
                 }
             </div>
         </div>

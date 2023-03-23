@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { ref, get, set, child, onValue, Database, DatabaseReference, off, increment, update } from "firebase/database";
 import Board from "./board";
 import Chat from "./chat";
-import Panel from "./panel";
-import { UserData, PlayerData } from "../user";
-import { randomInt, diceIcons } from './random';
-import { ResourceRoll } from './card/resource';
+import Panel from "./user/panel";
+import { UserData, PlayerData } from "./user";
+import { randomInt } from './random';
+import Resource, { ResourceRoll } from './card/resource';
 import { CardHand, countCards, countResourceCards } from './card/hand';
 import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
@@ -14,6 +14,8 @@ import { defaultInfrastructure, InfrastructureQuota } from './board/infrastructu
 import { hasRequiredCards, TradeOffer } from './trade';
 import TradeMenu from './trade/domestic';
 import Deck from './card/deck';
+import Card from './card/index';
+import { CardType } from './card/';
 
 interface GameProps {
     db: Database;
@@ -41,10 +43,11 @@ const Game = (props: GameProps) => {
     const [messages, setMessages] = useState<string[]>([]);
     const [robber, setRobber] = useState<Coordinate>();
     const [canPlaceRobber, setCanPlaceRobber] = useState<boolean>();
+    const [allDiscarded, setAllDiscarded] = useState<boolean>(true);
     const [needToDiscard, setNeedToDiscard] = useState<number>(0);
+    const [needToSteal, setNeedToSteal] = useState<boolean>();
     const [tradeOffer, setTradeOffer] = useState<TradeOffer>();
     const [ongoingTrade, setOngoingTrade] = useState<boolean>(false);
-    const [ongoingSteal, setOngoingSteal] = useState<boolean>(false);
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -210,9 +213,10 @@ const Game = (props: GameProps) => {
     useEffect(() => {
         // use robber movement hook to trigger card discard menu
         let count = countResourceCards(cards.current);
-        if (count > 7) {
-            setNeedToDiscard(Math.floor(count / 2));
-        }
+        let discard = count > 7 ? Math.floor(count / 2) : 0;
+
+        setNeedToDiscard(discard);
+        update(child(props.roomRef, "discarded"), { [props.userIndex]: discard === 0 });
     }, [robber]);
 
     function startGame() {
@@ -269,11 +273,12 @@ const Game = (props: GameProps) => {
                         set(child(props.roomRef, "roll"), roll);
 
                         // update dice
-                        let icons = diceIcons[r1 - 1] + diceIcons[r2 - 1];
-                        set(child(props.roomRef, "dice"), icons);
+                        let diceIcons = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+                        let resultIcons = diceIcons[r1 - 1] + diceIcons[r2 - 1];
+                        set(child(props.roomRef, "dice"), resultIcons);
 
                         // update chat
-                        let message = `${props.userName} rolled a ${roll} ${icons}`;
+                        let message = `${props.userName} rolled a ${roll} ${resultIcons}`;
                         broadcastMessage(props.roomRef, messages, message);
 
                         // move robber
@@ -302,44 +307,60 @@ const Game = (props: GameProps) => {
             !(robber.x === x && robber.y === y)) {
             set(child(props.roomRef, "robber"), { x: x, y: y });
 
-            // let userPromises = playerRefs
-            //     .filter((playerRef) => playerRef.key !== props.userRef.key)
-            //     .map((playerRef) => get(playerRef));
-            // Promise.all(userPromises)
-            //     .then((users) => {
-            //         let canSteal = false;
-            //         users.forEach((user) => {
-            //             let userData: UserData = user.val();
+            // game cannot continue until all players have discarded
+            setAllDiscarded(false);
 
-            //             for (let resourceRoll of userData.resourceRolls) {
-            //                 if (resourceRoll.tile.x === x &&
-            //                     resourceRoll.tile.y === y) {
+            let discardRef = child(props.roomRef, "discarded");
+            set(discardRef, Array(playerCount).fill(false));
+            onValue(discardRef, (currentStatus) => {
+                let discardedStatus: boolean[] = currentStatus.val();
+                if (discardedStatus.every((discarded) => discarded)) {
+                    // once all cards discarded, check if any players can be stolen from
+                    let userPromises = playerRefs
+                        .filter((playerRef) => playerRef.key !== props.userRef.key)
+                        .map((playerRef) => get(playerRef));
+                    Promise.all(userPromises)
+                        .then((users) => {
+                            users.forEach((user) => {
+                                let userData: UserData = user.val();
 
-            //                     // update whether player can be robbed
-            //                     setPlayers((currentPlayers) => {
-            //                         let newPlayerData = [...currentPlayers];
-            //                         for (let i = 0; i < currentPlayers.length; i++) {
-            //                             if (newPlayerData[i].id === userData.id) {
-            //                                 newPlayerData[i].canStealFrom = true;
-            //                             }
-            //                         }
+                                // cannot steal if no cards
+                                let canSteal = false;
+                                if (countCards(userData.cards)) {
+                                    for (let resourceRoll of userData.resourceRolls) {
+                                        if (resourceRoll.tile.x === x &&
+                                            resourceRoll.tile.y === y) {
 
-            //                         return newPlayerData;
-            //                     });
+                                            // update whether player can be robbed
+                                            setPlayers((currentPlayers) => {
+                                                let newPlayerData = [...currentPlayers];
+                                                for (let i = 0; i < currentPlayers.length; i++) {
+                                                    if (newPlayerData[i].id === userData.id) {
+                                                        newPlayerData[i].canStealFrom = true;
+                                                    }
+                                                }
 
-            //                     canSteal = true;
-            //                 }
-            //             }
-            //         });
+                                                return newPlayerData;
+                                            });
 
-            //         setOngoingSteal(canSteal);
-            //     });
+                                            canSteal = true;
+                                        }
+                                    }
+                                }
+
+                                setNeedToSteal(canSteal);
+                                setAllDiscarded(true);
+                            });
+                        });
+
+                    off(discardRef);
+                }
+            });
 
             setCanPlaceRobber(false);
         }
     }
 
-    // return completion state
     function discardCards(cards: CardHand) {
         setNeedToDiscard((currentDiscard) => {
             // only proceed if the correct number is discarded
@@ -350,13 +371,19 @@ const Game = (props: GameProps) => {
             let discardUpdate = Object.fromEntries(Object.entries(cards)
                 .map(([card, quantity]) => [card, increment(quantity * -1)]));
             update(child(props.userRef, "cards"), discardUpdate);
+            update(child(props.roomRef, "discarded"), { [props.userIndex]: true });
 
             return 0;
         });
     }
 
-    function stealCard() {
-
+    function stealCards(targetId: string, cards: CardHand) {
+        let targetRef = ref(props.db, `users/${targetId}/cards`);
+        update(targetRef, Object.fromEntries(Object.entries(cards)
+            .map(([card, quantity]) => [card, increment(quantity * -1)])));
+        update(child(props.userRef, "cards"), Object.fromEntries(Object.entries(cards)
+            .map(([card, quantity]) => [card, increment(quantity)])));
+        setNeedToSteal(false);
     }
 
     function offerTrade(targetId: string, offering: CardHand,
@@ -435,9 +462,11 @@ const Game = (props: GameProps) => {
             index: playerIndex,
             dice: dice,
             canPlaceRobber: canPlaceRobber,
+            needToSteal: needToSteal,
+            allDiscarded: allDiscarded,
             ongoingTrade: ongoingTrade,
-            ongoingSteal: ongoingSteal,
             rollDice: rollDice,
+            stealCards: stealCards,
             offerTrade: offerTrade,
             endTurn: endTurn,
         };
@@ -456,7 +485,7 @@ const Game = (props: GameProps) => {
         };
     }
 
-    function menuProps() {
+    function tradeMenuProps() {
         return {
             offer: tradeOffer,
             canAccept: hasRequiredCards(cards.current, tradeOffer.requesting),
@@ -477,6 +506,8 @@ const Game = (props: GameProps) => {
             <div className="overlay menu" style={{ display: "flex" }}>
                 <Deck
                     cards={cards.current}
+                    drop={true}
+                    selectQuota={needToDiscard}
                     actionLabel={`Discard ${needToDiscard}`}
                     action={discardCards}
                 />
@@ -504,7 +535,7 @@ const Game = (props: GameProps) => {
             </div>
 
             {
-                tradeOffer && <TradeMenu {...menuProps()} />
+                tradeOffer && <TradeMenu {...tradeMenuProps()} />
             }
 
             {
