@@ -349,10 +349,10 @@ const Game = (props: GameProps) => {
                                 }
 
                                 setNeedToSteal(canSteal);
-                                setAllDiscarded(true);
                             });
                         });
 
+                    setAllDiscarded(true);
                     off(discardRef);
                 }
             });

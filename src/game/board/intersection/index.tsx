@@ -1,4 +1,4 @@
-import { get, set, child, DatabaseReference } from "firebase/database";
+import { get, set, child, DatabaseReference, increment, update } from 'firebase/database';
 import { BoardUpdate, Coordinate } from "..";
 import { defaultColors } from "../default";
 import Infrastructure, { InfrastructureQuota, hasSufficientResources, deductResources } from "../infrastructure";
@@ -120,6 +120,15 @@ const Intersection = (props: IntersectionProps) => {
 
                                 // end turn automatically for setup turns
                                 if (props.setupTurn) {
+                                    // starter resources given by 2nd settlement
+                                    if (props.quota.current[Infrastructure.settlement] === 0) {
+                                        for (let resourceRoll of props.resourceRolls) {
+                                            let roll = Number(Object.keys(resourceRoll)
+                                                .filter((key) => key !== "tile")[0]);
+                                            update(child(props.userRef, "cards"), { [resourceRoll[roll]]: increment(1) });
+                                        }
+                                    }
+
                                     props.endTurn();
                                 }
                             }
