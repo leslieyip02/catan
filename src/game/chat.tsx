@@ -35,7 +35,7 @@ const Chat = (props: ChatProps) => {
 
             // scroll to bottom
             let chatLog = document.querySelector(".chat__log");
-            chatLog.scrollTo(0, chatLog.scrollHeight);
+            chatLog.scrollTop = chatLog.scrollHeight;
         });
     }, []);
 
