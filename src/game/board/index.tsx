@@ -24,6 +24,7 @@ interface BoardProps {
     cards: React.MutableRefObject<CardHand>;
     quota: React.MutableRefObject<InfrastructureQuota>;
     robber?: Coordinate;
+    rolled: boolean;
     endTurn: () => void;
     placeRobber?: (x: number, y: number) => void;
 };

@@ -27,6 +27,7 @@ interface RoadProps extends RoadData {
     roomRef: DatabaseReference;
     playerTurn: boolean;
     setupTurn: boolean;
+    rolled: boolean;
     cards: React.MutableRefObject<CardHand>;
     quota: React.MutableRefObject<InfrastructureQuota>;
     lookUp: (x: number, y: number) => IntersectionData;
@@ -36,7 +37,8 @@ interface RoadProps extends RoadData {
 
 const Road = (props: RoadProps) => {
     function buildRoad() {
-        if (props.playerTurn && !props.owner) {
+        if (props.playerTurn && !props.owner &&
+            (props.setupTurn || props.rolled)) {
             // roads must be connected to at least 1 road / settlement / city            
             let conenctedByIntersection = false;
             let connectedByRoad = false;

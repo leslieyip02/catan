@@ -480,6 +480,7 @@ const Game = (props: GameProps) => {
             cards: cards,
             quota: quota,
             robber: robber,
+            rolled: dice !== null,
             endTurn: endTurn,
             placeRobber: canPlaceRobber ? placeRobber : null,
         };

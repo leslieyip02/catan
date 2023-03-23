@@ -35,6 +35,7 @@ interface IntersectionProps extends IntersectionData {
     x: number;
     y: number;
     resourceRolls: ResourceRoll[];
+    rolled: boolean;
     lookUp: (x: number, y: number) => IntersectionData;
     endTurn: () => void;
 };
@@ -49,6 +50,7 @@ const Intersection = (props: IntersectionProps) => {
 
     function buildSettlement() {
         if (props.playerTurn &&
+            (props.rolled || props.setupTurn) &&
             props.infrastructure === Infrastructure.none) {
             // intersections must be connected to at least 1 road
             let connectedByRoad = false;
@@ -140,7 +142,7 @@ const Intersection = (props: IntersectionProps) => {
 
     function buildCity() {
         // does nothing once city has been built
-        if (props.playerTurn && !props.setupTurn &&
+        if (props.playerTurn && props.rolled &&
             props.infrastructure === Infrastructure.settlement &&
             props.owner === props.userRef.key) {
 
@@ -203,6 +205,7 @@ const Intersection = (props: IntersectionProps) => {
             setupTurn: props.setupTurn,
             cards: props.cards,
             quota: props.quota,
+            rolled: props.rolled,
             lookUp: props.lookUp,
             endTurn: props.endTurn,
             broadcastUpdate: broadcastUpdate,
