@@ -35,7 +35,6 @@
     width: 75%;
     max-width: 75%;
     font-size: 2rem;
-    overflow-x: scroll;
     margin-right: 1rem;
 }
 
@@ -62,6 +61,13 @@
 .panel__buttons {
     display: flex;
     width: fit-content;
+}
+
+.panel__button {
+    min-width: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .panel__tab {

@@ -15,8 +15,8 @@ enum HarborDirection {
 };
 
 interface HarborData {
-    direction: HarborDirection;
-    access: Coordinate[];
+    direction?: HarborDirection;
+    access?: Coordinate[];
     resource: Resource;
 };
 
@@ -30,7 +30,7 @@ interface HarborProps extends HarborData {
     needToSteal: boolean;
     allDiscarded: boolean;
     ongoingTrade: boolean;
-    lookUp: (x: number, y: number) => IntersectionData;
+    lookUp?: (x: number, y: number) => IntersectionData;
 };
 
 interface ResourceDropDownProps {
@@ -42,7 +42,8 @@ const Harbor = (props: HarborProps) => {
     const [offering, setOffering] = useState<Resource>(props.resource);
     const [requesting, setRequesting] = useState<Resource>(Resource.none);
 
-    const ratio = props.resource !== Resource.none ? 2 : 3;
+    const ratio = !props.direction ? 4 :
+        props.resource !== Resource.none ? 2 : 3;
 
     function setLeftOffset() {
         switch (props.direction) {

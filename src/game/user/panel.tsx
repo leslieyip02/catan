@@ -6,8 +6,11 @@ import { PlayerData } from ".";
 import TradeForm from "../trade/form";
 import Inventory from './inventory';
 import Resource from "../card/resource";
+import Harbor from "../board/harbor";
+import { DatabaseReference } from "firebase/database";
 
 interface PanelProps extends PlayerData {
+    userRef: DatabaseReference;
     thisPlayer: boolean;
     playerTurn: boolean;
     setupTurn: boolean;
@@ -59,7 +62,11 @@ const UserPanel = (props: PanelProps) => {
         let canRoll = props.playerTurn && !props.setupTurn && !rolled;
 
         return (
-            <button disabled={!canRoll} onClick={rollDice}>
+            <button
+                className="panel__button"
+                disabled={!canRoll}
+                onClick={rollDice}
+            >
                 <i className="fa-solid fa-dice"></i>Roll
             </button>
         );
@@ -82,7 +89,10 @@ const UserPanel = (props: PanelProps) => {
         }
 
         return (
-            <div onClick={toggleHide}>
+            <div
+                className="panel__button"
+                onClick={toggleHide}
+            >
                 <i className="fa-solid fa-people-robbery"></i>
                 <div
                     id={`steal-menu-${props.id}`}
@@ -102,6 +112,34 @@ const UserPanel = (props: PanelProps) => {
         );
     }
 
+    const MaritimeTradeButton = () => {
+        let canTrade = props.playerTurn && rolled &&
+            !props.setupTurn && !props.canPlaceRobber &&
+            !props.needToSteal && !props.ongoingTrade;
+
+        // basic 4 : 1 trade
+        return (
+            <button
+                className="panel__button"
+                disabled={!canTrade}
+            >
+                <Harbor
+                    userRef={props.userRef}
+                    playerTurn={props.playerTurn}
+                    setupTurn={props.setupTurn}
+                    cards={cards}
+                    rolled={rolled}
+                    canPlaceRobber={props.canPlaceRobber}
+                    needToSteal={props.needToSteal}
+                    allDiscarded={props.allDiscarded}
+                    ongoingTrade={props.ongoingTrade}
+                    access={[]}
+                    resource={Resource.none}
+                />
+            </button>
+        );
+    }
+
     const EndTurnButton = () => {
         function endTurn() {
             setRolled(false);
@@ -113,7 +151,11 @@ const UserPanel = (props: PanelProps) => {
             !props.needToSteal && props.allDiscarded && rolled;
 
         return (
-            <button disabled={!canEnd} onClick={endTurn}>
+            <button
+                className="panel__button"
+                disabled={!canEnd}
+                onClick={endTurn}
+            >
                 <i className="fa-solid fa-square-check"></i>End Turn
             </button>
         );
@@ -136,6 +178,7 @@ const UserPanel = (props: PanelProps) => {
                                 ? <>
                                     <RollDiceButton />
                                     <EndTurnButton />
+                                    <MaritimeTradeButton />
                                 </>
                                 : <TradeForm {...props} />
                         }

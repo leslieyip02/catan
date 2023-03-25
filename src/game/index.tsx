@@ -438,6 +438,7 @@ const Game = (props: GameProps) => {
 
     function panelProps(playerId: string, playerIndex: number) {
         return {
+            userRef: props.userRef,
             thisPlayer: playerId === props.userRef.key,
             playerTurn: isPlayerTurn(playerIndex),
             setupTurn: setupTurn,
