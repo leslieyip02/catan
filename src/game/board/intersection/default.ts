@@ -2,9 +2,59 @@ import { IntersectionType, IntersectionData } from "./";
 import { Coordinate } from "../";
 import Infrastructure from "../infrastructure";
 import { RoadDirection, RoadData } from "../road";
+import { HarborDirection, HarborData } from "../harbor";
+import Resource from "../../card/resource";
 
 let intersectionCounts = [3, 4, 4, 5, 5, 6, 6, 5, 5, 4, 4, 3];
 let halfHeight = intersectionCounts.length / 2;
+
+let defaultHarbours: HarborData[] = [
+    {
+        direction: HarborDirection.above,
+        access: [{ x: 0, y: 0 }, { x: 0, y: 1 }],
+        resource: Resource.none,
+    },
+    {
+        direction: HarborDirection.above,
+        access: [{ x: 1, y: 0 }, { x: 2, y: 1 }],
+        resource: Resource.grain,
+    },
+    {
+        direction: HarborDirection.above,
+        access: [{ x: 3, y: 2 }, { x: 4, y: 3 }],
+        resource: Resource.ore,
+    },
+    {
+        direction: HarborDirection.left,
+        access: [{ x: 0, y: 3 }, { x: 0, y: 4 }],
+        resource: Resource.lumber,
+    },
+    {
+        direction: HarborDirection.right,
+        access: [{ x: 5, y: 5 }, { x: 5, y: 6 }],
+        resource: Resource.none,
+    },
+    {
+        direction: HarborDirection.left,
+        access: [{ x: 0, y: 7 }, { x: 0, y: 8 }],
+        resource: Resource.brick,
+    },
+    {
+        direction: HarborDirection.below,
+        access: [{ x: 3, y: 9 }, { x: 4, y: 8 }],
+        resource: Resource.wool,
+    },
+    {
+        direction: HarborDirection.below,
+        access: [{ x: 0, y: 11 }, { x: 0, y: 10 }],
+        resource: Resource.none,
+    },
+    {
+        direction: HarborDirection.below,
+        access: [{ x: 1, y: 11 }, { x: 2, y: 10 }],
+        resource: Resource.none,
+    },
+];
 
 function intersectionType(x: number, y: number): IntersectionType {
     // bottom level intersections have no roads
@@ -103,6 +153,17 @@ function roadDestination(x: number, y: number, direction: RoadDirection) {
     return destination;
 }
 
+function intersectionHarbor(x: number, y: number) {
+    for (let defaultHarbor of defaultHarbours) {
+        if (defaultHarbor.access[0].x === x &&
+            defaultHarbor.access[0].y === y) {
+            return defaultHarbor;
+        }
+    }
+
+    return null;
+}
+
 let defaultIntersections: IntersectionData[][] = intersectionCounts.map((n, y) => {
     return Array(n).fill(0).map((_, x) => {
         let type = intersectionType(x, y);
@@ -115,10 +176,13 @@ let defaultIntersections: IntersectionData[][] = intersectionCounts.map((n, y) =
             };
         });
 
+        let harbor = intersectionHarbor(x, y);
+
         return {
             type: type,
             adjacents: adjacents,
             roads: roads,
+            harbor: harbor,
             infrastructure: Infrastructure.none,
         };
     });

@@ -1,15 +1,16 @@
 .board {
     position: relative;
-    width: 100vh;
+    width: 60vw;
     height: 100vh;
-    padding-left: calc(var(--tile-width) / 2);
-    padding-right: calc(var(--tile-width) / 2);
-    overflow-x: scroll;
+    padding-left: calc(var(--tile-width) * 0.75);
+    padding-right: calc(var(--tile-width) * 0.75);
+    overflow: scroll;
+    background-color: #b0e2ff;
 }
 
 .board__layer {
     position: absolute;
-    top: var(--road-width);
+    top: calc(var(--tile-width));
     left: 0%;
     width: 100%;
     height: calc(100% - var(--road-width));

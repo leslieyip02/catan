@@ -43,6 +43,11 @@
     background-color: #555555;
 }
 
+.intersection__point--hovered {
+    scale: 2;
+    background-color: #555555;
+}
+
 .intersection__point--rolled {
     scale: 2;
     border: 2px solid #555555;

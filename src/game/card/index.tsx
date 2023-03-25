@@ -39,10 +39,18 @@ const Card = (props: CardProps) => {
         }
     }
 
-    function icons() {
-        return ["card__icon", ...(hidden
-            ? defaultIcons["unknown"]
-            : defaultIcons[props.card])]
+    const CardContent = () => {
+        return (
+            hidden
+                ? <>
+                    <i className={`card__icon ${defaultIcons["unknown"].join(" ")}`}></i>
+                    <div className="card__label">"???"</div>
+                </>
+                : <>
+                    <i className={`card__icon ${defaultIcons[props.card].join(" ")}`}></i>
+                    <div className="card__label">{props.label}</div>
+                </>
+        );
     }
 
     return (
@@ -51,8 +59,7 @@ const Card = (props: CardProps) => {
             className={`card${selected ? " card--selected" : ""}`}
             onClick={(e) => props.toggleSelect ? selectCard(e) : {}}
         >
-            <i className={`${icons().join(" ")}`}></i>
-            <div className="card__label">{hidden ? "???" : props.label}</div>
+            <CardContent />
         </div>
     );
 }

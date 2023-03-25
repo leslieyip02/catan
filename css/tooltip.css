@@ -26,3 +26,16 @@
 *:hover > .tooltip {
     visibility: visible;
 }
+
+.tooltip--big {
+    bottom: calc(100% + 0.25rem);
+}
+
+.tooltip--big::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: calc(50% - 0.5rem);
+    border: 0.5rem solid transparent;
+    border-top-color: #555555;
+}

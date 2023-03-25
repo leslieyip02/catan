@@ -5,6 +5,8 @@ import Infrastructure, { InfrastructureQuota, hasSufficientResources, deductReso
 import { ResourceRoll } from "../../card/resource";
 import Road, { RoadData } from "../road";
 import { CardHand } from "../../card/hand";
+import Harbor, { HarborData } from '../harbor';
+import { useRef } from 'react';
 
 enum IntersectionType {
     fork = "fork",
@@ -19,6 +21,7 @@ interface IntersectionData {
     type: IntersectionType;
     adjacents: Coordinate[];
     roads: RoadData[];
+    harbor?: HarborData;
     infrastructure: Infrastructure;
     owner?: string;
     color?: string;
@@ -36,6 +39,10 @@ interface IntersectionProps extends IntersectionData {
     y: number;
     resourceRolls: ResourceRoll[];
     rolled: boolean;
+    canPlaceRobber: boolean;
+    needToSteal: boolean;
+    allDiscarded: boolean;
+    ongoingTrade: boolean;
     lookUp: (x: number, y: number) => IntersectionData;
     endTurn: () => void;
 };
@@ -212,6 +219,22 @@ const Intersection = (props: IntersectionProps) => {
         };
     }
 
+    function harborProps() {
+        return {
+            ...props.harbor,
+            userRef: props.userRef,
+            playerTurn: props.playerTurn,
+            setupTurn: props.setupTurn,
+            cards: props.cards,
+            rolled: props.rolled,
+            canPlaceRobber: props.canPlaceRobber,
+            needToSteal: props.needToSteal,
+            allDiscarded: props.allDiscarded,
+            ongoingTrade: props.ongoingTrade,
+            lookUp: props.lookUp,
+        };
+    }
+
     const IntersectionIcon = () => {
         if (props.infrastructure === Infrastructure.settlement) {
             return <i className="intersection__icon fa-solid fa-oil-well"></i>;
@@ -223,6 +246,7 @@ const Intersection = (props: IntersectionProps) => {
     return (
         <div className={`intersection intersection--${props.type}`}>
             <div
+                id={`intersection-point-(${props.x}, ${props.y})`}
                 className="intersection__point"
                 style={{ backgroundColor: props.color }}
                 onClick={() => {
@@ -242,6 +266,9 @@ const Intersection = (props: IntersectionProps) => {
                         {...roadProps()}
                     />
                 })
+            }
+            {
+                props.harbor && <Harbor {...harborProps()} />
             }
         </div>
     );

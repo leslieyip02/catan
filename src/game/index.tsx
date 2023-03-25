@@ -11,7 +11,7 @@ import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
 import { Coordinate } from './board';
 import { defaultInfrastructure, InfrastructureQuota } from './board/infrastructure';
-import { hasRequiredCards, TradeOffer } from './trade';
+import { tradeResources, hasRequiredCards, TradeOffer } from './trade';
 import TradeMenu from './trade/domestic';
 import Deck from './card/deck';
 import Card from './card/index';
@@ -378,11 +378,8 @@ const Game = (props: GameProps) => {
     }
 
     function stealCards(targetId: string, cards: CardHand) {
-        let targetRef = ref(props.db, `users/${targetId}/cards`);
-        update(targetRef, Object.fromEntries(Object.entries(cards)
-            .map(([card, quantity]) => [card, increment(quantity * -1)])));
-        update(child(props.userRef, "cards"), Object.fromEntries(Object.entries(cards)
-            .map(([card, quantity]) => [card, increment(quantity)])));
+        tradeResources(ref(props.db, `users/${targetId}`), { offering: cards, requesting: {} });
+        tradeResources(props.userRef, { offering: {}, requesting: cards });
         setNeedToSteal(false);
     }
 
@@ -421,23 +418,8 @@ const Game = (props: GameProps) => {
 
     function processOffer(accept: boolean, offer?: TradeOffer) {
         if (accept && offer) {
-            let transfer: Record<string, number> = {};
-
-            for (let [card, quantity] of Object.entries(offer.offering)) {
-                transfer[card] = (transfer[card] || 0) - quantity;
-            }
-
-            for (let [card, quantity] of Object.entries(offer.requesting)) {
-                transfer[card] = (transfer[card] || 0) + quantity;
-            }
-
-            let offerUpdate = Object.fromEntries(Object.entries(transfer)
-                .map(([card, quantity]) => [card, increment(quantity)]));
-            update(ref(props.db, `users/${offer.fromId}/cards`), offerUpdate);
-
-            let requestUpdate = Object.fromEntries(Object.entries(transfer)
-                .map(([card, quantity]) => [card, increment(quantity * -1)]));
-            update(child(props.userRef, "cards"), requestUpdate);
+            tradeResources(ref(props.db, `users/${offer.fromId}`), offer);
+            tradeResources(props.userRef, { offering: offer.requesting, requesting: offer.offering });
         }
 
         set(child(props.userRef, "tradeOffer"), null);
@@ -481,6 +463,10 @@ const Game = (props: GameProps) => {
             quota: quota,
             robber: robber,
             rolled: dice !== null,
+            canPlaceRobber: canPlaceRobber,
+            needToSteal: needToSteal,
+            allDiscarded: allDiscarded,
+            ongoingTrade: ongoingTrade,
             endTurn: endTurn,
             placeRobber: canPlaceRobber ? placeRobber : null,
         };

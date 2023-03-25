@@ -6,6 +6,7 @@
 @import "./css/deck.css";
 @import "./css/form.css";
 @import "./css/game.css";
+@import "./css/harbor.css";
 @import "./css/intersection.css";
 @import "./css/menu.css";
 @import "./css/lobby.css";
@@ -16,13 +17,14 @@
 @import "./css/tooltip.css";
 
 :root {
-    /* the board is about 31 units tall */
-    font-size: calc(100vh / 32);
+    /* the board with padding is about 35 units tall */
+    font-size: calc(100vh / 40);
     --tile-width: 5rem;
     --road-width: 1rem;
     --road-z: 5;
     --tile-z: 10;
     --intersection-z: 15;
+    --harbor-z: 20;
     --tooltip-z: 95;
     --chat-z: 100;
     --panel-z: 105;

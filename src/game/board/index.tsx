@@ -25,6 +25,10 @@ interface BoardProps {
     quota: React.MutableRefObject<InfrastructureQuota>;
     robber?: Coordinate;
     rolled: boolean;
+    canPlaceRobber: boolean;
+    needToSteal: boolean;
+    allDiscarded: boolean;
+    ongoingTrade: boolean;
     endTurn: () => void;
     placeRobber?: (x: number, y: number) => void;
 };

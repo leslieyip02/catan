@@ -1,0 +1,87 @@
+.harbor {
+    position: absolute;
+    width: var(--road-width);
+    height: var(--road-width);
+    font-size: 0.8rem;
+    transition: scale 0.2s;
+    z-index: var(--harbor-z);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.harbor--above {
+    top: calc(var(--tile-width) * -0.25);
+}
+
+.harbor--below {
+    top: calc(var(--tile-width) * 0.25);
+}
+
+.harbor--left {
+    top: calc(var(--tile-width) * 0.2886);
+    left: calc(var(--tile-width) * -0.4);
+}
+
+.harbor--right {
+    top: calc(var(--tile-width) * 0.2886);
+    left: calc(var(--tile-width) * 0.4);
+}
+
+.harbor:hover {
+    scale: 1.1;
+    color: #555555;
+}
+
+.habor__icons {
+    margin: 0.1rem;
+    padding: 0.2rem;
+}
+
+.harbor__form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.2rem;
+}
+
+.harbor__drop-down {
+    position: relative;
+    display: inline-block;
+    font-size: 0.8rem;
+    border-bottom: 0.1rem solid #eeeeee;
+    z-index: var(--harbor-z);
+}
+
+.harbor__drop-down > .harbor__options {
+    display: none;
+}
+
+.harbor__drop-down:hover > .harbor__options {
+    display: block;
+}
+
+.harbor__options {
+    position: absolute;
+    top: 0%;
+    left: 50%;
+    border-radius: 0.2rem;
+    transform: translateX(-50%);
+}
+
+.harbor__option {
+    border: 0.2rem solid #eeeeee;
+    background-color: #555555;
+}
+
+.harbor__option:hover {
+    background-color: #777777;
+}
+
+.harbor__button {
+    margin: 0.3rem;
+}
+
+.harbor__button:hover {
+    scale: 1.1
+}
