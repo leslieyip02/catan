@@ -72,8 +72,8 @@ const UserPanel = (props: PanelProps) => {
         );
     }
 
-    const StealButton = () => {
-        const [hidden, setHidden] = useState<boolean>(true);
+    const StealButton = ({ cards }: { cards: CardHand }) => {
+        // const [hidden, setHidden] = useState<boolean>(true);
 
         function toggleHide() {
             let stealMenu: HTMLDivElement = document.querySelector(`#steal-menu-${props.id}`);
@@ -81,7 +81,7 @@ const UserPanel = (props: PanelProps) => {
         }
 
         function stealCard(cards: CardHand) {
-            setHidden(false);
+            // setHidden(false);
 
             setTimeout(() => {
                 props.stealCards(props.id, cards);
@@ -93,16 +93,18 @@ const UserPanel = (props: PanelProps) => {
                 className="panel__button"
                 onClick={toggleHide}
             >
-                <i className="fa-solid fa-people-robbery"></i>
+                <i className="fa-solid fa-user-minus"></i>
+                <span className="tooltip">Steal 1 resource</span>
                 <div
                     id={`steal-menu-${props.id}`}
                     className="overlay"
                     style={{ display: "none" }}
                 >
                     <Deck
-                        cards={props.cards}
+                        cards={cards}
                         drop={true}
-                        hidden={hidden}
+                        hidden={true}
+                        // hidden={hidden}
                         selectQuota={1}
                         actionLabel={"Steal 1"}
                         action={stealCard}
@@ -183,7 +185,8 @@ const UserPanel = (props: PanelProps) => {
                                 : <TradeForm {...props} />
                         }
                         {
-                            props.canStealFrom && props.needToSteal && <StealButton />
+                            props.canStealFrom && props.needToSteal &&
+                            <StealButton cards={props.cards} />
                         }
                     </div>
                 </div>

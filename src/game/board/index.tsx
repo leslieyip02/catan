@@ -181,9 +181,9 @@ const Board = (props: BoardProps) => {
                 continue;
             }
 
-            let t1 = shuffledRolls[y1][x1];
+            let r1 = shuffledRolls[y1][x1];
             shuffledRolls[y1][x1] = shuffledRolls[y2][x2];
-            shuffledRolls[y2][x2] = t1;
+            shuffledRolls[y2][x2] = r1;
         }
 
         set(child(props.roomRef, "terrains"), shuffledTerrains);

@@ -1,9 +1,10 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import Card from ".";
 import { CardHand, countCards } from "./hand";
 import { defaultIcons } from "./default";
 import Resource from './resource';
 import { CardType } from '.';
+import { randomInt } from '../random';
 
 interface DeckProps {
     cards: CardHand;
@@ -17,8 +18,10 @@ interface DeckProps {
 
 const Deck = (props: DeckProps) => {
     const [stack, setStack] = useState<boolean>(props.stack || false);
-    const [selected, setSelected] = useState<CardHand>();
     const [hidden, setHidden] = useState<boolean>();
+
+    // prevent re-render on select
+    const selected = useRef<CardHand>();
 
     useEffect(() => {
         setHidden(props.hidden);
@@ -27,7 +30,7 @@ const Deck = (props: DeckProps) => {
     useEffect(() => {
         // stacking disallowed when an action needs to be taken
         if (props.action) {
-            setSelected({});
+            selected.current = {};
         }
     }, [props.action]);
 
@@ -37,7 +40,7 @@ const Deck = (props: DeckProps) => {
         }
 
         if (props.selectQuota) {
-            let currentCount = countCards(selected);
+            let currentCount = countCards(selected.current);
             let newCount = currentCount + (select ? 1 : -1);
 
             if (newCount > props.selectQuota) {
@@ -45,12 +48,8 @@ const Deck = (props: DeckProps) => {
             }
         }
 
-        setSelected((currentSelected) => {
-            let newSelected = { ...currentSelected };
-            newSelected[card] = (newSelected[card] || 0) +
-                (select ? 1 : -1);
-            return newSelected;
-        });
+        selected.current[card] = (selected.current[card] || 0) +
+            (select ? 1 : -1);
 
         return true;
     }
@@ -72,11 +71,14 @@ const Deck = (props: DeckProps) => {
 
     const ActionButton = () => {
         function takeAction() {
+            // props.hidden refers to whether this deck is initially hidden
+            // hidden refers to the current state, 
+            // so the hidden cards should be revealed when action is taken
             if (hidden) {
                 setHidden(false);
             }
 
-            props.action(selected);
+            props.action(selected.current);
         }
 
         return (
@@ -86,6 +88,39 @@ const Deck = (props: DeckProps) => {
                 <i className="fa-solid fa-square-check"></i>
                 <span className="tooltip">{props.actionLabel}</span>
             </button>
+        );
+    }
+
+    const HiddenCards = ({ cards }: { cards: CardHand }) => {
+        let shuffledCards: CardType[] = Object.entries(cards)
+            .map(([card, quantity]) => Array(quantity).fill(card))
+            .flat();
+        let c = shuffledCards.length;
+        for (let shuffleCount = randomInt(1, c); shuffleCount > 0; shuffleCount--) {
+            let i1 = randomInt(0, c);
+            let i2 = randomInt(0, c);
+
+            let c1 = shuffledCards[i1];
+            shuffledCards[i1] = shuffledCards[i2];
+            shuffledCards[i2] = c1;
+        }
+
+        return (
+            <>
+                {
+                    shuffledCards
+                        .map((card, index) => {
+                            return <Card
+                                key={`hidden-card-${index}`}
+                                card={card as CardType}
+                                label={card}
+                                index={index}
+                                hidden={hidden}
+                                toggleSelect={toggleSelect}
+                            />
+                        })
+                }
+            </>
         );
     }
 
@@ -100,33 +135,35 @@ const Deck = (props: DeckProps) => {
             }
             <div className="deck__cards">
                 {
-                    countCards(props.cards) > 0
-                        ? Object.entries(props.cards)
-                            .filter(([_, quantity]) => quantity > 0)
-                            .map(([card, quantity]) => {
-                                return (stack && !props.action)
-                                    ? <Card
-                                        key={`stacked-${card}`}
-                                        card={card as CardType}
-                                        label={`${quantity} x ${card}`}
-                                    />
-                                    : <Fragment key={`cards-${card}`}>
-                                        {
-                                            Array(quantity).fill(0)
-                                                .map((_, index) => {
-                                                    return <Card
-                                                        key={`${card}-${index}`}
-                                                        card={card as CardType}
-                                                        label={card}
-                                                        index={index}
-                                                        hidden={hidden}
-                                                        toggleSelect={toggleSelect}
-                                                    />
-                                                })
-                                        }
-                                    </Fragment>
-                            })
-                        : <Card card={"none"} label={"No cards"} />
+                    props.hidden
+                        ? <HiddenCards cards={props.cards} />
+                        : countCards(props.cards) > 0
+                            ? Object.entries(props.cards)
+                                .filter(([_, quantity]) => quantity > 0)
+                                .map(([card, quantity]) => {
+                                    return (stack && !props.action)
+                                        ? <Card
+                                            key={`stacked-${card}`}
+                                            card={card as CardType}
+                                            label={`${quantity} x ${card}`}
+                                        />
+                                        : <Fragment key={`cards-${card}`}>
+                                            {
+                                                Array(quantity).fill(0)
+                                                    .map((_, index) => {
+                                                        return <Card
+                                                            key={`${card}-${index}`}
+                                                            card={card as CardType}
+                                                            label={card}
+                                                            index={index}
+                                                            hidden={hidden}
+                                                            toggleSelect={toggleSelect}
+                                                        />
+                                                    })
+                                            }
+                                        </Fragment>
+                                })
+                            : <Card card={"none"} label={"No cards"} />
                 }
             </div>
         </div>

@@ -44,7 +44,7 @@ const Card = (props: CardProps) => {
             hidden
                 ? <>
                     <i className={`card__icon ${defaultIcons["unknown"].join(" ")}`}></i>
-                    <div className="card__label">"???"</div>
+                    <div className="card__label">???</div>
                 </>
                 : <>
                     <i className={`card__icon ${defaultIcons[props.card].join(" ")}`}></i>

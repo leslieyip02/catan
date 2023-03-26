@@ -41,15 +41,15 @@ const TradeForm = (props: TradeFormProps) => {
         // check if the form is filled
         if (countCards(offering.current) + countCards(requesting.current) > 0) {
             setTooltipText(null);
-            
+
             // send trade offer
             props.offerTrade(props.id, offering.current, requesting.current)
-            .then((sent) => setTooltipText(sent))
-            .catch((rejected) => setTooltipText(rejected));
-            
+                .then((sent) => setTooltipText(sent))
+                .catch((rejected) => setTooltipText(rejected));
+
             // reset inputs
             document.querySelectorAll(".trade__input")
-            .forEach((input: HTMLInputElement) => input.value = null);
+                .forEach((input: HTMLInputElement) => input.value = null);
             offering.current = {};
             requesting.current = {};
         }
@@ -130,7 +130,7 @@ const TradeForm = (props: TradeFormProps) => {
                 {tooltipText}
             </span>
             <button className="trade__button" disabled={!canTrade() || props.ongoingTrade} type="submit">
-                <i className="fa-solid fa-arrow-right-arrow-left"></i>Trade
+                <i className="fa-solid fa-money-bill-transfer"></i>Trade
             </button>
 
             <TradeMatrix />
