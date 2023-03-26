@@ -6,16 +6,19 @@ import Panel from "./user/panel";
 import { UserData, PlayerData } from "./user";
 import { randomInt } from './random';
 import Resource, { ResourceRoll } from './card/resource';
-import { CardHand, countCards, countResourceCards } from './card/hand';
+import { CardHand, countCards, countResourceCards, resourceCards } from './card/hand';
 import { broadcastMessage } from './chat';
 import { Terrain } from './board/tile';
 import { Coordinate } from './board';
-import { defaultInfrastructure, InfrastructureQuota } from './board/infrastructure';
+import { InfrastructureQuota } from './board/infrastructure';
 import { tradeResources, hasRequiredCards, TradeOffer } from './trade';
 import TradeMenu from './trade/domestic';
 import Deck from './card/deck';
 import Card from './card/index';
 import { CardType } from './card/';
+import { defaultInfrastructure } from './board/default';
+import Development, { DevelopmentStock } from './card/development';
+import { defaultDevelopmentCards } from './card/default';
 
 interface GameProps {
     db: Database;
@@ -52,6 +55,7 @@ const Game = (props: GameProps) => {
     // keep separate reference
     const cards = useRef<CardHand>({});
     const quota = useRef<InfrastructureQuota>(defaultInfrastructure);
+    const stock = useRef<DevelopmentStock>(defaultDevelopmentCards);
 
     useEffect(() => {
         // check if this user is the host
@@ -393,7 +397,7 @@ const Game = (props: GameProps) => {
 
         // check for cards
         if (!hasRequiredCards(cards.current, offering)) {
-            return Promise.reject("Insufficient resources");;
+            return Promise.reject("Insufficient resources");
         }
 
         let offer: TradeOffer = {
@@ -427,6 +431,29 @@ const Game = (props: GameProps) => {
         setOngoingTrade(false);
     }
 
+    function buyCard(): Promise<string> {
+        if (!cards.current[Resource.grain] ||
+            !cards.current[Resource.ore] ||
+            !cards.current[Resource.wool]) {
+
+            return Promise.reject("Insufficient resources");
+        }
+
+        let availableCards: Development[] = Object.entries(stock.current)
+            .map(([card, quantity]) => Array(quantity).fill(card))
+            .flat();
+        let card = availableCards[randomInt(0, availableCards.length)];
+        stock.current[card]--;
+
+        update(child(props.userRef, "cards"), {
+            [Resource.grain]: increment(-1),
+            [Resource.ore]: increment(-1),
+            [Resource.wool]: increment(-1),
+            [card]: increment(1),
+        });
+        return Promise.resolve(card);
+    }
+
     function endTurn() {
         if (isPlayerTurn()) {
             // reset roll so the listener can detect if the same number gets rolled
@@ -451,6 +478,7 @@ const Game = (props: GameProps) => {
             rollDice: rollDice,
             stealCards: stealCards,
             offerTrade: offerTrade,
+            buyCard: buyCard,
             endTurn: endTurn,
         };
     }
@@ -493,7 +521,7 @@ const Game = (props: GameProps) => {
         return (
             <div className="overlay menu" style={{ display: "flex" }}>
                 <Deck
-                    cards={cards.current}
+                    cards={resourceCards(cards.current)}
                     drop={true}
                     selectQuota={needToDiscard}
                     actionLabel={`Discard ${needToDiscard}`}

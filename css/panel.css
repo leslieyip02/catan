@@ -64,6 +64,7 @@
 }
 
 .panel__button {
+    position: relative;
     min-width: 2rem;
     display: flex;
     justify-content: center;

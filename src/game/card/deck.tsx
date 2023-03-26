@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
 import Card from ".";
-import { CardHand, countCards } from "./hand";
+import { CardHand, countCards, developmentCards, resourceCards } from "./hand";
 import { defaultIcons } from "./default";
 import Resource from './resource';
 import { CardType } from '.';
@@ -124,6 +124,40 @@ const Deck = (props: DeckProps) => {
         );
     }
 
+    const Cards = ({ cards, stack }: { cards: CardHand, stack: boolean }) => {
+        return (
+            <>
+                {
+                    Object.entries(cards)
+                        .filter(([_, quantity]) => quantity > 0)
+                        .map(([card, quantity]) => {
+                            return (stack && !props.action)
+                                ? <Card
+                                    key={`stacked-${card}`}
+                                    card={card as CardType}
+                                    label={`${quantity} x ${card}`}
+                                />
+                                : <Fragment key={`cards-${card}`}>
+                                    {
+                                        Array(quantity).fill(0)
+                                            .map((_, index) => {
+                                                return <Card
+                                                    key={`${card}-${index}`}
+                                                    card={card as CardType}
+                                                    label={card}
+                                                    index={index}
+                                                    hidden={hidden}
+                                                    toggleSelect={toggleSelect}
+                                                />
+                                            })
+                                    }
+                                </Fragment>
+                        })
+                }
+            </>
+        );
+    }
+
     return (
         <div className={`deck${props.drop ? " deck--drop" : ""}`}>
             {
@@ -138,31 +172,10 @@ const Deck = (props: DeckProps) => {
                     props.hidden
                         ? <HiddenCards cards={props.cards} />
                         : countCards(props.cards) > 0
-                            ? Object.entries(props.cards)
-                                .filter(([_, quantity]) => quantity > 0)
-                                .map(([card, quantity]) => {
-                                    return (stack && !props.action)
-                                        ? <Card
-                                            key={`stacked-${card}`}
-                                            card={card as CardType}
-                                            label={`${quantity} x ${card}`}
-                                        />
-                                        : <Fragment key={`cards-${card}`}>
-                                            {
-                                                Array(quantity).fill(0)
-                                                    .map((_, index) => {
-                                                        return <Card
-                                                            key={`${card}-${index}`}
-                                                            card={card as CardType}
-                                                            label={card}
-                                                            index={index}
-                                                            hidden={hidden}
-                                                            toggleSelect={toggleSelect}
-                                                        />
-                                                    })
-                                            }
-                                        </Fragment>
-                                })
+                            ? <>
+                                <Cards cards={resourceCards(props.cards)} stack={stack} />
+                                <Cards cards={developmentCards(props.cards)} stack={false} />
+                            </>
                             : <Card card={"none"} label={"No cards"} />
                 }
             </div>

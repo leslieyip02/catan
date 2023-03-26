@@ -42,8 +42,8 @@ const Harbor = (props: HarborProps) => {
     const [offering, setOffering] = useState<Resource>(props.resource);
     const [requesting, setRequesting] = useState<Resource>(Resource.none);
 
-    const ratio = !props.direction ? 4 :
-        props.resource !== Resource.none ? 2 : 3;
+    const panel = !!!props.direction;
+    const ratio = panel ? 4 : (props.resource !== Resource.none ? 2 : 3);
 
     function setLeftOffset() {
         switch (props.direction) {
@@ -158,30 +158,33 @@ const Harbor = (props: HarborProps) => {
                     resource={requesting}
                     setResource={setRequesting}
                 />
-                <button
-                    className="harbor__button"
-                    onClick={processTrade}
-                    disabled={owned() && !canTrade}
+                <div
+                    className="harbor__confirm"
+                    onClick={(e) => canTrade ? processTrade(e) : {}}
                 >
                     <i className="fa-solid fa-square-check">
                         <span className="tooltip">Trade</span>
                     </i>
-                </button>
+                </div>
             </form>
         );
     }
 
     return (
         <div
-            className={`harbor harbor--${props.direction}`}
+            className={`harbor harbor--${props.direction}${panel ? " harbor--panel" : ""}`}
             style={setLeftOffset()}
             onMouseEnter={activateParentIntersections}
             onMouseLeave={deactivateParentIntersections}
         >
             <i className="fa-solid fa-ship"></i>
-            <span className="tooltip tooltip--big">
-                <HarborContent />
-            </span>
+            {
+                panel && !props.playerTurn
+                    ? <span className="tooltip">4:1 Trade</span>
+                    : <span className="tooltip tooltip--big">
+                        <HarborContent />
+                    </span>
+            }
         </div>
     );
 }

@@ -1,9 +1,20 @@
 import { CardType } from ".";
+import Development from "./development";
 import Resource from "./resource";
 
 type CardHand = {
     [key in CardType]?: number;
 };
+
+function resourceCards(cards: CardHand) {
+    return Object.fromEntries(Object.entries(cards || {})
+        .filter(([card, _]) => card in Resource));
+}
+
+function developmentCards(cards: CardHand) {
+    return Object.fromEntries(Object.entries(cards || {})
+        .filter(([card, _]) => card in Development));
+}
 
 function countCards(cards: CardHand): number {
     return Object.values(cards || {})
@@ -11,8 +22,7 @@ function countCards(cards: CardHand): number {
 }
 
 function countResourceCards(cards: CardHand): number {
-    return Object.entries(cards || {})
-        .filter(([card, _]) => card in Resource)
+    return Object.entries(resourceCards(cards))
         .map(([_, quantity]) => quantity)
         .reduce((c1, c2) => c1 + c2, 0);
 }
@@ -38,4 +48,11 @@ function differentCards(original: CardHand, current: CardHand): boolean {
     return false;
 }
 
-export { CardHand, countCards, countResourceCards, differentCards };
+export {
+    CardHand,
+    resourceCards,
+    developmentCards,
+    countCards,
+    countResourceCards,
+    differentCards
+};

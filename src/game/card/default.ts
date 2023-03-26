@@ -1,3 +1,4 @@
+import Development, { DevelopmentStock } from "./development";
 import Resource from "./resource";
 
 let defaultIcons: Record<string, string[]> = {
@@ -7,7 +8,21 @@ let defaultIcons: Record<string, string[]> = {
     [Resource.lumber]: ["fa-solid", "fa-tree"],
     [Resource.ore]: ["fa-solid", "fa-mountain"],
     [Resource.wool]: ["fa-solid", "fa-cloud"],
+    [Development.knight]: ["fa-solid", "fa-chess-knight"],
+    [Development.roadBuilding]: ["fa-solid", "fa-road"],
+    [Development.yearOfPlenty]: ["fa-solid", "fa-person-digging"],
+    [Development.monopoly]: ["fa-solid", "fa-people-robbery"],
+    [Development.victoryPoint]: ["fa-solid", "fa-trophy"],
     "unknown": ["fa-solid", "fa-circle-question"],
 };
 
-export { defaultIcons };
+// development cards do not go back into circulation
+let defaultDevelopmentCards: DevelopmentStock = {
+    [Development.knight]: 14,
+    [Development.roadBuilding]: 2,
+    [Development.yearOfPlenty]: 2,
+    [Development.monopoly]: 2,
+    [Development.victoryPoint]: 5,
+}
+
+export { defaultIcons, defaultDevelopmentCards };

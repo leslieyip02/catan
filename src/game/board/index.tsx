@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { set, child, onValue, Database, DatabaseReference } from 'firebase/database';
 import { defaultTerrains, defaultRolls } from "./default";
-import Infrastructure, { defaultInfrastructure, InfrastructureQuota } from "./infrastructure";
+import Infrastructure, { InfrastructureQuota } from "./infrastructure";
 import Intersection, { IntersectionData, defaultIntersections } from "./intersection";
 import { randomInt } from "../random";
 import { ResourceRoll, mapTerrainToResource } from "../card/resource";

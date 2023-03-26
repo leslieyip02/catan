@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
-import { CardHand, countCards, differentCards } from "../card/hand";
+import { CardHand, countCards, differentCards, resourceCards } from "../card/hand";
 import { defaultColors } from "../board/default";
 import Deck from '../card/deck';
 import { PlayerData } from ".";
@@ -24,6 +24,7 @@ interface PanelProps extends PlayerData {
     stealCards: (targetId: string, cards: CardHand) => void;
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
+    buyCard: () => Promise<string>;
     endTurn: () => void;
 };
 
@@ -67,22 +68,19 @@ const UserPanel = (props: PanelProps) => {
                 disabled={!canRoll}
                 onClick={rollDice}
             >
-                <i className="fa-solid fa-dice"></i>Roll
+                <i className="fa-solid fa-dice"></i>
+                <span className="tooltip">Roll Dice</span>
             </button>
         );
     }
 
     const StealButton = ({ cards }: { cards: CardHand }) => {
-        // const [hidden, setHidden] = useState<boolean>(true);
-
         function toggleHide() {
             let stealMenu: HTMLDivElement = document.querySelector(`#steal-menu-${props.id}`);
             stealMenu.style.display = "flex";
         }
 
         function stealCard(cards: CardHand) {
-            // setHidden(false);
-
             setTimeout(() => {
                 props.stealCards(props.id, cards);
             }, 2000);
@@ -101,10 +99,9 @@ const UserPanel = (props: PanelProps) => {
                     style={{ display: "none" }}
                 >
                     <Deck
-                        cards={cards}
+                        cards={resourceCards(cards)}
                         drop={true}
                         hidden={true}
-                        // hidden={hidden}
                         selectQuota={1}
                         actionLabel={"Steal 1"}
                         action={stealCard}
@@ -114,12 +111,58 @@ const UserPanel = (props: PanelProps) => {
         );
     }
 
+    const BuyCardButton = () => {
+        const [tooltipText, setTooltipText] = useState<string>();
+
+        useEffect(() => {
+            if (tooltipText) {
+                let formTooltip: HTMLSpanElement = document
+                    .querySelector(`#buy-${props.id}`);
+                formTooltip.style.visibility = "visible";
+
+                setTimeout(() => {
+                    formTooltip.style.visibility = "hidden";
+                }, 2000);
+            }
+        }, [tooltipText]);
+
+        // buy development cards
+        function buyCard() {
+            setTooltipText(null);
+            props.buyCard()
+                .then((bought) => setTooltipText(bought))
+                .catch((rejected) => setTooltipText(rejected));
+        }
+
+        let canBuy = props.playerTurn && rolled &&
+            !props.setupTurn && !props.canPlaceRobber &&
+            !props.needToSteal && !props.ongoingTrade;
+
+        return (
+            <button
+                className="panel__button"
+                disabled={!canBuy}
+                onClick={buyCard}
+            >
+                <i className="fa-solid fa-cart-shopping"></i>
+                <span className="tooltip">Buy Card</span>
+                <span
+                    id={`buy-${props.id}`}
+                    className="tooltip"
+                    style={{ visibility: "hidden" }}
+                >
+                    {tooltipText}
+                </span>
+            </button>
+        );
+    }
+
     const MaritimeTradeButton = () => {
+        // basic 4 : 1 trade
         let canTrade = props.playerTurn && rolled &&
             !props.setupTurn && !props.canPlaceRobber &&
             !props.needToSteal && !props.ongoingTrade;
 
-        // basic 4 : 1 trade
         return (
             <button
                 className="panel__button"
@@ -158,7 +201,8 @@ const UserPanel = (props: PanelProps) => {
                 disabled={!canEnd}
                 onClick={endTurn}
             >
-                <i className="fa-solid fa-square-check"></i>End Turn
+                <i className="fa-solid fa-square-check"></i>
+                <span className="tooltip">End Turn</span>
             </button>
         );
     }
@@ -179,8 +223,9 @@ const UserPanel = (props: PanelProps) => {
                             props.thisPlayer
                                 ? <>
                                     <RollDiceButton />
-                                    <EndTurnButton />
+                                    <BuyCardButton />
                                     <MaritimeTradeButton />
+                                    <EndTurnButton />
                                 </>
                                 : <TradeForm {...props} />
                         }

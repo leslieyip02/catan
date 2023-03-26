@@ -1,4 +1,6 @@
 import { Terrain } from "./tile";
+import Infrastructure, { InfrastructureQuota, InfrastructureCosts } from './infrastructure';
+import Resource from "../card/resource";
 
 let defaultTerrains = [
     [Terrain.mountains, Terrain.pasture, Terrain.forest],
@@ -23,4 +25,32 @@ let defaultColors = [
     "#ffff85",
 ];
 
-export { defaultTerrains, defaultRolls, defaultColors };
+let defaultInfrastructure: InfrastructureQuota = {
+    [Infrastructure.settlement]: 2,
+    [Infrastructure.road]: 2,
+};
+
+let defaultInfrastructureCosts: InfrastructureCosts = {
+    [Infrastructure.settlement]: {
+        [Resource.brick]: 1,
+        [Resource.grain]: 1,
+        [Resource.lumber]: 1,
+        [Resource.wool]: 1,
+    },
+    [Infrastructure.city]: {
+        [Resource.grain]: 2,
+        [Resource.ore]: 3,
+    },
+    [Infrastructure.road]: {
+        [Resource.brick]: 1,
+        [Resource.lumber]: 1,
+    },
+};
+
+export {
+    defaultTerrains,
+    defaultRolls,
+    defaultColors,
+    defaultInfrastructure,
+    defaultInfrastructureCosts,
+};

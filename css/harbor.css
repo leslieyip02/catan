@@ -33,6 +33,10 @@
     color: #555555;
 }
 
+.harbor--panel:hover {
+    scale: 1;
+}
+
 .habor__icons {
     margin: 0.1rem;
     padding: 0.2rem;
@@ -78,10 +82,10 @@
     background-color: #777777;
 }
 
-.harbor__button {
+.harbor__confirm {
     margin: 0.3rem;
 }
 
-.harbor__button:hover {
-    scale: 1.1
+.harbor__confirm:hover {
+    scale: 1.1;
 }
