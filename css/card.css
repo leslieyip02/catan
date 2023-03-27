@@ -49,3 +49,8 @@
     text-align: center;
     color: #eeeeee;
 }
+
+.card__label > p {
+    margin: 0rem;
+    padding: 0rem;
+}

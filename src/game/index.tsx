@@ -442,6 +442,11 @@ const Game = (props: GameProps) => {
         let availableCards: Development[] = Object.entries(stock.current)
             .map(([card, quantity]) => Array(quantity).fill(card))
             .flat();
+
+        if (availableCards.length === 0) {
+            return Promise.reject("No cards left");
+        }
+
         let card = availableCards[randomInt(0, availableCards.length)];
         stock.current[card]--;
 

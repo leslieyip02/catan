@@ -7,7 +7,8 @@ type CardType = `${Resource}` | `${Development}`;
 
 interface CardProps {
     card: CardType;
-    label: string;
+    label?: string;
+    quantity?: number;
     index?: number;
     hidden?: boolean;
     toggleSelect?: (card: CardType, selected: boolean) => boolean;
@@ -48,7 +49,16 @@ const Card = (props: CardProps) => {
                 </>
                 : <>
                     <i className={`card__icon ${defaultIcons[props.card].join(" ")}`}></i>
-                    <div className="card__label">{props.label}</div>
+                    <div className="card__label">
+                        {
+                            props.quantity
+                                ? <>
+                                    <p>{`${props.quantity} x`}</p>
+                                    <p>{props.card}</p>
+                                </>
+                                : <p>{props.label}</p>
+                        }
+                    </div>
                 </>
         );
     }

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
 import Card from ".";
 import { CardHand, countCards, developmentCards, resourceCards } from "./hand";
-import { defaultIcons } from "./default";
 import Resource from './resource';
 import { CardType } from '.';
 import { randomInt } from '../random';
+import { developmentLabels } from './development';
 
 interface DeckProps {
     cards: CardHand;
@@ -135,7 +135,7 @@ const Deck = (props: DeckProps) => {
                                 ? <Card
                                     key={`stacked-${card}`}
                                     card={card as CardType}
-                                    label={`${quantity} x ${card}`}
+                                    quantity={quantity}
                                 />
                                 : <Fragment key={`cards-${card}`}>
                                     {
@@ -144,7 +144,7 @@ const Deck = (props: DeckProps) => {
                                                 return <Card
                                                     key={`${card}-${index}`}
                                                     card={card as CardType}
-                                                    label={card}
+                                                    label={developmentLabels[card] || card}
                                                     index={index}
                                                     hidden={hidden}
                                                     toggleSelect={toggleSelect}
