@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Deck from '../card/deck';
 import { CardHand } from "../card/hand";
+import Development from '../card/development';
 
 interface InventoryProps {
     id: string;
@@ -10,6 +11,7 @@ interface InventoryProps {
     cardCount: number;
     thisPlayer: boolean;
     playerTurn: boolean;
+    playKnightCard?: () => void;
 };
 
 const Inventory = (props: InventoryProps) => {
@@ -25,6 +27,15 @@ const Inventory = (props: InventoryProps) => {
         }
     }
 
+    function deckProps() {
+        return {
+            cards: props.cards,
+            drop: true,
+            playerTurn: props.playerTurn,
+            playKnightCard: props.playKnightCard,
+        };
+    }
+
     return (
         <div className="panel__cards" onClick={toggleHide}>
             <span>
@@ -36,7 +47,7 @@ const Inventory = (props: InventoryProps) => {
                     className="overlay"
                     style={{ display: open ? "block" : "none" }}
                 >
-                    <Deck cards={props.cards} drop={true} />
+                    <Deck {...deckProps()} />
                 </div>
             }
         </div>

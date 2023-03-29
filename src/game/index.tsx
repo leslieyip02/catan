@@ -42,7 +42,7 @@ const Game = (props: GameProps) => {
     const [setupTurn, setSetupTurn] = useState<boolean>(false);
 
     // game activity data
-    const [dice, setDice] = useState<string>();
+    const [notification, setNotification] = useState<string | Development>();
     const [messages, setMessages] = useState<string[]>([]);
     const [robber, setRobber] = useState<Coordinate>();
     const [canPlaceRobber, setCanPlaceRobber] = useState<boolean>();
@@ -150,9 +150,10 @@ const Game = (props: GameProps) => {
             }
         });
 
-        onValue(child(props.roomRef, "dice"), (newDice) => {
-            if (newDice.val()) {
-                setDice(newDice.val());
+        // listen for notifications
+        onValue(child(props.roomRef, "notification"), (newNotification) => {
+            if (newNotification.val()) {
+                setNotification(newNotification.val());
             }
         })
 
@@ -200,9 +201,9 @@ const Game = (props: GameProps) => {
         setPlayerTurn(isPlayerTurn());
         setSetupTurn(isSetupTurn());
 
-        // reset causes dice roll bubble to disappear
-        setDice(null);
-        set(child(props.roomRef, "dice"), null);
+        // reset causes notification bubble to disappear
+        setNotification(null);
+        set(child(props.roomRef, "notification"), null);
     }, [turn]);
 
     useEffect(() => {
@@ -276,10 +277,10 @@ const Game = (props: GameProps) => {
                         let roll = r1 + r2;
                         set(child(props.roomRef, "roll"), roll);
 
-                        // update dice
+                        // update dice notification
                         let diceIcons = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
                         let resultIcons = diceIcons[r1 - 1] + diceIcons[r2 - 1];
-                        set(child(props.roomRef, "dice"), resultIcons);
+                        set(child(props.roomRef, "notification"), resultIcons);
 
                         // update chat
                         let message = `${props.userName} rolled a ${roll} ${resultIcons}`;
@@ -292,6 +293,15 @@ const Game = (props: GameProps) => {
                     }
                 })
         }
+    }
+
+    function playKnightCard() {
+        update(child(props.userRef, "cards"), { "knight": increment(-1) });
+        set(child(props.roomRef, "notification"), Development.knight);
+
+        // TODO: track how many knight cards played for largest army
+        
+        setCanPlaceRobber(true);
     }
 
     function isRobbed(tile: Coordinate): boolean {
@@ -469,22 +479,28 @@ const Game = (props: GameProps) => {
     }
 
     function panelProps(playerId: string, playerIndex: number) {
+        let thisPlayer = playerId === props.userRef.key
+        let thisPlayerActions = thisPlayer ? {
+            rollDice: rollDice,
+            buyCard: buyCard,
+            playKnightCard: playKnightCard,
+            endTurn: endTurn,
+        } : {};
+
         return {
             userRef: props.userRef,
-            thisPlayer: playerId === props.userRef.key,
+            thisPlayer: thisPlayer,
             playerTurn: isPlayerTurn(playerIndex),
             setupTurn: setupTurn,
             index: playerIndex,
-            dice: dice,
+            notification: notification,
             canPlaceRobber: canPlaceRobber,
             needToSteal: needToSteal,
             allDiscarded: allDiscarded,
             ongoingTrade: ongoingTrade,
-            rollDice: rollDice,
             stealCards: stealCards,
             offerTrade: offerTrade,
-            buyCard: buyCard,
-            endTurn: endTurn,
+            ...thisPlayerActions,
         };
     }
 
@@ -496,7 +512,7 @@ const Game = (props: GameProps) => {
             cards: cards,
             quota: quota,
             robber: robber,
-            rolled: dice !== null,
+            rolled: notification !== null,
             canPlaceRobber: canPlaceRobber,
             needToSteal: needToSteal,
             allDiscarded: allDiscarded,

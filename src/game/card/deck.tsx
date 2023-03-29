@@ -4,7 +4,7 @@ import { CardHand, countCards, developmentCards, resourceCards } from "./hand";
 import Resource from './resource';
 import { CardType } from '.';
 import { randomInt } from '../random';
-import { developmentLabels } from './development';
+import Development, { developmentLabels } from './development';
 
 interface DeckProps {
     cards: CardHand;
@@ -13,17 +13,25 @@ interface DeckProps {
     hidden?: boolean;
     selectQuota?: number;
     actionLabel?: string;
+    playerTurn?: boolean;
     action?: (cards: CardHand) => void;
+    playKnightCard?: () => void;
 };
 
 const Deck = (props: DeckProps) => {
     const [stack, setStack] = useState<boolean>(props.stack || false);
     const [hidden, setHidden] = useState<boolean>();
 
-    // prevent re-render on select
+    // keep separate references to prevent re-render
     const selected = useRef<CardHand>();
+    const shuffledCards = useRef<CardType[]>();
 
     useEffect(() => {
+        if (props.hidden) {
+            // this causes the HiddenCards component to shuffle
+            shuffledCards.current = null;
+        }
+
         setHidden(props.hidden);
     }, [props.hidden]);
 
@@ -92,23 +100,25 @@ const Deck = (props: DeckProps) => {
     }
 
     const HiddenCards = ({ cards }: { cards: CardHand }) => {
-        let shuffledCards: CardType[] = Object.entries(cards)
-            .map(([card, quantity]) => Array(quantity).fill(card))
-            .flat();
-        let c = shuffledCards.length;
-        for (let shuffleCount = randomInt(1, c); shuffleCount > 0; shuffleCount--) {
-            let i1 = randomInt(0, c);
-            let i2 = randomInt(0, c);
+        if (!shuffledCards.current) {
+            shuffledCards.current = Object.entries(cards)
+                .map(([card, quantity]) => Array(quantity).fill(card))
+                .flat();
+            let c = shuffledCards.current.length;
+            for (let shuffleCount = randomInt(1, c); shuffleCount > 0; shuffleCount--) {
+                let i1 = randomInt(0, c);
+                let i2 = randomInt(0, c);
 
-            let c1 = shuffledCards[i1];
-            shuffledCards[i1] = shuffledCards[i2];
-            shuffledCards[i2] = c1;
+                let c1 = shuffledCards.current[i1];
+                shuffledCards.current[i1] = shuffledCards.current[i2];
+                shuffledCards.current[i2] = c1;
+            }
         }
 
         return (
             <>
                 {
-                    shuffledCards
+                    shuffledCards.current
                         .map((card, index) => {
                             return <Card
                                 key={`hidden-card-${index}`}
@@ -125,6 +135,20 @@ const Deck = (props: DeckProps) => {
     }
 
     const Cards = ({ cards, stack }: { cards: CardHand, stack: boolean }) => {
+        function cardAction(card: CardType) {
+            if (!props.playerTurn) {
+                return null;
+            }
+
+            switch (card) {
+                case Development.knight:
+                    return props.playKnightCard;
+
+                default:
+                    return null;
+            }
+        }
+
         return (
             <>
                 {
@@ -148,6 +172,7 @@ const Deck = (props: DeckProps) => {
                                                     index={index}
                                                     hidden={hidden}
                                                     toggleSelect={toggleSelect}
+                                                    action={cardAction(card as CardType)}
                                                 />
                                             })
                                     }

@@ -9,7 +9,7 @@ interface TradeFormProps {
     setupTurn: boolean;
     id: string;
     index: number;
-    dice?: string;
+    notification?: string;
     canPlaceRobber: boolean;
     ongoingTrade: boolean;
     offerTrade: (targetId: string, offering: CardHand,
@@ -56,8 +56,8 @@ const TradeForm = (props: TradeFormProps) => {
     }
 
     function canTrade(): boolean {
-        // dice is null if not rolled
-        return props.dice && !props.playerTurn &&
+        // notification is null if dice has not been rolled
+        return props.notification && !props.playerTurn &&
             !props.setupTurn && !props.canPlaceRobber && !props.ongoingTrade;
     }
 

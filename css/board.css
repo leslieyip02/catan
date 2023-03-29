@@ -4,7 +4,7 @@
     height: 100vh;
     padding-left: calc(var(--tile-width) * 0.75);
     padding-right: calc(var(--tile-width) * 0.75);
-    overflow: scroll;
+    overflow: auto;
     background-color: #b0e2ff;
 }
 

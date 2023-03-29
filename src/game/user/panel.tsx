@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, FormEvent } from "react";
+import React, { useState, useEffect, useRef, FormEvent } from "react";
 import { CardHand, countCards, differentCards, resourceCards } from "../card/hand";
 import { defaultColors } from "../board/default";
 import Deck from '../card/deck';
@@ -8,6 +8,8 @@ import Inventory from './inventory';
 import Resource from "../card/resource";
 import Harbor from "../board/harbor";
 import { DatabaseReference } from "firebase/database";
+import Development from "../card/development";
+import { defaultIcons } from "../card/default";
 
 interface PanelProps extends PlayerData {
     userRef: DatabaseReference;
@@ -15,17 +17,18 @@ interface PanelProps extends PlayerData {
     playerTurn: boolean;
     setupTurn: boolean;
     index: number;
-    dice?: string;
+    notification?: string;
     canPlaceRobber: boolean;
     needToSteal: boolean;
     allDiscarded: boolean;
     ongoingTrade: boolean;
-    rollDice: () => void;
+    rollDice?: () => void;
     stealCards: (targetId: string, cards: CardHand) => void;
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
-    buyCard: () => Promise<string>;
-    endTurn: () => void;
+    buyCard?: () => Promise<string>;
+    playKnightCard?: () => void;
+    endTurn?: () => void;
 };
 
 const UserPanel = (props: PanelProps) => {
@@ -45,6 +48,10 @@ const UserPanel = (props: PanelProps) => {
         setCardCount(countCards(props.cards || {}));
     }, [props.cards])
 
+    useEffect(() => {
+
+    }, [props.notification]);
+
     function activatePanel() {
         let panel: HTMLDivElement = document.querySelector(`#panel-${props.id}`);
         panel.style.width = "110%";
@@ -52,6 +59,19 @@ const UserPanel = (props: PanelProps) => {
         setTimeout(() => {
             panel.style.width = "100%";
         }, 1200);
+    }
+
+    function inventoryProps() {
+        return {
+            id: props.id,
+            index: props.index,
+            name: props.name,
+            cards: props.cards,
+            cardCount: cardCount,
+            thisPlayer: props.thisPlayer,
+            playerTurn: props.playerTurn,
+            playKnightCard: props.playKnightCard,
+        };
     }
 
     const RollDiceButton = () => {
@@ -71,43 +91,6 @@ const UserPanel = (props: PanelProps) => {
                 <i className="fa-solid fa-dice"></i>
                 <span className="tooltip">Roll Dice</span>
             </button>
-        );
-    }
-
-    const StealButton = ({ cards }: { cards: CardHand }) => {
-        function toggleHide() {
-            let stealMenu: HTMLDivElement = document.querySelector(`#steal-menu-${props.id}`);
-            stealMenu.style.display = "flex";
-        }
-
-        function stealCard(cards: CardHand) {
-            setTimeout(() => {
-                props.stealCards(props.id, cards);
-            }, 2000);
-        }
-
-        return (
-            <div
-                className="panel__button"
-                onClick={toggleHide}
-            >
-                <i className="fa-solid fa-user-minus"></i>
-                <span className="tooltip">Steal 1 resource</span>
-                <div
-                    id={`steal-menu-${props.id}`}
-                    className="overlay"
-                    style={{ display: "none" }}
-                >
-                    <Deck
-                        cards={resourceCards(cards)}
-                        drop={true}
-                        hidden={true}
-                        selectQuota={1}
-                        actionLabel={"Steal 1"}
-                        action={stealCard}
-                    />
-                </div>
-            </div>
         );
     }
 
@@ -185,6 +168,43 @@ const UserPanel = (props: PanelProps) => {
         );
     }
 
+    const StealButton = ({ cards }: { cards: CardHand }) => {
+        function toggleHide() {
+            let stealMenu: HTMLDivElement = document.querySelector(`#steal-menu-${props.id}`);
+            stealMenu.style.display = "flex";
+        }
+
+        function stealCard(cards: CardHand) {
+            setTimeout(() => {
+                props.stealCards(props.id, cards);
+            }, 2000);
+        }
+
+        return (
+            <div
+                className="panel__button"
+                onClick={toggleHide}
+            >
+                <i className="fa-solid fa-user-minus"></i>
+                <span className="tooltip">Steal 1 resource</span>
+                <div
+                    id={`steal-menu-${props.id}`}
+                    className="overlay"
+                    style={{ display: "none" }}
+                >
+                    <Deck
+                        cards={resourceCards(cards)}
+                        drop={true}
+                        hidden={true}
+                        selectQuota={1}
+                        actionLabel={"Steal 1"}
+                        action={stealCard}
+                    />
+                </div>
+            </div>
+        );
+    }
+
     const EndTurnButton = () => {
         function endTurn() {
             setRolled(false);
@@ -217,7 +237,7 @@ const UserPanel = (props: PanelProps) => {
                     }
                 </div>
                 <div className="panel__row">
-                    <Inventory {...props} cardCount={cardCount} />
+                    <Inventory {...inventoryProps()} />
                     <div className="panel__buttons">
                         {
                             props.thisPlayer
@@ -244,10 +264,16 @@ const UserPanel = (props: PanelProps) => {
                     props.thisPlayer && <i className="fa-regular fa-user"></i>
                 }
                 <span
-                    className="panel__dice"
-                    style={{ opacity: (props.playerTurn && props.dice) ? "100%" : "0%" }}
+                    className="panel__notification"
+                    style={{ opacity: (props.playerTurn && props.notification) ? "100%" : "0%" }}
                 >
-                    <div className="panel__dice-text">{props.dice}</div>
+                    <div className="panel__notification-content">
+                        {
+                            props.notification in Development
+                                ? <i className={`${defaultIcons[props.notification].join(" ")}`}></i>
+                                : props.notification
+                        }
+                    </div>
                 </span>
             </div>
         </div>

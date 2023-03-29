@@ -12,10 +12,11 @@ interface CardProps {
     index?: number;
     hidden?: boolean;
     toggleSelect?: (card: CardType, selected: boolean) => boolean;
+    action?: () => void;
 };
 
 const Card = (props: CardProps) => {
-    const [selected, setSelected] = useState<boolean>(false);
+    const [selected, setSelected] = useState<boolean>();
     const [hidden, setHidden] = useState<boolean>();
 
     useEffect(() => {
@@ -67,7 +68,13 @@ const Card = (props: CardProps) => {
         <div
             id={`${props.card}-${props.index}`}
             className={`card${selected ? " card--selected" : ""}`}
-            onClick={(e) => props.toggleSelect ? selectCard(e) : {}}
+            onClick={(e) => {
+                props.action
+                    ? props.action()
+                    : props.toggleSelect
+                        ? selectCard(e)
+                        : {}
+            }}
         >
             <CardContent />
         </div>

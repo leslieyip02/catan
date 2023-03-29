@@ -83,7 +83,7 @@
     align-items: center;
 }
 
-.panel__dice {
+.panel__notification {
     position: absolute;
     top: calc(50% - 1.5rem);
     left: calc(100% + 0.8rem);
@@ -95,7 +95,7 @@
     transition: opacity 0.2s;
 }
 
-.panel__dice-text {
+.panel__notification-content {
     margin: auto;
     width: 3rem;
     color: #eeeeee;
@@ -103,7 +103,7 @@
     text-align: center;
 }
 
-.panel__dice::before {
+.panel__notification::before {
     content: "";
     position: absolute;
     top: calc(50% - 0.5rem);
