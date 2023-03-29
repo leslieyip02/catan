@@ -19,6 +19,9 @@ const Lobby = (props: LobbyProps) => {
     const [userName, setUserName] = useState<string>("");
     const [roomId, setRoomId] = useState<string>("");
 
+    const [userNameTooltipText, setUserNameTooltipText] = useState<string>();
+    const [clipboardTooltipText, setClipboardTooltipText] = useState<string>();
+
     // sign in on page load and get user ref
     useEffect(() => {
         onAuthStateChanged(props.auth, (user) => {
@@ -38,6 +41,34 @@ const Lobby = (props: LobbyProps) => {
 
         signInAnonymously(props.auth);
     }, []);
+
+    useEffect(() => {
+        if (userNameTooltipText) {
+            let userNameTooltip: HTMLSpanElement = document
+                .querySelector("#user-name-tooltip");
+            userNameTooltip.style.visibility = "visible";
+
+            console.log(userNameTooltip)
+
+            setTimeout(() => {
+                userNameTooltip.style.visibility = "hidden";
+                setUserNameTooltipText("");
+            }, 2000);
+        }
+    }, [userNameTooltipText]);
+
+    useEffect(() => {
+        if (clipboardTooltipText) {
+            let clipboardTooltip: HTMLSpanElement = document
+                .querySelector("#clipboard-tooltip");
+            clipboardTooltip.style.visibility = "visible";
+
+            setTimeout(() => {
+                clipboardTooltip.style.visibility = "hidden";
+                setClipboardTooltipText("");
+            }, 2000);
+        }
+    }, [clipboardTooltipText]);
 
     function createRoom() {
         // create new ref for the room
@@ -60,6 +91,16 @@ const Lobby = (props: LobbyProps) => {
     };
 
     function joinRoom() {
+        if (roomId.length === 0) {
+            setUserNameTooltipText("Nothing to join")
+            return;
+        }
+
+        if (userName.length > 10) {
+            setUserNameTooltipText("Username should be ≤ 10 characters")
+            return;
+        }
+
         // cannot join a non-existent room
         if (roomId) {
             // append user
@@ -105,6 +146,16 @@ const Lobby = (props: LobbyProps) => {
         }
     };
 
+    function copyToClipboard() {
+        if (roomId.length === 0) {
+            setClipboardTooltipText("Nothing to copy");
+            return;
+        }
+
+        navigator.clipboard.writeText(roomId);
+        setClipboardTooltipText("Copied!");
+    }
+
     return (
         <div>
             <form className="form" onSubmit={(e) => e.preventDefault()}>
@@ -114,7 +165,15 @@ const Lobby = (props: LobbyProps) => {
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                     />
-                    <i className="fa-solid fa-user" />
+                    <i className="fa-solid fa-user">
+                        <span
+                            id="user-name-tooltip"
+                            className="tooltip"
+                            style={{ visibility: "hidden" }}
+                        >
+                            {userNameTooltipText}
+                        </span>
+                    </i>
                 </div>
                 <div className="form__input">
                     <input
@@ -124,8 +183,16 @@ const Lobby = (props: LobbyProps) => {
                     />
                     <i
                         className="fa-solid fa-paste"
-                        onClick={() => navigator.clipboard.writeText(roomId)}
-                    />
+                        onClick={copyToClipboard}
+                    >
+                        <span
+                            id="clipboard-tooltip"
+                            className="tooltip"
+                            style={{ visibility: "hidden" }}
+                        >
+                            {clipboardTooltipText}
+                        </span>
+                    </i>
                 </div>
                 <div className="form__buttons">
                     <button onClick={createRoom}>Create Room</button>

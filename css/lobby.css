@@ -11,15 +11,16 @@
 }
 
 .form__input > i {
+    position: relative;
     font-size: 1.6rem;
     margin: auto;
     padding: 0.2rem;
-    opacity: 100%;
 }
 
 .form__input > .fa-paste:hover {
-    opacity: 50%;
+    cursor: pointer;
     scale: 1.1;
+    color: #777777;
 }
 
 .form__buttons {
