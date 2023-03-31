@@ -10,8 +10,8 @@ let defaultIcons: Record<string, string[]> = {
     [Resource.wool]: ["fa-solid", "fa-cloud"],
     [Development.knight]: ["fa-solid", "fa-chess-knight"],
     [Development.roadBuilding]: ["fa-solid", "fa-road"],
-    [Development.yearOfPlenty]: ["fa-solid", "fa-person-digging"],
-    [Development.monopoly]: ["fa-solid", "fa-people-robbery"],
+    [Development.yearOfPlenty]: ["fa-solid fa-coins"],
+    [Development.monopoly]: ["fa-solid", "fa-hand-holding-dollar"],
     [Development.victoryPoint]: ["fa-solid", "fa-trophy"],
     "unknown": ["fa-solid", "fa-circle-question"],
 };

@@ -39,7 +39,7 @@
 }
 
 .card__icon {
-    font-size: var(--tile-width);
+    font-size: calc(var(--tile-width) * 0.8);
     margin-bottom: 0.5rem;
     color: #eeeeee;
 }
