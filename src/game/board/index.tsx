@@ -29,6 +29,7 @@ interface BoardProps {
     needToSteal: boolean;
     allDiscarded: boolean;
     ongoingTrade: boolean;
+    updateNeedToBuildRoads: (needToBuildRoads: boolean) => void;
     endTurn: () => void;
     placeRobber?: (x: number, y: number) => void;
 };
@@ -76,6 +77,11 @@ const Board = (props: BoardProps) => {
                             updatedIntersections[y][x].roads[i].color = color;
                             break;
                         }
+                    }
+
+                    // probably not the best way to handle road building card
+                    if (props.quota.current[Infrastructure.road] === 0) {
+                        props.updateNeedToBuildRoads(false);
                     }
                 } else {
                     updatedIntersections[y][x].owner = owner;

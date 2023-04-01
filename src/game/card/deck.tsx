@@ -16,6 +16,7 @@ interface DeckProps {
     playerTurn?: boolean;
     action?: (cards: CardHand) => void;
     playKnightCard?: () => void;
+    playRoadBuildingCard?: () => void;
 };
 
 const Deck = (props: DeckProps) => {
@@ -143,6 +144,9 @@ const Deck = (props: DeckProps) => {
             switch (card) {
                 case Development.knight:
                     return props.playKnightCard;
+
+                case Development.roadBuilding:
+                    return props.playRoadBuildingCard;
 
                 default:
                     return null;

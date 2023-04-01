@@ -22,12 +22,14 @@ interface PanelProps extends PlayerData {
     needToSteal: boolean;
     allDiscarded: boolean;
     ongoingTrade: boolean;
+    needToBuildRoads: boolean;
     rollDice?: () => void;
     stealCards: (targetId: string, cards: CardHand) => void;
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
     buyCard?: () => Promise<string>;
     playKnightCard?: () => void;
+    playRoadBuildingCard?: () => void;
     endTurn?: () => void;
 };
 
@@ -71,6 +73,7 @@ const UserPanel = (props: PanelProps) => {
             thisPlayer: props.thisPlayer,
             playerTurn: props.playerTurn,
             playKnightCard: props.playKnightCard,
+            playRoadBuildingCard: props.playRoadBuildingCard,
         };
     }
 
@@ -119,7 +122,8 @@ const UserPanel = (props: PanelProps) => {
 
         let canBuy = props.playerTurn && rolled &&
             !props.setupTurn && !props.canPlaceRobber &&
-            !props.needToSteal && !props.ongoingTrade;
+            !props.needToSteal && !props.ongoingTrade &&
+            !props.needToBuildRoads;
 
         return (
             <button
@@ -144,7 +148,8 @@ const UserPanel = (props: PanelProps) => {
         // basic 4 : 1 trade
         let canTrade = props.playerTurn && rolled &&
             !props.setupTurn && !props.canPlaceRobber &&
-            !props.needToSteal && !props.ongoingTrade;
+            !props.needToSteal && !props.ongoingTrade &&
+            !props.needToBuildRoads;
 
         return (
             <button
@@ -213,7 +218,8 @@ const UserPanel = (props: PanelProps) => {
 
         let canEnd = props.playerTurn && !props.setupTurn &&
             !props.canPlaceRobber && !props.ongoingTrade &&
-            !props.needToSteal && props.allDiscarded && rolled;
+            !props.needToSteal && props.allDiscarded && 
+            !props.needToBuildRoads && rolled;
 
         return (
             <button

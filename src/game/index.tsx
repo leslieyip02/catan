@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ref, get, set, child, onValue, Database, DatabaseReference, off, increment, update } from "firebase/database";
 import Board from "./board";
 import Chat from "./chat";
@@ -19,6 +19,7 @@ import { CardType } from './card/';
 import { defaultInfrastructure } from './board/default';
 import Development, { DevelopmentStock } from './card/development';
 import { defaultDevelopmentCards } from './card/default';
+import Infrastructure from './board/infrastructure';
 
 interface GameProps {
     db: Database;
@@ -51,6 +52,7 @@ const Game = (props: GameProps) => {
     const [needToSteal, setNeedToSteal] = useState<boolean>();
     const [tradeOffer, setTradeOffer] = useState<TradeOffer>();
     const [ongoingTrade, setOngoingTrade] = useState<boolean>(false);
+    const [needToBuildRoads, setNeedToBuildRoads] = useState<boolean>(false);
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -300,8 +302,18 @@ const Game = (props: GameProps) => {
         set(child(props.roomRef, "notification"), Development.knight);
 
         // TODO: track how many knight cards played for largest army
-        
+
         setCanPlaceRobber(true);
+    }
+
+    function playRoadBuildingCard() {
+        // can build 2 roads
+        quota.current[Infrastructure.road] = 2;
+        
+        update(child(props.userRef, "cards"), { "roadBuilding": increment(-1) });
+        set(child(props.roomRef, "notification"), Development.roadBuilding);
+        
+        setNeedToBuildRoads(true);
     }
 
     function isRobbed(tile: Coordinate): boolean {
@@ -484,6 +496,7 @@ const Game = (props: GameProps) => {
             rollDice: rollDice,
             buyCard: buyCard,
             playKnightCard: playKnightCard,
+            playRoadBuildingCard: playRoadBuildingCard,
             endTurn: endTurn,
         } : {};
 
@@ -498,6 +511,7 @@ const Game = (props: GameProps) => {
             needToSteal: needToSteal,
             allDiscarded: allDiscarded,
             ongoingTrade: ongoingTrade,
+            needToBuildRoads: needToBuildRoads,
             stealCards: stealCards,
             offerTrade: offerTrade,
             ...thisPlayerActions,
@@ -517,6 +531,7 @@ const Game = (props: GameProps) => {
             needToSteal: needToSteal,
             allDiscarded: allDiscarded,
             ongoingTrade: ongoingTrade,
+            updateNeedToBuildRoads: setNeedToBuildRoads,
             endTurn: endTurn,
             placeRobber: canPlaceRobber ? placeRobber : null,
         };

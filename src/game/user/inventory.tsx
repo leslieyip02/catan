@@ -12,6 +12,7 @@ interface InventoryProps {
     thisPlayer: boolean;
     playerTurn: boolean;
     playKnightCard?: () => void;
+    playRoadBuildingCard?: () => void;
 };
 
 const Inventory = (props: InventoryProps) => {
@@ -33,6 +34,7 @@ const Inventory = (props: InventoryProps) => {
             drop: true,
             playerTurn: props.playerTurn,
             playKnightCard: props.playKnightCard,
+            playRoadBuildingCard: props.playRoadBuildingCard,
         };
     }
 

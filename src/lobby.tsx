@@ -48,8 +48,6 @@ const Lobby = (props: LobbyProps) => {
                 .querySelector("#user-name-tooltip");
             userNameTooltip.style.visibility = "visible";
 
-            console.log(userNameTooltip)
-
             setTimeout(() => {
                 userNameTooltip.style.visibility = "hidden";
                 setUserNameTooltipText("");
