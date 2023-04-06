@@ -120,7 +120,7 @@ const UserPanel = (props: PanelProps) => {
                 .catch((rejected) => setTooltipText(rejected));
         }
 
-        let canBuy = props.playerTurn && rolled &&
+        let canBuy = props.buyCard && props.playerTurn && rolled &&
             !props.setupTurn && !props.canPlaceRobber &&
             !props.needToSteal && !props.ongoingTrade &&
             !props.needToBuildRoads;
@@ -132,7 +132,11 @@ const UserPanel = (props: PanelProps) => {
                 onClick={buyCard}
             >
                 <i className="fa-solid fa-cart-shopping"></i>
-                <span className="tooltip">Buy Card</span>
+                <span className="tooltip">
+                    {
+                        props.buyCard ? "Buy Card" : "No cards left"
+                    }
+                </span>
                 <span
                     id={`buy-${props.id}`}
                     className="tooltip"
@@ -218,7 +222,7 @@ const UserPanel = (props: PanelProps) => {
 
         let canEnd = props.playerTurn && !props.setupTurn &&
             !props.canPlaceRobber && !props.ongoingTrade &&
-            !props.needToSteal && props.allDiscarded && 
+            !props.needToSteal && props.allDiscarded &&
             !props.needToBuildRoads && rolled;
 
         return (

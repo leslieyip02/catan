@@ -166,6 +166,13 @@ const Game = (props: GameProps) => {
             }
         });
 
+        // listen for development card purchase
+        onValue(child(props.roomRef, "stock"), (newStock) => {
+            if (newStock.val()) {
+                stock.current = newStock.val();
+            }
+        });
+
         // listen for trade offers made to this user
         onValue(child(props.userRef, "tradeOffer"), (newOffer) => {
             if (newOffer.val()) {
@@ -309,10 +316,10 @@ const Game = (props: GameProps) => {
     function playRoadBuildingCard() {
         // can build 2 roads
         quota.current[Infrastructure.road] = 2;
-        
+
         update(child(props.userRef, "cards"), { "roadBuilding": increment(-1) });
         set(child(props.roomRef, "notification"), Development.roadBuilding);
-        
+
         setNeedToBuildRoads(true);
     }
 
@@ -470,7 +477,7 @@ const Game = (props: GameProps) => {
         }
 
         let card = availableCards[randomInt(0, availableCards.length)];
-        stock.current[card]--;
+        update(child(props.roomRef, "stock"), { [card]: increment(-1) });
 
         update(child(props.userRef, "cards"), {
             [Resource.grain]: increment(-1),
@@ -478,6 +485,7 @@ const Game = (props: GameProps) => {
             [Resource.wool]: increment(-1),
             [card]: increment(1),
         });
+
         return Promise.resolve(card);
     }
 
@@ -492,9 +500,11 @@ const Game = (props: GameProps) => {
 
     function panelProps(playerId: string, playerIndex: number) {
         let thisPlayer = playerId === props.userRef.key
+        let canBuyCard = Object.values(stock.current)
+            .reduce((c1, c2) => c1 + c2, 0) !== 0;
         let thisPlayerActions = thisPlayer ? {
             rollDice: rollDice,
-            buyCard: buyCard,
+            buyCard: canBuyCard ? buyCard : null,
             playKnightCard: playKnightCard,
             playRoadBuildingCard: playRoadBuildingCard,
             endTurn: endTurn,

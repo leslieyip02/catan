@@ -1,4 +1,3 @@
-import { CardType } from '.';
 enum Development {
     knight = "knight",
     roadBuilding = "roadBuilding",

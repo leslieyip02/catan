@@ -3,6 +3,7 @@ import { ref, get, set, update, push, child, Database, DatabaseReference, onDisc
 import { signInAnonymously, onAuthStateChanged, Auth } from "firebase/auth";
 import { UserData, defaultUserQuotas } from "./game/user";
 import { defaultTerrains, defaultRolls } from "./game/board/default";
+import { defaultDevelopmentCards } from "./game/card/default";
 
 interface LobbyProps {
     auth: Auth;
@@ -76,6 +77,7 @@ const Lobby = (props: LobbyProps) => {
             started: false,
             terrains: defaultTerrains,
             rolls: defaultRolls,
+            stock: defaultDevelopmentCards,
         });
 
         setRoomId(newRoomRef.key);
