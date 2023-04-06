@@ -8,7 +8,7 @@ import Inventory from './inventory';
 import Resource from "../card/resource";
 import Harbor from "../board/harbor";
 import { DatabaseReference } from "firebase/database";
-import Development from "../card/development";
+import Development, { DevelopmentCardActions } from "../card/development";
 import { defaultIcons } from "../card/default";
 
 interface PanelProps extends PlayerData {
@@ -28,8 +28,7 @@ interface PanelProps extends PlayerData {
     offerTrade: (targetId: string, offering: CardHand,
         requesting: CardHand) => Promise<string>;
     buyCard?: () => Promise<string>;
-    playKnightCard?: () => void;
-    playRoadBuildingCard?: () => void;
+    cardActions?: DevelopmentCardActions;
     endTurn?: () => void;
 };
 
@@ -72,8 +71,7 @@ const UserPanel = (props: PanelProps) => {
             cardCount: cardCount,
             thisPlayer: props.thisPlayer,
             playerTurn: props.playerTurn,
-            playKnightCard: props.playKnightCard,
-            playRoadBuildingCard: props.playRoadBuildingCard,
+            cardActions: props.cardActions,
         };
     }
 
@@ -207,7 +205,7 @@ const UserPanel = (props: PanelProps) => {
                         hidden={true}
                         selectQuota={1}
                         actionLabel={"Steal 1"}
-                        action={stealCard}
+                        deckAction={stealCard}
                     />
                 </div>
             </div>

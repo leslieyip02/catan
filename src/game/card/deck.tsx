@@ -4,7 +4,7 @@ import { CardHand, countCards, developmentCards, resourceCards } from "./hand";
 import Resource from './resource';
 import { CardType } from '.';
 import { randomInt } from '../random';
-import Development, { developmentLabels } from './development';
+import Development, { DevelopmentCardActions, developmentLabels } from './development';
 
 interface DeckProps {
     cards: CardHand;
@@ -14,9 +14,8 @@ interface DeckProps {
     selectQuota?: number;
     actionLabel?: string;
     playerTurn?: boolean;
-    action?: (cards: CardHand) => void;
-    playKnightCard?: () => void;
-    playRoadBuildingCard?: () => void;
+    deckAction?: (cards: CardHand) => void;
+    cardActions?: DevelopmentCardActions;
 };
 
 const Deck = (props: DeckProps) => {
@@ -38,13 +37,13 @@ const Deck = (props: DeckProps) => {
 
     useEffect(() => {
         // stacking disallowed when an action needs to be taken
-        if (props.action) {
+        if (props.deckAction) {
             selected.current = {};
         }
-    }, [props.action]);
+    }, [props.deckAction]);
 
     function toggleSelect(card: Resource, select: boolean): boolean {
-        if (!props.action) {
+        if (!props.deckAction) {
             return false;
         }
 
@@ -87,7 +86,7 @@ const Deck = (props: DeckProps) => {
                 setHidden(false);
             }
 
-            props.action(selected.current);
+            props.deckAction(selected.current);
         }
 
         return (
@@ -141,16 +140,7 @@ const Deck = (props: DeckProps) => {
                 return null;
             }
 
-            switch (card) {
-                case Development.knight:
-                    return props.playKnightCard;
-
-                case Development.roadBuilding:
-                    return props.playRoadBuildingCard;
-
-                default:
-                    return null;
-            }
+            return props.cardActions[card as Development] || null;
         }
 
         return (
@@ -159,7 +149,7 @@ const Deck = (props: DeckProps) => {
                     Object.entries(cards)
                         .filter(([_, quantity]) => quantity > 0)
                         .map(([card, quantity]) => {
-                            return (stack && !props.action)
+                            return (stack && !props.deckAction)
                                 ? <Card
                                     key={`stacked-${card}`}
                                     card={card as CardType}
@@ -191,7 +181,7 @@ const Deck = (props: DeckProps) => {
         <div className={`deck${props.drop ? " deck--drop" : ""}`}>
             {
                 countCards(props.cards) > 0 && (
-                    props.action
+                    props.deckAction
                         ? <ActionButton />
                         : <StackButton />
                 )

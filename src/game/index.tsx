@@ -17,7 +17,7 @@ import Deck from './card/deck';
 import Card from './card/index';
 import { CardType } from './card/';
 import { defaultInfrastructure } from './board/default';
-import Development, { DevelopmentStock } from './card/development';
+import Development, { DevelopmentCardActions, DevelopmentStock } from './card/development';
 import { defaultDevelopmentCards } from './card/default';
 import Infrastructure from './board/infrastructure';
 
@@ -53,6 +53,7 @@ const Game = (props: GameProps) => {
     const [tradeOffer, setTradeOffer] = useState<TradeOffer>();
     const [ongoingTrade, setOngoingTrade] = useState<boolean>(false);
     const [needToBuildRoads, setNeedToBuildRoads] = useState<boolean>(false);
+    const [needToDrawCards, setNeedToDrawCards] = useState<boolean>(false);
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -304,25 +305,6 @@ const Game = (props: GameProps) => {
         }
     }
 
-    function playKnightCard() {
-        update(child(props.userRef, "cards"), { "knight": increment(-1) });
-        set(child(props.roomRef, "notification"), Development.knight);
-
-        // TODO: track how many knight cards played for largest army
-
-        setCanPlaceRobber(true);
-    }
-
-    function playRoadBuildingCard() {
-        // can build 2 roads
-        quota.current[Infrastructure.road] = 2;
-
-        update(child(props.userRef, "cards"), { "roadBuilding": increment(-1) });
-        set(child(props.roomRef, "notification"), Development.roadBuilding);
-
-        setNeedToBuildRoads(true);
-    }
-
     function isRobbed(tile: Coordinate): boolean {
         let robbed = false;
 
@@ -489,7 +471,45 @@ const Game = (props: GameProps) => {
         return Promise.resolve(card);
     }
 
-    function endTurn() {
+    function playKnightCard() {
+        update(child(props.userRef, "cards"), { [Development.knight]: increment(-1) });
+        set(child(props.roomRef, "notification"), Development.knight);
+
+        // TODO: track how many knight cards played for largest army
+
+        setCanPlaceRobber(true);
+    }
+
+    function playRoadBuildingCard() {
+        // can build 2 roads
+        quota.current[Infrastructure.road] = 2;
+
+        update(child(props.userRef, "cards"), { [Development.roadBuilding]: increment(-1) });
+        set(child(props.roomRef, "notification"), Development.roadBuilding);
+
+        setNeedToBuildRoads(true);
+    }
+
+    function drawCards(cards: CardHand) {
+        // draw 2 cards for year of plenty card
+        if (countCards(cards) !== 2) {
+            return;
+        }
+
+        let drawCardsUpdate = Object.fromEntries(Object.entries(cards)
+            .map(([card, quantity]) => [card, increment(quantity)]));
+        update(child(props.userRef, "cards"), drawCardsUpdate);
+        setNeedToDrawCards(false);
+    }
+
+    function playYearOfPlentyCard() {
+        update(child(props.userRef, "cards"), { [Development.yearOfPlenty]: increment(-1) });
+        set(child(props.roomRef, "notification"), Development.yearOfPlenty);
+
+        setNeedToDrawCards(true);
+    }
+
+    function endTurn(): void {
         if (isPlayerTurn()) {
             // reset roll so the listener can detect if the same number gets rolled
             set(child(props.roomRef, "roll"), 0);
@@ -502,11 +522,15 @@ const Game = (props: GameProps) => {
         let thisPlayer = playerId === props.userRef.key
         let canBuyCard = Object.values(stock.current)
             .reduce((c1, c2) => c1 + c2, 0) !== 0;
+        let cardActions: DevelopmentCardActions = {
+            [Development.knight]: playKnightCard,
+            [Development.roadBuilding]: playRoadBuildingCard,
+            [Development.yearOfPlenty]: playYearOfPlentyCard,
+        };
         let thisPlayerActions = thisPlayer ? {
             rollDice: rollDice,
             buyCard: canBuyCard ? buyCard : null,
-            playKnightCard: playKnightCard,
-            playRoadBuildingCard: playRoadBuildingCard,
+            cardActions: cardActions,
             endTurn: endTurn,
         } : {};
 
@@ -571,7 +595,25 @@ const Game = (props: GameProps) => {
                     drop={true}
                     selectQuota={needToDiscard}
                     actionLabel={`Discard ${needToDiscard}`}
-                    action={discardCards}
+                    deckAction={discardCards}
+                />
+            </div>
+        );
+    }
+
+    const DrawCardsMenu = () => {
+        let drawPile: CardHand = Object.fromEntries(Object.keys(Resource)
+            .filter((card) => card !== Resource.none)
+            .map((card) => [card, 2]));
+
+        return (
+            <div className="overlay menu" style={{ display: "flex" }}>
+                <Deck
+                    cards={drawPile}
+                    drop={true}
+                    selectQuota={2}
+                    actionLabel={"Draw 2"}
+                    deckAction={drawCards}
                 />
             </div>
         );
@@ -602,6 +644,10 @@ const Game = (props: GameProps) => {
 
             {
                 needToDiscard > 0 && <DiscardMenu />
+            }
+
+            {
+                needToDrawCards && <DrawCardsMenu />
             }
 
             <Board {...props} {...boardProps()} />

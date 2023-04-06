@@ -10,6 +10,10 @@ type DevelopmentStock = {
     [key in Development]?: number;
 };
 
+type DevelopmentCardActions = {
+    [key in Development]?: () => void
+};
+
 let developmentLabels: Record<string, string> = {
     [Development.roadBuilding]: "road building",
     [Development.yearOfPlenty]: "year of plenty",
@@ -17,4 +21,4 @@ let developmentLabels: Record<string, string> = {
 };
 
 export default Development;
-export { DevelopmentStock, developmentLabels };
+export { DevelopmentStock, DevelopmentCardActions, developmentLabels };

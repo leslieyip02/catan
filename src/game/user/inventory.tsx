@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Deck from '../card/deck';
 import { CardHand } from "../card/hand";
-import Development from '../card/development';
+import Development, { DevelopmentCardActions } from '../card/development';
 
 interface InventoryProps {
     id: string;
@@ -11,8 +11,7 @@ interface InventoryProps {
     cardCount: number;
     thisPlayer: boolean;
     playerTurn: boolean;
-    playKnightCard?: () => void;
-    playRoadBuildingCard?: () => void;
+    cardActions?: DevelopmentCardActions;
 };
 
 const Inventory = (props: InventoryProps) => {
@@ -33,8 +32,7 @@ const Inventory = (props: InventoryProps) => {
             cards: props.cards,
             drop: true,
             playerTurn: props.playerTurn,
-            playKnightCard: props.playKnightCard,
-            playRoadBuildingCard: props.playRoadBuildingCard,
+            cardActions: props.cardActions,
         };
     }
 
