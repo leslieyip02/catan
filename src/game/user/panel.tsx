@@ -278,7 +278,9 @@ const UserPanel = (props: PanelProps) => {
                     <div className="panel__notification-content">
                         {
                             props.notification in Development
-                                ? <i className={`${defaultIcons[props.notification].join(" ")}`}></i>
+                                ? <i className={`${defaultIcons[props.notification].join(" ")}`}>
+                                    <span className="tooltip">{props.notification}</span>
+                                </i>
                                 : props.notification
                         }
                     </div>

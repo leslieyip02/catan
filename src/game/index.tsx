@@ -54,6 +54,7 @@ const Game = (props: GameProps) => {
     const [ongoingTrade, setOngoingTrade] = useState<boolean>(false);
     const [needToBuildRoads, setNeedToBuildRoads] = useState<boolean>(false);
     const [needToDrawCards, setNeedToDrawCards] = useState<boolean>(false);
+    const [needToMonopoly, setNeedToMonopoly] = useState<boolean>(false);
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -75,9 +76,9 @@ const Game = (props: GameProps) => {
                 get(child(props.roomRef, "users"))
                     .then((currentUsers) => {
                         let userIds = Object.keys(currentUsers.val());
-                        let userRefs = userIds.map((userId) => ref(props.db, `users/${userId}`))
+                        let userRefs = userIds.map((userId) => ref(props.db, `users/${userId}`));
                         setPlayerRefs(userRefs);
-                        setPlayerCount(userIds.length)
+                        setPlayerCount(userIds.length);
 
                         // for each user, attach a listener for their card updates
                         for (let userRef of userRefs) {
@@ -509,6 +510,41 @@ const Game = (props: GameProps) => {
         setNeedToDrawCards(true);
     }
 
+    function stealAllResources(cards: CardHand) {
+        // steal all resources of a certain type from all players for monopoly
+        let resource = Object.entries(cards)
+            .filter(([_, quantity]) => quantity != 0)[0][0];
+
+        let total = 0;
+        for (let player of players) {
+            if (player.id === props.userRef.key) {
+                continue;
+            }
+
+            let quantity = player.cards[resource as Resource];
+            if (!quantity) {
+                continue;
+            }
+            
+            total += quantity;
+
+            tradeResources(ref(props.db, `users/${player.id}`),
+                { offering: { [resource]: quantity }, requesting: {} });
+        }
+
+        tradeResources(props.userRef,
+            { offering: {}, requesting: { [resource]: total } });
+
+        setNeedToMonopoly(false);
+    }
+
+    function playMonopolyCard() {
+        update(child(props.userRef, "cards"), { [Development.monopoly]: increment(-1) });
+        set(child(props.roomRef, "notification"), Development.monopoly);
+
+        setNeedToMonopoly(true);
+    }
+
     function endTurn(): void {
         if (isPlayerTurn()) {
             // reset roll so the listener can detect if the same number gets rolled
@@ -522,11 +558,14 @@ const Game = (props: GameProps) => {
         let thisPlayer = playerId === props.userRef.key
         let canBuyCard = Object.values(stock.current)
             .reduce((c1, c2) => c1 + c2, 0) !== 0;
+
         let cardActions: DevelopmentCardActions = {
             [Development.knight]: playKnightCard,
             [Development.roadBuilding]: playRoadBuildingCard,
             [Development.yearOfPlenty]: playYearOfPlentyCard,
+            [Development.monopoly]: playMonopolyCard,
         };
+
         let thisPlayerActions = thisPlayer ? {
             rollDice: rollDice,
             buyCard: canBuyCard ? buyCard : null,
@@ -619,6 +658,24 @@ const Game = (props: GameProps) => {
         );
     }
 
+    const MonopolyCardMenu = () => {
+        let resourceCards: CardHand = Object.fromEntries(Object.keys(Resource)
+            .filter((card) => card !== Resource.none)
+            .map((card) => [card, 1]));
+
+        return (
+            <div className="overlay menu" style={{ display: "flex" }}>
+                <Deck
+                    cards={resourceCards}
+                    drop={true}
+                    selectQuota={1}
+                    actionLabel={"Choose 1 resource"}
+                    deckAction={stealAllResources}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="game">
             {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
@@ -648,6 +705,10 @@ const Game = (props: GameProps) => {
 
             {
                 needToDrawCards && <DrawCardsMenu />
+            }
+
+            {
+                needToMonopoly && <MonopolyCardMenu />
             }
 
             <Board {...props} {...boardProps()} />

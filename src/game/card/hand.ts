@@ -6,12 +6,12 @@ type CardHand = {
     [key in CardType]?: number;
 };
 
-function resourceCards(cards: CardHand) {
+function resourceCards(cards: CardHand): CardHand {
     return Object.fromEntries(Object.entries(cards || {})
         .filter(([card, _]) => card in Resource));
 }
 
-function developmentCards(cards: CardHand) {
+function developmentCards(cards: CardHand) : CardHand {
     return Object.fromEntries(Object.entries(cards || {})
         .filter(([card, _]) => card in Development));
 }

@@ -21,8 +21,7 @@ function hasRequiredCards(cards: CardHand, required: CardHand): boolean {
     return true;
 }
 
-function tradeResources(targetRef: DatabaseReference,
-    offer: TradeOffer) {
+function tradeResources(targetRef: DatabaseReference, offer: TradeOffer) {
     let transfer: Record<string, number> = {};
 
     for (let [card, quantity] of Object.entries(offer.offering)) {
