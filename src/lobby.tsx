@@ -130,6 +130,7 @@ const Lobby = (props: LobbyProps) => {
                                     name: userName || "Anonymous",
                                     cards: {},
                                     resourceRolls: [],
+                                    knightCardsPlayed: 0,
                                     ...defaultUserQuotas,
                                 };
 

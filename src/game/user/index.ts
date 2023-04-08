@@ -9,6 +9,7 @@ interface PlayerData {
     settlements: number;
     cities: number;
     roads: number;
+    knightCardsPlayed: number;
     canStealFrom?: boolean;
 };
 

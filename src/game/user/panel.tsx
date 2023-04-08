@@ -23,6 +23,7 @@ interface PanelProps extends PlayerData {
     allDiscarded: boolean;
     ongoingTrade: boolean;
     needToBuildRoads: boolean;
+    knightCardsPlayed: number;
     rollDice?: () => void;
     stealCards: (targetId: string, cards: CardHand) => void;
     offerTrade: (targetId: string, offering: CardHand,
@@ -239,10 +240,18 @@ const UserPanel = (props: PanelProps) => {
         <div id={`panel-${props.id}`} className="panel">
             <div className="panel__info">
                 <div className="panel__row">
-                    <div className="panel__name">{props.name}</div>
+                    <div className="panel__name">
+                        {props.name}
+                        <span>
+                            {props.knightCardsPlayed}x
+                            <i className="fa-solid fa-chess-knight"></i>
+                        </span>
+                    </div>
+
                     {
                         props.playerTurn && <i className="fa-solid fa-gamepad"></i>
                     }
+
                 </div>
                 <div className="panel__row">
                     <Inventory {...inventoryProps()} />
@@ -286,7 +295,7 @@ const UserPanel = (props: PanelProps) => {
                     </div>
                 </span>
             </div>
-        </div>
+        </div >
     );
 }
 

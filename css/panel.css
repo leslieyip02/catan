@@ -1,5 +1,5 @@
 .panels {
-    width: 40%;
+    width: 40vw;
     overflow: visible;
     padding-top: calc(var(--road-width));
     padding-bottom: calc(var(--road-width));
@@ -34,8 +34,11 @@
 .panel__name {
     width: 75%;
     max-width: 75%;
-    font-size: 2rem;
     margin-right: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 2rem;
 }
 
 .panel__cards {

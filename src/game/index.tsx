@@ -90,6 +90,13 @@ const Game = (props: GameProps) => {
                                         let newPlayerData = [...currentPlayers];
                                         for (let i = 0; i < currentPlayers.length; i++) {
                                             if (newPlayerData[i].id === userRef.key) {
+                                                // listen for knight cards played here 
+                                                // so another listener doesn't need to be attached
+                                                if (newPlayerData[i].cards[Development.knight] >
+                                                    newCards[Development.knight]) {
+                                                    newPlayerData[i].knightCardsPlayed++;
+                                                }
+
                                                 newPlayerData[i].cards = newCards;
                                                 break;
                                             }
@@ -200,6 +207,7 @@ const Game = (props: GameProps) => {
                             settlements: userData.settlements,
                             cities: userData.cities,
                             roads: userData.roads,
+                            knightCardsPlayed: userData.knightCardsPlayed,
                         };
                     });
 
@@ -473,10 +481,9 @@ const Game = (props: GameProps) => {
     }
 
     function playKnightCard() {
-        update(child(props.userRef, "cards"), { [Development.knight]: increment(-1) });
+        update(child(props.userRef, "cards"), { [Development.knight]: increment(-1) }); ``
+        update(props.userRef, { "knightCardsPlayed": increment(1) });
         set(child(props.roomRef, "notification"), Development.knight);
-
-        // TODO: track how many knight cards played for largest army
 
         setCanPlaceRobber(true);
     }
@@ -525,7 +532,7 @@ const Game = (props: GameProps) => {
             if (!quantity) {
                 continue;
             }
-            
+
             total += quantity;
 
             tradeResources(ref(props.db, `users/${player.id}`),
@@ -585,6 +592,7 @@ const Game = (props: GameProps) => {
             allDiscarded: allDiscarded,
             ongoingTrade: ongoingTrade,
             needToBuildRoads: needToBuildRoads,
+            knightCardsPlayed: players[playerIndex].knightCardsPlayed,
             stealCards: stealCards,
             offerTrade: offerTrade,
             ...thisPlayerActions,
