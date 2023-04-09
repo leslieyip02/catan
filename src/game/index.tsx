@@ -18,7 +18,7 @@ import Card from './card/index';
 import { CardType } from './card/';
 import { defaultInfrastructure } from './board/default';
 import Development, { DevelopmentCardActions, DevelopmentStock } from './card/development';
-import { defaultDevelopmentCards } from './card/default';
+import { defaultDevelopmentCards, defaultLongestRoad, defaultLargestArmy } from './card/default';
 import Infrastructure from './board/infrastructure';
 
 interface GameProps {
@@ -55,6 +55,7 @@ const Game = (props: GameProps) => {
     const [needToBuildRoads, setNeedToBuildRoads] = useState<boolean>(false);
     const [needToDrawCards, setNeedToDrawCards] = useState<boolean>(false);
     const [needToMonopoly, setNeedToMonopoly] = useState<boolean>(false);
+    const [longestRoad, setLongestRoad] = useState<number>(defaultLongestRoad);
     const [longestRoadOwner, setLongestRoadOwner] = useState<string>();
     const [largestArmyOwner, setLargestArmyOwner] = useState<string>();
 
@@ -62,7 +63,7 @@ const Game = (props: GameProps) => {
     const cards = useRef<CardHand>({});
     const quota = useRef<InfrastructureQuota>(defaultInfrastructure);
     const stock = useRef<DevelopmentStock>(defaultDevelopmentCards);
-    const largestArmy = useRef<number>(2);
+    const largestArmy = useRef<number>(defaultLargestArmy);
 
     useEffect(() => {
         // check if this user is the host
@@ -185,7 +186,13 @@ const Game = (props: GameProps) => {
             }
         });
 
-        // listen for longest road owner
+        // listen for longest road
+        onValue(child(props.roomRef, "longestRoad"), (newLongestRoad) => {
+            if (newLongestRoad.val()) {
+                setLongestRoad(newLongestRoad.val());
+            }
+        });
+
         onValue(child(props.roomRef, "longestRoadOwner"), (newOwner) => {
             if (newOwner.val()) {
                 setLongestRoadOwner(newOwner.val());
@@ -509,7 +516,7 @@ const Game = (props: GameProps) => {
             set(child(props.roomRef, "largestArmy"), army);
             set(child(props.roomRef, "largestArmyOwner"), props.userRef.key);
         }
-        
+
         update(child(props.userRef, "cards"), { [Development.knight]: increment(-1) }); ``
         update(props.userRef, { "knightCardsPlayed": increment(1) });
         set(child(props.roomRef, "notification"), Development.knight);
@@ -621,6 +628,7 @@ const Game = (props: GameProps) => {
             allDiscarded: allDiscarded,
             ongoingTrade: ongoingTrade,
             needToBuildRoads: needToBuildRoads,
+            longestRoad: longestRoad,
             knightCardsPlayed: players[playerIndex].knightCardsPlayed,
             longestRoadOwner: longestRoadOwner === playerId,
             largestArmyOwner: largestArmyOwner === playerId,
@@ -637,6 +645,7 @@ const Game = (props: GameProps) => {
             setupTurn: setupTurn,
             cards: cards,
             quota: quota,
+            longestRoad: longestRoad,
             robber: robber,
             rolled: notification !== null,
             canPlaceRobber: canPlaceRobber,

@@ -31,6 +31,10 @@
     align-items: center;
 }
 
+.panel__row > i {
+    margin: auto;
+}
+
 .panel__name {
     width: 80%;
     max-width: 80%;
@@ -43,6 +47,7 @@
 
 .panel__name > span > i {
     position: relative;
+    margin: 0.3rem;
 }
 
 .panel__cards {

@@ -23,6 +23,7 @@ interface BoardProps {
     setupTurn: boolean;
     cards: React.MutableRefObject<CardHand>;
     quota: React.MutableRefObject<InfrastructureQuota>;
+    longestRoad: number;
     robber?: Coordinate;
     rolled: boolean;
     canPlaceRobber: boolean;
@@ -47,8 +48,6 @@ const Board = (props: BoardProps) => {
     const [terrains, setTerrains] = useState<Terrain[][]>(defaultTerrains);
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);
-
-    const longestRoad = useRef<number>(4);
 
     useEffect(() => {
         // listen for board shuffles
@@ -98,13 +97,6 @@ const Board = (props: BoardProps) => {
                 }
 
                 setIntersections(updatedIntersections);
-            }
-        });
-
-        // listen for longest road
-        onValue(child(props.roomRef, "longestRoad"), (newLongestRoad) => {
-            if (newLongestRoad.val()) {
-                longestRoad.current = newLongestRoad.val();
             }
         });
     }, []);
@@ -293,7 +285,7 @@ const Board = (props: BoardProps) => {
             return longestCombo;
         }
 
-        let longestLength = longestRoad.current;
+        let longestLength = props.longestRoad;
         let isLonger = false;
         for (let y = 0; y < searchData.length; y++) {
             for (let x = 0; x < searchData[y].length; x++) {
