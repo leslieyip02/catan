@@ -91,7 +91,8 @@ const Lobby = (props: LobbyProps) => {
     };
 
     function joinRoom() {
-        if (roomId.length === 0) {
+        // cannot join a non-existent room
+        if (!roomId || roomId.length === 0) {
             setUserNameTooltipText("Nothing to join")
             return;
         }
@@ -101,50 +102,51 @@ const Lobby = (props: LobbyProps) => {
             return;
         }
 
-        // cannot join a non-existent room
-        if (roomId) {
-            // append user
-            let targetRoomRef = ref(props.db, `rooms/${roomId}`);
-            get(child(targetRoomRef, "started"))
-                .then((started) => {
-                    // cannot join ongoing games
-                    if (!started.val()) {
-                        let roomUsersRef = child(targetRoomRef, "users");
-                        get(roomUsersRef)
-                            // currentUsers is a dictionary of user IDs
-                            .then((currentUsers) => {
-                                let userIds = currentUsers.val() || {};
+        // append user
+        let targetRoomRef = ref(props.db, `rooms/${roomId}`);
+        get(child(targetRoomRef, "started"))
+            .then((started) => {
+                // cannot join ongoing games
+                if (!started.val()) {
+                    let roomUsersRef = child(targetRoomRef, "users");
+                    get(roomUsersRef)
+                        // currentUsers is a dictionary of user IDs
+                        .then((currentUsers) => {
+                            let userIds = currentUsers.val() || {};
 
-                                // check if user is already in a room
-                                if (userId in userIds) {
-                                    return;
-                                }
+                            // check if user is already in a room
+                            if (userId in userIds) {
+                                return;
+                            }
 
-                                let index = Object.values(userIds).length;
-                                update(roomUsersRef, { [userId]: true });
+                            let index = Object.values(userIds).length;
+                            update(roomUsersRef, { [userId]: true });
 
-                                let updatedUser: UserData = {
-                                    id: userId,
-                                    roomId: roomId,
-                                    index: index,
-                                    name: userName || "Anonymous",
-                                    cards: {},
-                                    resourceRolls: [],
-                                    knightCardsPlayed: 0,
-                                    ...defaultUserQuotas,
-                                };
+                            let updatedUser: UserData = {
+                                id: userId,
+                                roomId: roomId,
+                                index: index,
+                                name: userName || "Anonymous",
+                                cards: {},
+                                resourceRolls: [],
+                                knightCardsPlayed: 0,
+                                ...defaultUserQuotas,
+                            };
 
-                                set(userRef, updatedUser);
+                            set(userRef, updatedUser);
 
-                                // update parent app component
-                                props.updateUserRef(userRef);
-                                props.updateRoomRef(targetRoomRef);
-                                props.updateUserIndex(index);
-                                props.updateUserName(updatedUser.name);
-                            });
-                    }
-                });
-        }
+                            // update parent app component
+                            props.updateUserRef(userRef);
+                            props.updateRoomRef(targetRoomRef);
+                            props.updateUserIndex(index);
+                            props.updateUserName(updatedUser.name);
+                        });
+                }
+            })
+            .catch(() => {
+                setUserNameTooltipText("Unable to join");
+                return;
+            });
     };
 
     function copyToClipboard() {
