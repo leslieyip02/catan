@@ -25,6 +25,7 @@ interface PanelProps extends PlayerData {
     needToBuildRoads: boolean;
     knightCardsPlayed: number;
     longestRoadOwner?: boolean;
+    largestArmyOwner?: boolean;
     rollDice?: () => void;
     stealCards: (targetId: string, cards: CardHand) => void;
     offerTrade: (targetId: string, offering: CardHand,
@@ -243,15 +244,22 @@ const UserPanel = (props: PanelProps) => {
                 <div className="panel__row">
                     <div className="panel__name">
                         {props.name}
-                        <span>
-                            {props.knightCardsPlayed}x
-                            <i className="fa-solid fa-chess-knight"></i>
-                        </span>
+
                         <span>
                             {
                                 props.longestRoadOwner &&
                                 <i className="fa-solid fa-road">
                                     <span className="tooltip">Longest Road</span>
+                                </i>
+                            }
+                        </span>
+                        <span>
+                            {
+                                props.largestArmyOwner &&
+                                <i className="fa-solid fa-chess-knight">
+                                    <span className="tooltip">
+                                        {`Largest Army (${props.knightCardsPlayed})`}
+                                    </span>
                                 </i>
                             }
                         </span>

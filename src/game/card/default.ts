@@ -19,10 +19,11 @@ let defaultIcons: Record<string, string[]> = {
 // development cards do not go back into circulation
 let defaultDevelopmentCards: DevelopmentStock = {
     [Development.knight]: 14,
-    [Development.roadBuilding]: 2,
-    [Development.yearOfPlenty]: 2,
-    [Development.monopoly]: 2,
-    [Development.victoryPoint]: 5,
+    // [Development.knight]: 14,
+    // [Development.roadBuilding]: 2,
+    // [Development.yearOfPlenty]: 2,
+    // [Development.monopoly]: 2,
+    // [Development.victoryPoint]: 5,
 }
 
 export { defaultIcons, defaultDevelopmentCards };

@@ -41,6 +41,10 @@
     font-size: 2rem;
 }
 
+.panel__name > span > i {
+    position: relative;
+}
+
 .panel__cards {
     position: relative;
     display: inline-block;

@@ -56,11 +56,13 @@ const Game = (props: GameProps) => {
     const [needToDrawCards, setNeedToDrawCards] = useState<boolean>(false);
     const [needToMonopoly, setNeedToMonopoly] = useState<boolean>(false);
     const [longestRoadOwner, setLongestRoadOwner] = useState<string>();
+    const [largestArmyOwner, setLargestArmyOwner] = useState<string>();
 
     // keep separate reference
     const cards = useRef<CardHand>({});
     const quota = useRef<InfrastructureQuota>(defaultInfrastructure);
     const stock = useRef<DevelopmentStock>(defaultDevelopmentCards);
+    const largestArmy = useRef<number>(2);
 
     useEffect(() => {
         // check if this user is the host
@@ -187,6 +189,19 @@ const Game = (props: GameProps) => {
         onValue(child(props.roomRef, "longestRoadOwner"), (newOwner) => {
             if (newOwner.val()) {
                 setLongestRoadOwner(newOwner.val());
+            }
+        });
+
+        // listen for largest army
+        onValue(child(props.roomRef, "largestArmy"), (newArmy) => {
+            if (newArmy.val()) {
+                largestArmy.current = newArmy.val();
+            }
+        });
+
+        onValue(child(props.roomRef, "largestArmyOwner"), (newOwner) => {
+            if (newOwner.val()) {
+                setLargestArmyOwner(newOwner.val());
             }
         });
 
@@ -489,6 +504,12 @@ const Game = (props: GameProps) => {
     }
 
     function playKnightCard() {
+        let army = players[props.userIndex].knightCardsPlayed + 1;
+        if (army > largestArmy.current) {
+            set(child(props.roomRef, "largestArmy"), army);
+            set(child(props.roomRef, "largestArmyOwner"), props.userRef.key);
+        }
+        
         update(child(props.userRef, "cards"), { [Development.knight]: increment(-1) }); ``
         update(props.userRef, { "knightCardsPlayed": increment(1) });
         set(child(props.roomRef, "notification"), Development.knight);
@@ -602,6 +623,7 @@ const Game = (props: GameProps) => {
             needToBuildRoads: needToBuildRoads,
             knightCardsPlayed: players[playerIndex].knightCardsPlayed,
             longestRoadOwner: longestRoadOwner === playerId,
+            largestArmyOwner: largestArmyOwner === playerId,
             stealCards: stealCards,
             offerTrade: offerTrade,
             ...thisPlayerActions,
