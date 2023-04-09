@@ -111,7 +111,7 @@ const Road = (props: RoadProps) => {
                                     props.endTurn();
                                 }
                             }
-                        })
+                        });
                 }
             }
         }

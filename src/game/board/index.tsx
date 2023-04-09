@@ -48,6 +48,8 @@ const Board = (props: BoardProps) => {
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);
 
+    const longestRoad = useRef<number>(4);
+
     useEffect(() => {
         // listen for board shuffles
         onValue(child(props.roomRef, "terrains"), (newTerrains) => {
@@ -83,6 +85,12 @@ const Board = (props: BoardProps) => {
                     if (props.quota.current[Infrastructure.road] === 0) {
                         props.updateNeedToBuildRoads(false);
                     }
+
+                    /// check longest road here for most updated intersections
+                    if (!props.setupTurn &&
+                        boardUpdate.owner === props.userRef.key) {
+                        checkLongestRoad(updatedIntersections);
+                    }
                 } else {
                     updatedIntersections[y][x].owner = owner;
                     updatedIntersections[y][x].color = color;
@@ -90,6 +98,13 @@ const Board = (props: BoardProps) => {
                 }
 
                 setIntersections(updatedIntersections);
+            }
+        });
+
+        // listen for longest road
+        onValue(child(props.roomRef, "longestRoad"), (newLongestRoad) => {
+            if (newLongestRoad.val()) {
+                longestRoad.current = newLongestRoad.val();
             }
         });
     }, []);
@@ -147,6 +162,7 @@ const Board = (props: BoardProps) => {
             y: y,
             resourceRolls: mapRollsToIntersections(x, y),
             lookUp: (x: number, y: number) => intersections[y][x],
+            checkLongestRoad: checkLongestRoad,
         };
     }
 
@@ -205,6 +221,97 @@ const Board = (props: BoardProps) => {
 
         set(child(props.roomRef, "rolls"), defaultRolls);
         setRolls(defaultRolls);
+    }
+
+    function checkLongestRoad(currentIntersections: IntersectionData[][]) {
+        let searchData = currentIntersections.map((row) => row
+            .map((intersection) => {
+                return {
+                    owner: intersection.owner,
+                    roads: intersection.roads.map((roadData) => {
+                        return {
+                            owner: roadData.owner,
+                            origin: roadData.origin,
+                            destination: roadData.destination,
+                            visited: false,
+                        };
+                    }),
+                    visited: false,
+                };
+            }));
+
+        // look for longest road recursively
+        function traceRoads(intersection: Coordinate, current: number): number {
+            let currentIntersection = searchData[intersection.y][intersection.x];
+            if (currentIntersection.visited) {
+                return current;
+            }
+
+            // each intersection is connected to 3 roads,
+            // so choose the longest 2 to make the longest road
+            let roadLengths = [current];
+
+            // search child intersections below
+            for (let road of currentIntersection.roads) {
+                if (!road.visited &&
+                    road.owner === props.userRef.key) {
+
+                    road.visited = true;
+                    roadLengths.push(traceRoads(road.destination, 1));
+                }
+            }
+
+            // search parent intersections above
+            if (intersection.y > 0) {
+                let y = intersection.y - 1;
+                for (let x = 0; x < searchData[y].length; x++) {
+                    let nextIntersection = searchData[y][x];
+                    for (let road of nextIntersection.roads) {
+                        if (!road.visited &&
+                            road.destination.x === intersection.x &&
+                            road.destination.y === intersection.y &&
+                            road.owner === props.userRef.key) {
+
+                            road.visited = true;
+                            roadLengths.push(traceRoads({ x, y }, 1));
+                        }
+                    }
+                }
+            }
+
+            // take the 2 longest roads
+            let sortedLengths = roadLengths.sort();
+            let longestCombo = 0;
+            for (let i = 0; i < 2; i++) {
+                if (sortedLengths.length === 0) {
+                    break;
+                }
+
+                longestCombo += sortedLengths.pop();
+            }
+
+            return longestCombo;
+        }
+
+        let longestLength = longestRoad.current;
+        let isLonger = false;
+        for (let y = 0; y < searchData.length; y++) {
+            for (let x = 0; x < searchData[y].length; x++) {
+                if (searchData[y][x].owner === props.userRef.key &&
+                    !searchData[y][x].visited) {
+                    let currentLength = traceRoads({ x, y }, 0);
+                    if (currentLength > longestLength) {
+                        longestLength = currentLength;
+                        isLonger = true;
+                    }
+                }
+            }
+        }
+
+        if (isLonger) {
+            set(child(props.roomRef, "longestRoad"), longestLength);
+            set(child(props.roomRef, "longestRoadOwner"), props.userRef.key);
+        }
     }
 
     const ShuffleButton = () => {

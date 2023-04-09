@@ -55,6 +55,7 @@ const Game = (props: GameProps) => {
     const [needToBuildRoads, setNeedToBuildRoads] = useState<boolean>(false);
     const [needToDrawCards, setNeedToDrawCards] = useState<boolean>(false);
     const [needToMonopoly, setNeedToMonopoly] = useState<boolean>(false);
+    const [longestRoadOwner, setLongestRoadOwner] = useState<string>();
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -179,6 +180,13 @@ const Game = (props: GameProps) => {
         onValue(child(props.roomRef, "stock"), (newStock) => {
             if (newStock.val()) {
                 stock.current = newStock.val();
+            }
+        });
+
+        // listen for longest road owner
+        onValue(child(props.roomRef, "longestRoadOwner"), (newOwner) => {
+            if (newOwner.val()) {
+                setLongestRoadOwner(newOwner.val());
             }
         });
 
@@ -593,6 +601,7 @@ const Game = (props: GameProps) => {
             ongoingTrade: ongoingTrade,
             needToBuildRoads: needToBuildRoads,
             knightCardsPlayed: players[playerIndex].knightCardsPlayed,
+            longestRoadOwner: longestRoadOwner === playerId,
             stealCards: stealCards,
             offerTrade: offerTrade,
             ...thisPlayerActions,
