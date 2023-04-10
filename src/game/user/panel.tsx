@@ -192,11 +192,11 @@ const UserPanel = (props: PanelProps) => {
         }
 
         return (
-            <div
+            <button
                 className="panel__button"
                 onClick={toggleHide}
             >
-                <i className="fa-solid fa-user-minus"></i>
+                <i className="fa-solid fa-user-ninja"></i>
                 <span className="tooltip">Steal 1 resource</span>
                 <div
                     id={`steal-menu-${props.id}`}
@@ -212,7 +212,7 @@ const UserPanel = (props: PanelProps) => {
                         deckAction={stealCard}
                     />
                 </div>
-            </div>
+            </button>
         );
     }
 

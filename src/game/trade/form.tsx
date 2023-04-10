@@ -130,7 +130,8 @@ const TradeForm = (props: TradeFormProps) => {
                 {tooltipText}
             </span>
             <button className="trade__button" disabled={!canTrade() || props.ongoingTrade} type="submit">
-                <i className="fa-solid fa-money-bill-transfer"></i>Trade
+                <i className="fa-solid fa-money-bill-transfer"></i>
+                <span className="tooltip">Trade</span>
             </button>
 
             <TradeMatrix />

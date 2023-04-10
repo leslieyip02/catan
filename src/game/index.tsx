@@ -12,7 +12,7 @@ import { Terrain } from './board/tile';
 import { Coordinate } from './board';
 import { InfrastructureQuota } from './board/infrastructure';
 import { tradeResources, hasRequiredCards, TradeOffer } from './trade';
-import TradeMenu from './trade/domestic';
+import TradeMenu from './trade/menu';
 import Deck from './card/deck';
 import Card from './card/index';
 import { CardType } from './card/';
@@ -784,7 +784,6 @@ const Game = (props: GameProps) => {
                             <i className="fa-solid fa-rotate-right"></i>
                             <span className="tooltip">Back to Lobby</span>
                         </a>
-
                         <a href="https://github.com/leslieyip02/catan">
                             <i className="fa-brands fa-github"></i>
                             <span className="tooltip">Github</span>

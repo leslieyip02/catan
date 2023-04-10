@@ -31,4 +31,18 @@
 .deck__button {
     position: absolute;
     right: 100%;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    background-color: #222222;
+    transition: scale 0.2s;
+}
+
+.deck__button > i {
+    font-size: 1.5rem;
+    color: #eeeeee;
+}
+
+.deck__button:hover {
+    scale: 1.1;
 }

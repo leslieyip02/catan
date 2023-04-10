@@ -8,6 +8,8 @@
     position: fixed;
     top: 0%;
     left: 0%;
+    margin: 0.2rem;
+    color: #eeeeee;
     z-index: var(--overlay-z);
 }
 
@@ -32,6 +34,25 @@
 
 .menu__button {
     position: relative;
-    margin-left: 0.25rem;
-    margin-right: 0.25rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    border: none;
+    background-color: #222222;
+    opacity: 100%;
+    transition: scale 0.2s;
+}
+
+.menu__button > i {
+    color: #eeeeee;
+}
+
+.menu__button:hover {
+    scale: 1.1;
+}
+
+.menu__button:disabled {
+    pointer-events: none;
+    opacity: 50%;
 }

@@ -69,11 +69,12 @@ const Deck = (props: DeckProps) => {
         }
 
         return (
-            <button
+            <div
                 className="deck__button"
                 onClick={stack}>
                 <i className="fa-solid fa-layer-group"></i>
-            </button>
+                <span className="tooltip">Stack / Unstack</span>
+            </div>
         );
     }
 
@@ -90,12 +91,12 @@ const Deck = (props: DeckProps) => {
         }
 
         return (
-            <button
+            <div
                 className="deck__button"
                 onClick={takeAction}>
                 <i className="fa-solid fa-square-check"></i>
                 <span className="tooltip">{props.actionLabel}</span>
-            </button>
+            </div>
         );
     }
 
