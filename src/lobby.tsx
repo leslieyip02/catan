@@ -119,6 +119,11 @@ const Lobby = (props: LobbyProps) => {
                                 return;
                             }
 
+                            // cannot exceed 4 players
+                            if (Object.values(userIds).length === 4) {
+                                return;
+                            }
+
                             let index = Object.values(userIds).length;
                             update(roomUsersRef, { [userId]: true });
 
