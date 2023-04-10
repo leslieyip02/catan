@@ -3,7 +3,7 @@
     min-width: calc(var(--tile-width) * 1.5);
     max-width: calc(var(--tile-width) * 1.5);
     height: calc(var(--tile-width) * 2.25);
-    padding: 0.2em;
+    padding: 0.2rem;
     background-color: #222222;
     border-radius: 0.5rem;
     box-sizing: border-box;
@@ -40,11 +40,12 @@
 
 .card__icon {
     font-size: calc(var(--tile-width) * 0.8);
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     color: #eeeeee;
 }
 
 .card__label {
+    height: 20%;
     padding: 0.25rem;
     text-align: center;
     color: #eeeeee;
