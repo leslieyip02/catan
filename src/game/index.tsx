@@ -795,9 +795,19 @@ const Game = (props: GameProps) => {
 
     return (
         <div className="game">
-            {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
             {
-                host && !started && <StartButton />
+                !started && <div className="game__room-info">
+                    <div>
+                        {`Room: ${props.roomRef.key}`}
+                    </div>
+                    <div>
+                        {
+                            host
+                                ? <StartButton />
+                                : <div>Waiting to start...</div>
+                        }
+                    </div>
+                </div>
             }
 
             <div className="panels">

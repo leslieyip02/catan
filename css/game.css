@@ -7,16 +7,14 @@
     justify-content: space-between;
 }
 
-.game__room-id {
-    position: absolute;
-    top: 0%;
-    left: 0%;
-}
-
-.game__start {
+.game__room-info {
     position: fixed;
     top: 0%;
     left: 0%;
+    margin: 0.2rem;
+}
+
+.game__start {
     z-index: var(--chat-z);
 }
 
