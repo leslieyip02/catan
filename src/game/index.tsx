@@ -12,7 +12,7 @@ import { Terrain } from './board/tile';
 import { Coordinate } from './board';
 import { InfrastructureQuota } from './board/infrastructure';
 import { tradeResources, hasRequiredCards, TradeOffer } from './trade';
-import TradeMenu from './trade/menu';
+import TradeMenu from './trade/domestic';
 import Deck from './card/deck';
 import Card from './card/index';
 import { CardType } from './card/';
@@ -700,7 +700,6 @@ const Game = (props: GameProps) => {
             vp += 2;
         }
 
-        console.log(`Points: ${vp}`);
         return vp;
     }
 
