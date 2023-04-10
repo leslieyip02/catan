@@ -20,6 +20,69 @@
     z-index: var(--chat-z);
 }
 
+.game__win {
+    width: 60vw;
+    margin: auto;
+    margin-top: 10vh;
+    padding: 2rem;
+    background-color: #222222;
+    border: 0.3rem solid #eeeeee;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    box-shadow: 0.5rem 0.5rem 0.2rem 0.2rem #555555;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: slide-in 1s;
+}
+
+@keyframes slide-in {
+    0% {
+        translate: -100% 0%;
+    }
+
+    100% {
+        translate: 0% 0%;
+    }
+}
+
+.game__win > .fa-trophy {
+    font-size: 5rem;
+    margin: 1rem;
+    animation: blinking 1s infinite;
+}
+
+@keyframes blinking {
+    0% {
+        opacity: 0%;
+    }
+
+    50% {
+        opacity: 100%;
+    }
+
+    100% {
+        opacity: 0%;
+    }
+}
+
+.game__win-label {
+    font-size: 3rem;
+    color: #eeeeee;
+}
+
+.game__win-links {
+    align-self: flex-end;
+}
+
+.game__win-links > a {
+    position: relative;
+    margin: 0.5rem;
+    color: #eeeeee;
+    cursor: pointer;
+}
+
 @media screen and (max-width: 600px) {
     .game {
         flex-direction: column;

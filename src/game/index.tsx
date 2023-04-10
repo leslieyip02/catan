@@ -3,7 +3,7 @@ import { ref, get, set, child, onValue, Database, DatabaseReference, off, increm
 import Board from "./board";
 import Chat from "./chat";
 import Panel from "./user/panel";
-import { UserData, PlayerData } from "./user";
+import { UserData, PlayerData, defaultUserQuotas } from "./user";
 import { randomInt } from './random';
 import Resource, { ResourceRoll } from './card/resource';
 import { CardHand, countCards, countResourceCards, resourceCards } from './card/hand';
@@ -16,7 +16,7 @@ import TradeMenu from './trade/domestic';
 import Deck from './card/deck';
 import Card from './card/index';
 import { CardType } from './card/';
-import { defaultInfrastructure } from './board/default';
+import { defaultColors, defaultInfrastructure } from './board/default';
 import Development, { DevelopmentCardActions, DevelopmentStock } from './card/development';
 import { defaultDevelopmentCards, defaultLongestRoad, defaultLargestArmy } from './card/default';
 import Infrastructure from './board/infrastructure';
@@ -58,6 +58,7 @@ const Game = (props: GameProps) => {
     const [longestRoad, setLongestRoad] = useState<number>(defaultLongestRoad);
     const [longestRoadOwner, setLongestRoadOwner] = useState<string>();
     const [largestArmyOwner, setLargestArmyOwner] = useState<string>();
+    const [winnerIndex, setWinnerIndex] = useState<number>();
 
     // keep separate reference
     const cards = useRef<CardHand>({});
@@ -219,6 +220,14 @@ const Game = (props: GameProps) => {
                 setOngoingTrade(true);
             }
         });
+
+        // listen for the end of the game
+        onValue(child(props.roomRef, "winnerIndex"), (winner) => {
+            let index = winner.val();
+            if (index || index === 0) {
+                setWinnerIndex(winner.val());
+            }
+        });
     }, []);
 
     useEffect(() => {
@@ -253,6 +262,10 @@ const Game = (props: GameProps) => {
         // reset causes notification bubble to disappear
         setNotification(null);
         set(child(props.roomRef, "notification"), null);
+
+        // check game over here
+        // so game only ends after the end turn button is pressed
+        checkWinCondition();
     }, [turn]);
 
     useEffect(() => {
@@ -260,6 +273,7 @@ const Game = (props: GameProps) => {
         for (let player of players) {
             if (player.id === props.userRef.key) {
                 cards.current = player.cards;
+                break;
             }
         }
     }, [players]);
@@ -666,6 +680,36 @@ const Game = (props: GameProps) => {
         };
     }
 
+    function checkVictoryPoints(): number {
+        if (!started || setupTurn || players.length === 0) {
+            return;
+        }
+
+        let vp = 0;
+
+        vp += defaultUserQuotas.settlements - players[props.userIndex].settlements;
+        vp += (defaultUserQuotas.cities - players[props.userIndex].cities) * 2;
+
+        vp += players[props.userIndex].cards[Development.victoryPoint] || 0;
+
+        if (longestRoadOwner === props.userRef.key) {
+            vp += 2;
+        }
+
+        if (largestArmyOwner === props.userRef.key) {
+            vp += 2;
+        }
+
+        console.log(`Points: ${vp}`);
+        return vp;
+    }
+
+    function checkWinCondition() {
+        if (checkVictoryPoints() >= 10) {
+            set(child(props.roomRef, "winnerIndex"), props.userIndex);
+        }
+    }
+
     const StartButton = () => {
         return (
             <button className="game__start" onClick={startGame}>
@@ -724,6 +768,33 @@ const Game = (props: GameProps) => {
         );
     }
 
+    const WinScreen = () => {
+        return (
+            <div className="overlay overlay--fade-in">
+                <div className="game__win">
+                    <i
+                        className="fa-solid fa-trophy"
+                        style={{ color: defaultColors[winnerIndex] }}
+                    ></i>
+                    <div className="game__win-label">
+                        {`${players[winnerIndex].name} won!`}
+                    </div>
+                    <div className="game__win-links">
+                        <a href="./">
+                            <i className="fa-solid fa-rotate-right"></i>
+                            <span className="tooltip">Back to Lobby</span>
+                        </a>
+
+                        <a href="https://github.com/leslieyip02/catan">
+                            <i className="fa-brands fa-github"></i>
+                            <span className="tooltip">Github</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="game">
             {/* <div className="game__room-id">{`Room: ${props.roomRef.key}`}</div> */}
@@ -762,6 +833,10 @@ const Game = (props: GameProps) => {
             <Board {...props} {...boardProps()} />
 
             <Chat {...props} messages={messages} setMessages={setMessages} />
+
+            {
+                (winnerIndex !== undefined) && <WinScreen />
+            }
         </div>
     );
 }

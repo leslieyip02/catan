@@ -10,3 +10,17 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: var(--overlay-z);
 }
+
+.overlay--fade-in {
+    animation: fade-in 1s;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0%;
+    }
+
+    100% {
+        opacity: 100%;
+    }
+}
