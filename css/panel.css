@@ -123,3 +123,10 @@
     border: 0.5rem solid transparent;
     border-right-color: #222222;
 }
+
+@media screen and (max-width: 600px) {
+    .panels {
+        width: 100vw;
+        height: calc(100vh - 100vw);
+    }
+}

@@ -85,6 +85,6 @@
 
 @media screen and (max-width: 600px) {
     .game {
-        flex-direction: column;
+        flex-direction: column-reverse;
     }
 }
