@@ -1,11 +1,12 @@
 {
     "name": "catan",
     "version": "1.0.0",
-    "description": "",
+    "description": "Recreation of Catan with React and Firebase",
     "scripts": {
-        "build": "webpack --mode=development"
+        "build-dev": "webpack --mode=development",
+        "build-prod": "webpack --mode=production"
     },
-    "author": "",
+    "author": "Leslie Yip",
     "license": "ISC",
     "dependencies": {
         "firebase": "^9.17.2",

@@ -3,4 +3,5 @@ dist
 
 game_rules.pdf
 
-desktop.ini
+*.ini
+*.cache
