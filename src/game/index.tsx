@@ -17,7 +17,7 @@ import Deck from './card/deck';
 import Card from './card/index';
 import { CardType } from './card/';
 import { defaultColors, defaultInfrastructure } from './board/default';
-import Development, { DevelopmentCardActions, DevelopmentStock } from './card/development';
+import Development, { DevelopmentCardActions, DevelopmentStock, developmentLabels } from './card/development';
 import { defaultDevelopmentCards, defaultLongestRoad, defaultLargestArmy } from './card/default';
 import Infrastructure from './board/infrastructure';
 
@@ -543,7 +543,7 @@ const Game = (props: GameProps) => {
         quota.current[Infrastructure.road] = 2;
 
         update(child(props.userRef, "cards"), { [Development.roadBuilding]: increment(-1) });
-        set(child(props.roomRef, "notification"), Development.roadBuilding);
+        set(child(props.roomRef, "notification"), developmentLabels[Development.roadBuilding]);
 
         setNeedToBuildRoads(true);
     }
@@ -562,7 +562,7 @@ const Game = (props: GameProps) => {
 
     function playYearOfPlentyCard() {
         update(child(props.userRef, "cards"), { [Development.yearOfPlenty]: increment(-1) });
-        set(child(props.roomRef, "notification"), Development.yearOfPlenty);
+        set(child(props.roomRef, "notification"), developmentLabels[Development.yearOfPlenty]);
 
         setNeedToDrawCards(true);
     }
