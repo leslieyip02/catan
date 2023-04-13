@@ -49,6 +49,9 @@ const Board = (props: BoardProps) => {
     const [rolls, setRolls] = useState<number[][]>(defaultRolls);
     const [intersections, setIntersections] = useState<IntersectionData[][]>(defaultIntersections);
 
+    // ref needed so that checkLongestRoad uses the latest value
+    const longestRoad = useRef<number>(props.longestRoad);
+
     useEffect(() => {
         // listen for board shuffles
         onValue(child(props.roomRef, "terrains"), (newTerrains) => {
@@ -100,6 +103,10 @@ const Board = (props: BoardProps) => {
             }
         });
     }, []);
+
+    useEffect(() => {
+        longestRoad.current = props.longestRoad;
+    }, [props.longestRoad]);
 
     function mapRollsToIntersections(x: number, y: number): ResourceRoll[] {
         let resourceRolls: ResourceRoll[] = [];
@@ -154,7 +161,6 @@ const Board = (props: BoardProps) => {
             y: y,
             resourceRolls: mapRollsToIntersections(x, y),
             lookUp: (x: number, y: number) => intersections[y][x],
-            checkLongestRoad: checkLongestRoad,
         };
     }
 
@@ -285,7 +291,7 @@ const Board = (props: BoardProps) => {
             return longestCombo;
         }
 
-        let longestLength = props.longestRoad;
+        let longestLength = longestRoad.current;
         let isLonger = false;
         for (let y = 0; y < searchData.length; y++) {
             for (let x = 0; x < searchData[y].length; x++) {
