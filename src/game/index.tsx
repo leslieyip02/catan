@@ -387,36 +387,39 @@ const Game = (props: GameProps) => {
                     let userPromises = playerRefs
                         .filter((playerRef) => playerRef.key !== props.userRef.key)
                         .map((playerRef) => get(playerRef));
+
                     Promise.all(userPromises)
                         .then((users) => {
+                            let canStealFrom: number[] = [];
+
                             users.forEach((user) => {
                                 let userData: UserData = user.val();
 
                                 // cannot steal if no cards
-                                let canSteal = false;
-                                if (countCards(userData.cards)) {
+                                if (countCards(userData.cards) !== 0) {
                                     for (let resourceRoll of userData.resourceRolls) {
                                         if (resourceRoll.tile.x === x &&
                                             resourceRoll.tile.y === y) {
-
-                                            // update whether player can be robbed
-                                            setPlayers((currentPlayers) => {
-                                                let newPlayerData = [...currentPlayers];
-                                                for (let i = 0; i < currentPlayers.length; i++) {
-                                                    if (newPlayerData[i].id === userData.id) {
-                                                        newPlayerData[i].canStealFrom = true;
-                                                    }
-                                                }
-
-                                                return newPlayerData;
-                                            });
-
-                                            canSteal = true;
+                                            canStealFrom.push(userData.index);
                                         }
                                     }
                                 }
+                            });
 
-                                setNeedToSteal(canSteal);
+                            return canStealFrom;
+                        })
+                        .then((canStealFrom) => {
+                            setNeedToSteal(canStealFrom.length !== 0);
+
+                            // update all players that can be stolen from at once
+                            setPlayers((currentPlayerData) => {
+                                let newPlayerData = [...currentPlayerData];
+
+                                for (let index of canStealFrom) {
+                                    newPlayerData[index].canStealFrom = true;
+                                }
+
+                                return newPlayerData;
                             });
                         });
 
