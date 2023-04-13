@@ -32,6 +32,7 @@ interface GameProps {
 const Game = (props: GameProps) => {
     // user data
     const [host, setHost] = useState<boolean>(false);
+    const [playerNames, setPlayerNames] = useState<string[]>([]);
     const [players, setPlayers] = useState<PlayerData[]>([]);
     const [playerRefs, setPlayerRefs] = useState<DatabaseReference[]>([]);
     const [playerCount, setPlayerCount] = useState<number>();
@@ -70,6 +71,20 @@ const Game = (props: GameProps) => {
         // check if this user is the host
         get(child(props.roomRef, "host"))
             .then((host) => setHost(host.val() === props.userRef.key));
+
+        // just to keep track of users joining for display in waiting room
+        let roomUsersListener = onValue(child(props.roomRef, "users"),
+            (newUsers) => {
+                let userIds: string[] = Object.keys(newUsers.val());
+                if (userIds) {
+                    let userPromises = userIds
+                        .map((userId) => get(ref(props.db, `users/${userId}`)));
+                    Promise.all(userPromises)
+                        .then((users) => {
+                            setPlayerNames(users.map((user) => user.val().name));
+                        });
+                }
+            });
 
         // listen for game start
         let gameStartRef = child(props.roomRef, "started");
@@ -113,6 +128,9 @@ const Game = (props: GameProps) => {
                             });
                         }
                     });
+
+                // stop listening for users
+                roomUsersListener();
 
                 off(gameStartRef);
             }
@@ -720,6 +738,36 @@ const Game = (props: GameProps) => {
         );
     }
 
+    const WaitingScreen = () => {
+        return (
+            <div className="game__room-info">
+                <div>
+                    {`Room: ${props.roomRef.key}`}
+                </div>
+                <div>Waiting to start...</div>
+
+                <div className="game__room-names">
+                    {
+                        playerNames.map((name, i) => {
+                            return (
+                                <div key={`waiting-room-name-${i}`}>
+                                    <i className="fa-solid fa-user"></i>
+                                    <span>
+                                        {name}
+                                    </span>
+                                </div>
+                            );
+                        })
+                    }
+                </div>
+
+                {
+                    host && <StartButton />
+                }
+            </div>
+        );
+    }
+
     const DiscardMenu = () => {
         return (
             <div className="overlay menu" style={{ display: "flex" }}>
@@ -798,22 +846,11 @@ const Game = (props: GameProps) => {
 
     return (
         <div className="game">
-            {
-                !started && <div className="game__room-info">
-                    <div>
-                        {`Room: ${props.roomRef.key}`}
-                    </div>
-                    <div>
-                        {
-                            host
-                                ? <StartButton />
-                                : <div>Waiting to start...</div>
-                        }
-                    </div>
-                </div>
-            }
-
             <div className="panels">
+                {
+                    !started && <WaitingScreen />
+                }
+
                 {
                     players.map((playerData, index) => {
                         return <Panel

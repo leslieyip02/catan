@@ -1,4 +1,5 @@
 .panels {
+    position: relative;
     width: 40vw;
     overflow: visible;
     padding-top: calc(var(--road-width));

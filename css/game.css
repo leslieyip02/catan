@@ -7,14 +7,28 @@
     justify-content: space-between;
 }
 
-.game__room-info {
-    position: fixed;
-    top: 0.5rem;
-    left: 0.5rem;
-}
-
 .game__start {
     z-index: var(--chat-z);
+}
+
+.game__room-info {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.game__room-names {
+    margin: 1rem;
+}
+
+.game__room-names > div {
+    margin: 0.3rem;
+}
+
+.game__room-names > div > i {
+    margin-right: 1rem;
 }
 
 .game__win {
