@@ -128,16 +128,6 @@ const Harbor = (props: HarborProps) => {
             }
         }
 
-        function owned() {
-            for (let { x, y } of props.access) {
-                if (props.lookUp(x, y).owner === props.userRef.key) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         let canTrade = props.playerTurn && props.rolled &&
             props.cards.current[offering] >= ratio &&
             !props.setupTurn && !props.canPlaceRobber &&
@@ -163,7 +153,7 @@ const Harbor = (props: HarborProps) => {
                     onClick={(e) => canTrade ? processTrade(e) : {}}
                 >
                     <i className="fa-solid fa-square-check">
-                        <span className="tooltip">Trade</span>
+                        <span className="tooltip">{`${ratio}:1 Trade`}</span>
                     </i>
                 </div>
             </form>
