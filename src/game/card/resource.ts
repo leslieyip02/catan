@@ -4,9 +4,9 @@ import { Terrain } from "../board/tile";
 enum Resource {
     none = "none",
     brick = "brick",
+    grain = "grain",
     lumber = "lumber",
     ore = "ore",
-    grain = "grain",
     wool = "wool",
 };
 
