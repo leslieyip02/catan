@@ -6,8 +6,8 @@
     align-items: center;
 }
 
-.rules {
-    position: fixed;
+.rules__button {
+    position: absolute;
     bottom: 0.5rem;
     left: 0.5rem;
     width: 3rem;
@@ -20,12 +20,77 @@
     justify-content: center;
     align-items: center;
     transition: scale 0.2s;
+    cursor: pointer;
 }
 
-.rules:hover {
+.rules__button:hover {
     scale: 1.1;
 }
 
-.rules > i {
+.rules__button > i {
     color: #eeeeee;
+}
+
+.rules__overlay {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rules {
+    width: 60vw;
+    max-height: 80vh;
+    overflow: scroll;
+    margin: auto;
+    padding: 2rem;
+    background-color: #222222;
+    border: 0.3rem solid #eeeeee;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    box-shadow: 0.5rem 0.5rem 0.2rem 0.2rem #555555;
+}
+
+.rules > * {
+    color: #eeeeee;
+}
+
+.rules > h1 {
+    margin: auto;
+    text-align: center;
+    font-size: 3rem;
+    border-bottom: solid 0.2rem #eeeeee;
+}
+
+.rules > h1 > i {
+    position: relative;
+    margin: 1rem;
+    font-size: 2rem;
+}
+
+.rules > section > h2 {
+    font-size: 2rem;
+    text-decoration: underline;
+}
+
+.rules > section > h2 > i {
+    margin-right: 1rem;
+}
+
+.rules > section > p > i, .rules > section > h3 > i, li > i {
+    margin-right: 1ch;
+    width: 2ch;
+}
+
+.rules__link > a {
+    color: #eeeeee;
+}
+
+.rules__link > a > i {
+    margin-right: 1ch;
+    color: #aaaaaa;
+}
+
+.rules__link > a:hover {
+    color: #aaaaaa;
 }

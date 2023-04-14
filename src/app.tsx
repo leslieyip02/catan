@@ -3,6 +3,7 @@ import { Database, DatabaseReference } from "firebase/database";
 import { Auth } from "firebase/auth";
 import Lobby from "./lobby";
 import Game from "./game";
+import Rules from "./game/rules";
 
 interface AppProps {
     auth: Auth;
@@ -35,15 +36,7 @@ const App = (props: AppProps) => {
                         userName={userName}
                     />
             }
-            <a 
-                href="https://www.catan.com/sites/default/files/2021-06/catan_base_rules_2020_200707.pdf"
-                target="blank"
-                className="rules"
-            >
-                <i className="fa-solid fa-book">
-                    <span className="tooltip">Rules</span>
-                </i>
-            </a>
+            <Rules />
         </div>
     );
 }
